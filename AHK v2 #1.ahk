@@ -1,5 +1,7 @@
-; /* AHK v2 #1 - CONTENTS */
+; https://github.com/xypha/AHK-v2-scripts
+; https://github.com/xypha/AHK-v2-scripts/edit/main/AHK%20v2%20%231.ahk
 
+; /* AHK 1 v2  - CONTENTS */
 ; Settings
 ; Default state of lock keys
 ; Auto-execute
@@ -18,7 +20,7 @@
 ;  = Windows Refresh Or Run
 ;  = Notification Function
 ;  = Call Clipboard and ClipWait
-;  = Wrap Text In Quotes Functions
+;  = Wrap Text In Quotes Function
 ;  = Control Panel Tools Function
 
 ;------------------------------------------------------------------------------
@@ -40,7 +42,7 @@ SetScrollLockState "Off"
 ; Auto-execute
 ; always at the top of your script
 
-MyNotificationFunc("Loading AHK v2 #1", "500", "1650", "985", "1")
+MyNotificationFunc("Loading AHK 1 v2", "1000", "1650", "985", "1") ; text, duration in milliseconds, xAxis, yAxis, timer (1) or sleep (0)
 
 ;  = Toggle OS files
 
@@ -74,7 +76,7 @@ WinMaximize "ahk - AutoHotkey"
 }
 
 ^!Numpad1:: {
-MyNotificationFunc("Updating AHK v2 #1", "700", "1650", "985", "0")
+MyNotificationFunc("Updating AHK 1 v2", "500", "1650", "985", "0") ; use sleep coz reload cancels timers
 Reload
 }
 
@@ -299,7 +301,7 @@ MyNotification := Gui()
 MyNotification.Opt("+AlwaysOnTop -Caption +ToolWindow")  ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
 MyNotification.BackColor := "EEEEEE"  ; White background
 MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
-MyNotification.Add("Text", "cBlack Center", mytext)  ; black text
+MyNotification.Add("Text", "cBlack w181 Left", mytext)  ; black text
 MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
 if timer = 1
@@ -342,7 +344,7 @@ If !ClipWait(secs) {
 }
 
 ;------------------------------------------------------------------------------
-;  = Wrap Text In Quotes Functions
+;  = Wrap Text In Quotes Function
 
 WrapQuotesFunc(item, position, WrapQuotesMenu) {
 If position = 1
