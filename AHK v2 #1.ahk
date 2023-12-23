@@ -1,5 +1,12 @@
-; https://github.com/xypha/AHK-v2-scripts
+; https://github.com/xypha/AHK-v2-scripts/edit/main/README.md
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/AHK%20v2%20%231.ahk
+
+; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
+; Search for below commands/functions by using control + F to search on the help webpage - https://www.autohotkey.com/docs/v2/lib/
+
+; comments begin with semi-colon ";" at start of line or space+; " ;" in middle of line
+; comments can also be show like this - "/*" comment text "*/"
+; and these two methods can be combined too :)
 
 ; /* AHK 1 v2  - CONTENTS */
 ; Settings
@@ -25,6 +32,7 @@
 
 ;------------------------------------------------------------------------------
 ; Settings
+; Start of script code
 
 #Requires AutoHotkey v2.0
 #SingleInstance force
@@ -42,7 +50,8 @@ SetScrollLockState "Off"
 ; Auto-execute
 ; always at the top of your script
 
-MyNotificationFunc("Loading AHK 1 v2", "1000", "1650", "985", "1") ; text, duration in milliseconds, xAxis, yAxis, timer (1) or sleep (0)
+; Show notification with parameters - text, duration in milliseconds, position on screen xAxis, yAxis, use timeout timer (1) or use sleep (0)
+MyNotificationFunc("Loading AHK 1 v2", "10000", "1650", "985", "1") ; use timer for 10 seconds
 
 ;  = Toggle OS files
 
@@ -60,22 +69,29 @@ I_Icon := A_ScriptDir "\icons\1-512.ico"
 If FileExist(I_Icon)
     TraySetIcon I_Icon
 
-Return ; ends autoexecute
+SetTimer EndMyNotif, -1000 ; reset notification timer to 1s after code in auto-execute section has finished running
 
-; below code can be anywhere in your script
+Return ; ends auto-execute
+
+; Below code can be placed anywhere in your script
 
 ;------------------------------------------------------------------------------
 ; Hotkeys
 
+; ^ is Control / CTRL key
+; ! is ALT key
+; # is Windows / Win key
+; + is Shift key
+
 ;  = Check & Reload AHK
 
-!Numpad1:: {
+!Numpad1:: { ; CTRL & Numpad1 keys pressed together
 ListLines
 Sleep 500
 WinMaximize "ahk - AutoHotkey"
 }
 
-^!Numpad1:: {
+^!Numpad1:: { ; CTRL & ALT & Numpad1 keys pressed together
 MyNotificationFunc("Updating AHK 1 v2", "500", "1650", "985", "0") ; use sleep coz reload cancels timers
 Reload
 }
@@ -83,9 +99,9 @@ Reload
 ;-------------------------------------------------------------------------------
 ; Control Panel Tools Menu
 
-#+x:: { ; Win + Shift + x
-ControlPanelMenu := Menu()
-ControlPanelMenu.Delete
+#+x:: { ; Win & Shift & x
+ControlPanelMenu := Menu() ; starts building a pop-up menu
+ControlPanelMenu.Delete    ; deletes previously built pop-up menu, if any, and then starts adding items
 ControlPanelMenu.Add("&1 Control Panel"                 ,ControlPanelFunc)
 ControlPanelMenu.Add("&2 Installed Apps"                ,ControlPanelFunc)
 ControlPanelMenu.Add("&3 Add/Remove Programs (Legacy)"  ,ControlPanelFunc)
@@ -143,11 +159,12 @@ WrapQuotesMenu.Show
 
 ;------------------------------------------------------------------------------
 ; Wrap Text In Quotes keys
-; Taking inspiration from two old AHK v1 scripts from https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
+; Inspired by two old AHK v1 scripts from https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 ; and https://www.autohotkey.com/board/topic/9805-easy-encloseenquote/?p=61995
 
 #HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts
 
+; ALT + number row
 !1::EncQuote("`'","`'")         ; enclose in single quotes '' - ' U+0027 : APOSTROPHE
 !2::EncQuote(Chr(34),Chr(34))   ; enclose in double quotes "" - " U+0022 : QUOTATION MARK
 !3::EncQuote("(",")")           ; enclose in round breackets ()
@@ -162,16 +179,16 @@ WrapQuotesMenu.Show
 !q:: {
 WrapQuotesMenu := Menu()
 WrapQuotesMenu.Delete
-WrapQuotesMenu.Add("&1  `'  Single Quotes"    ,WrapQuotesFunc)
-WrapQuotesMenu.Add("&2  `"  Double Quotes"    ,WrapQuotesFunc) ;"
-WrapQuotesMenu.Add("&3  (  Round Breackets"   ,WrapQuotesFunc)
-WrapQuotesMenu.Add("&4  [  Square Brackets"   ,WrapQuotesFunc)
-WrapQuotesMenu.Add("&5  *  Asterix"           ,WrapQuotesFunc)
-WrapQuotesMenu.Add("&6  ``  Accent/Backtick"  ,WrapQuotesFunc)
-WrapQuotesMenu.Add("&7  `%  Percentage Sign"  ,WrapQuotesFunc)
-WrapQuotesMenu.Add("&8  ‘’  Single Quotation" ,WrapQuotesFunc)
-WrapQuotesMenu.Add("&9  “”  Double Quotation" ,WrapQuotesFunc)
-WrapQuotesMenu.Add("&0  Remove All Quotes"    ,WrapQuotesFunc)
+WrapQuotesMenu.Add("&1  `'  Single Quotes"    ,WrapQuotesFunc) ; single quotes '' 
+WrapQuotesMenu.Add("&2  `"  Double Quotes"    ,WrapQuotesFunc) ;" double quotes ""
+WrapQuotesMenu.Add("&3  (  Round Breackets"   ,WrapQuotesFunc) ; round breackets ()  
+WrapQuotesMenu.Add("&4  [  Square Brackets"   ,WrapQuotesFunc) ; square brackets []  
+WrapQuotesMenu.Add("&5  *  Asterix"           ,WrapQuotesFunc) ; flower brackets {} 
+WrapQuotesMenu.Add("&6  ``  Accent/Backtick"  ,WrapQuotesFunc) ; accent/backtick `` 
+WrapQuotesMenu.Add("&7  `%  Percentage Sign"  ,WrapQuotesFunc) ; percentage sign %% 
+WrapQuotesMenu.Add("&8  ‘’  Single Quotation" ,WrapQuotesFunc) ; single quotes ‘’ 
+WrapQuotesMenu.Add("&9  “”  Double Quotation" ,WrapQuotesFunc) ; double quotes “”
+WrapQuotesMenu.Add("&0  Remove All Quotes"    ,WrapQuotesFunc) ; remove quotes
 WrapQuotesMenu.Show
 }
 
@@ -231,8 +248,8 @@ Send "^v" ; Pastes new text
 Send Len  ; and selects it
 }
 
-; Code Credit #1 NeedleRegEx pattern modified from the one posted by ManaUser here - //www.autohotkey.com/board/topic/24431-convert-text-uppercase-lowercase-capitalized-or-inverted/?p=158295
-; Code Credit #2 idea for loop from kon's post here - https://www.autohotkey.com/boards/viewtopic.php?p=58417#p58417
+; Code Credit #1 NeedleRegEx pattern modified from pattern posted by ManaUser - https://www.autohotkey.com/board/topic/24431-convert-text-uppercase-lowercase-capitalized-or-inverted/?p=158295
+; Code Credit #2 idea for loop from kon's post - https://www.autohotkey.com/boards/viewtopic.php?p=58417#p58417
 ; Code Credit #3 - 4 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a auto-query to DuckDuckGPT by KudoAI via https://greasyfork.org/en/scripts/459849-duckduckgpt
 
 ;-------------------------------------------------------------------------------
@@ -243,7 +260,7 @@ Send Len  ; and selects it
 HasVal(haystack, needle) {
     ; if !(IsObject(haystack)) || (haystack.Length() = 0)
     ;   return -1
-    ; optimise above code to your needs after reading lexikos' comment here - https://www.autohotkey.com/boards/viewtopic.php?p=110388#p110388
+    ; optimise above code to your needs after reading lexikos' comment - https://www.autohotkey.com/boards/viewtopic.php?p=110388#p110388
     for index, value in haystack
         if (value == needle) ; case-sensitive
             return index
@@ -252,7 +269,7 @@ HasVal(haystack, needle) {
 
 ;-------------------------------------------------------------------------------
 ;  = Toggle OS Function
-; Inspired by a post by gonzax - https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
+; inspiration from a post by gonzax - https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
 
 ToggleOSCheck() {
 Global ShowSuperHidden_Status
@@ -281,13 +298,13 @@ If (ShowSuperHidden_Status = 0) { ; enable if disabled
 ;  = Windows Refresh Or Run
 
 WindowsRefreshOrRun() {
-if WinExist("ahk_class CabinetWClass") {
+if WinExist("ahk_class CabinetWClass") { ; refresh explorer if window exists
     WinActivate
     Sleep 500  ; change as per your system performance
     Send "{F5}" ; refresh
-} else {
+} else { ; open new explorer window if one doesn't already exist ; remove this section if not desired
     Run 'explorer.exe',,"max"
-    WinWait("ahk_class CabinetWClass")
+    WinWait("ahk_class CabinetWClass",,10) ; timeout 10 secs
     WinActivate
     }
 }
@@ -318,7 +335,6 @@ EndMyNotif() {
 
 ;-------------------------------------------------------------------------------
 ;  = Call Clipboard and ClipWait
-; Check what happens to clipSave later in script
 
 CallClipboard(secs) {
 clipSave := ClipboardAll()
@@ -332,6 +348,7 @@ If !ClipWait(secs) {
     clipSave := ""
     Exit
     }
+Return clipSave
 }
 
 CallClipboardShort(secs) {
@@ -341,6 +358,7 @@ If !ClipWait(secs) {
     ; SetTimer () => ToolTip(), -2000
     Exit
     }
+Return clipSave
 }
 
 ;------------------------------------------------------------------------------
@@ -426,19 +444,20 @@ if position = 10
 
 /*
 
-List of commands (several personal modifications over the years)
+'Short' list of commands (several personal modifications over the years - NOT comprehensive, at all)
 Original source - https://www.autohotkey.com/boards/viewtopic.php?p=24584#p24584
 
-ComObject("shell.application").ControlPanelItem("calc")            ; ^!+o       | Calculator
-ComObject("shell.application").ControlPanelItem("notepad")         ; ^!Numpad0  | Notepad
-ComObject("shell.application").ControlPanelItem("snippingtool")    ; ^Numpad8   | Snipping Tool ; Opens modern app
-
+; already in Win X menu
 ComObject("shell.application").ControlPanelItem("compmgmt.msc")    ; #x   | Computer Management
 ComObject("shell.application").ControlPanelItem("devmgmt.msc")     ; #x   | Device Manager
 ComObject("shell.application").ControlPanelItem("hdwwiz.cpl")      ; #x   | Device Manager ; alt
 ComObject("shell.application").ControlPanelItem("diskmgmt.msc")    ; #x   | Disk Management
 ComObject("shell.application").ControlPanelItem("eventvwr.msc")    ; #x   | Event Viewer
 
+; Added to Control Panel Tools function
+ComObject("shell.application").ControlPanelItem("calc")            ; Calculator
+ComObject("shell.application").ControlPanelItem("notepad")         ; Notepad
+ComObject("shell.application").ControlPanelItem("snippingtool")    ; Snipping Tool ; Opens modern app
 ComObject("shell.application").ControlPanelItem("control")         ; Control Panel
 run 'explorer.exe "ms-settings:appsfeatures"'                      ; Installed Apps ; Modern Add/Remove Programs
 ComObject("shell.application").ControlPanelItem("appwiz.cpl")      ; Add/Remove Programs ; Legacy Control Panel
@@ -450,37 +469,41 @@ ComObject("shell.application").ControlPanelItem("resmon.exe")      ; Resource Mo
 run 'explorer.exe "ms-settings:windowsupdate"'                     ; Windows Update
 ComObject("shell.application").ControlPanelItem("winver")          ; Windows version
 
-ComObject("shell.application").ControlPanelItem("powercfg.cpl")    ; => Power Configuration ; opens Power Options
-ComObject("shell.application").ControlPanelItem("msinfo32")        ; => System Information
-ComObject("shell.application").ControlPanelItem("timedate.cpl")    ; => Date and Time Properties
-ComObject("shell.application").ControlPanelItem("ncpa.cpl")        ; => Network Connections
-ComObject("shell.application").ControlPanelItem("mmsys.cpl")       ; => Sounds and Audio ; Opens old Sound panel - Playback, Recording, Sounds, Communications
-ComObject("shell.application").ControlPanelItem("dcomcnfg")        ; => Component Services
-ComObject("shell.application").ControlPanelItem("gpedit.msc")      ; => Group Policy Editor ; N/A in Home
-ComObject("shell.application").ControlPanelItem("iexplore")        ; => Internet Explorer ; Opens Edge browser
-ComObject("shell.application").ControlPanelItem("inetcpl.cpl")     ; => Internet Properties
-ComObject("shell.application").ControlPanelItem("secpol.msc")      ; => Local Security Settings ; N/A in Home
-ComObject("shell.application").ControlPanelItem("lusrmgr.msc")     ; => Local Users and Groups ; N/A in Win10 & later?
-ComObject("shell.application").ControlPanelItem("logoff")          ; => Logs You Out Of Windows
-ComObject("shell.application").ControlPanelItem("main.cpl")        ; => Mouse Properties
-ComObject("shell.application").ControlPanelItem("perfmon.msc")     ; => Performance Monitor
-ComObject("shell.application").ControlPanelItem("intl.cpl")        ; => Regional Settings
-ComObject("shell.application").ControlPanelItem("mstsc")           ; => Remote Desktop ; N/A in Home
-ComObject("shell.application").ControlPanelItem("wscui.cpl")       ; => Security and Maintenance
-ComObject("shell.application").ControlPanelItem("fsmgmt.msc")      ; => Shared Folders/MMC
-ComObject("shell.application").ControlPanelItem("shutdown")        ; => Shuts Down Windows
-ComObject("shell.application").ControlPanelItem("StikyNot")        ; => Sticky Note ; N/A
-ComObject("shell.application").ControlPanelItem("msconfig")        ; => System Configuration Utility
-ComObject("shell.application").ControlPanelItem("sysdm.cpl")       ; => System Properties
-ComObject("shell.application").ControlPanelItem("taskmgr")         ; => Task Manager
-ComObject("shell.application").ControlPanelItem("netplwiz")        ; => User Accounts
-ComObject("shell.application").ControlPanelItem("utilman")         ; => Modern Settings App > Accessibility
-ComObject("shell.application").ControlPanelItem("firewall.cpl")    ; => Windows Defender Firewall
-ComObject("shell.application").ControlPanelItem("wf.msc")          ; => Windows Defender Firewall with Advanced Security
-ComObject("shell.application").ControlPanelItem("wmimgmt.msc")     ; => Windows Management Instrumentation (WMI)
-ComObject("shell.application").ControlPanelItem("wuapp")           ; => Windows Update App Manager ; N/A
-ComObject("shell.application").ControlPanelItem("write")           ; => Wordpad ; N/A
-ComObject("shell.application").ShutdownWindows()                   ; => Shutdown Menu
+; Add to Control Panel Tools as desired
+ComObject("shell.application").ControlPanelItem("calc")            ; Calculator
+ComObject("shell.application").ControlPanelItem("notepad")         ; Notepad
+ComObject("shell.application").ControlPanelItem("snippingtool")    ; Snipping Tool ; Opens modern app
+ComObject("shell.application").ControlPanelItem("powercfg.cpl")    ; Power Configuration ; opens Power Options
+ComObject("shell.application").ControlPanelItem("msinfo32")        ; System Information
+ComObject("shell.application").ControlPanelItem("timedate.cpl")    ; Date and Time Properties
+ComObject("shell.application").ControlPanelItem("ncpa.cpl")        ; Network Connections
+ComObject("shell.application").ControlPanelItem("mmsys.cpl")       ; Sounds and Audio ; Opens old Sound panel - Playback, Recording, Sounds, Communications
+ComObject("shell.application").ControlPanelItem("dcomcnfg")        ; Component Services
+ComObject("shell.application").ControlPanelItem("gpedit.msc")      ; Group Policy Editor ; N/A in Home
+ComObject("shell.application").ControlPanelItem("iexplore")        ; Internet Explorer ; Opens Edge browser
+ComObject("shell.application").ControlPanelItem("inetcpl.cpl")     ; Internet Properties
+ComObject("shell.application").ControlPanelItem("secpol.msc")      ; Local Security Settings ; N/A in Home
+ComObject("shell.application").ControlPanelItem("lusrmgr.msc")     ; Local Users and Groups ; N/A in Win10 & later?
+ComObject("shell.application").ControlPanelItem("logoff")          ; Logs You Out Of Windows
+ComObject("shell.application").ControlPanelItem("main.cpl")        ; Mouse Properties
+ComObject("shell.application").ControlPanelItem("perfmon.msc")     ; Performance Monitor
+ComObject("shell.application").ControlPanelItem("intl.cpl")        ; Regional Settings
+ComObject("shell.application").ControlPanelItem("mstsc")           ; Remote Desktop ; N/A in Home
+ComObject("shell.application").ControlPanelItem("wscui.cpl")       ; Security and Maintenance
+ComObject("shell.application").ControlPanelItem("fsmgmt.msc")      ; Shared Folders/MMC
+ComObject("shell.application").ControlPanelItem("shutdown")        ; Shuts Down Windows
+ComObject("shell.application").ControlPanelItem("StikyNot")        ; Sticky Note ; N/A
+ComObject("shell.application").ControlPanelItem("msconfig")        ; System Configuration Utility
+ComObject("shell.application").ControlPanelItem("sysdm.cpl")       ; System Properties
+ComObject("shell.application").ControlPanelItem("taskmgr")         ; Task Manager
+ComObject("shell.application").ControlPanelItem("netplwiz")        ; User Accounts
+ComObject("shell.application").ControlPanelItem("utilman")         ; Modern Settings App > Accessibility
+ComObject("shell.application").ControlPanelItem("firewall.cpl")    ; Windows Defender Firewall
+ComObject("shell.application").ControlPanelItem("wf.msc")          ; Windows Defender Firewall with Advanced Security
+ComObject("shell.application").ControlPanelItem("wmimgmt.msc")     ; Windows Management Instrumentation (WMI)
+ComObject("shell.application").ControlPanelItem("wuapp")           ; Windows Update App Manager ; N/A
+ComObject("shell.application").ControlPanelItem("write")           ; Wordpad ; N/A
+ComObject("shell.application").ShutdownWindows()                   ; Shutdown Menu
 
 System Configuration Tools (skipped items already in #x or listed above)
 
@@ -497,7 +520,9 @@ C:\WINDOWS\System32\resmon.exe                                     ; Monitor the
 
 Others
 
-More shortcuts to various sections within modern Settings app - https://winaero.com/ms-settings-commands-in-windows-10/ -- check Summary.xlsx
+Find more shortcuts to various sections within modern Settings app - https://winaero.com/ms-settings-commands-in-windows-10/
 Shell:AppsFolder ; shortcuts to all apps in start menu
 
 */
+
+; End of script code
