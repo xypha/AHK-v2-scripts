@@ -1,4 +1,4 @@
-# AHK-v2-scripts  
+# AHK v2 scripts  
 
 AutoHotkey scripts with examples of commonly used commands and shortcut keys with several small functions, written in AHK v2. 
 
