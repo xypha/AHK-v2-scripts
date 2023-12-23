@@ -18,7 +18,7 @@
 ;  = Check & Reload AHK
 ; Control Panel Tools Menu
 ; Capitalise first letter of a sentence
-; Change the case of text in-line
+; Change the case of text
 ; Wrap Text In Quotes keys
 ; User-defined Functions
 ;  = Case Conversion Function
@@ -143,7 +143,7 @@ if (cfc2.EndReason = "Match")
 ; such as the one by Xtra linked above and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
 
 ;------------------------------------------------------------------------------
-; Change the case of text in-line
+; Change the case of text
 ; inspired by a v1 script from https://geekdrop.com/content/super-handy-AutoHotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 
 !c:: { ; ALT + C
@@ -179,14 +179,14 @@ WrapQuotesMenu.Show
 !q:: {
 WrapQuotesMenu := Menu()
 WrapQuotesMenu.Delete
-WrapQuotesMenu.Add("&1  `'  Single Quotes"    ,WrapQuotesFunc) ; single quotes '' 
+WrapQuotesMenu.Add("&1  `'  Single Quotes"    ,WrapQuotesFunc) ; single quotes ''
 WrapQuotesMenu.Add("&2  `"  Double Quotes"    ,WrapQuotesFunc) ;" double quotes ""
-WrapQuotesMenu.Add("&3  (  Round Breackets"   ,WrapQuotesFunc) ; round breackets ()  
-WrapQuotesMenu.Add("&4  [  Square Brackets"   ,WrapQuotesFunc) ; square brackets []  
-WrapQuotesMenu.Add("&5  *  Asterix"           ,WrapQuotesFunc) ; flower brackets {} 
-WrapQuotesMenu.Add("&6  ``  Accent/Backtick"  ,WrapQuotesFunc) ; accent/backtick `` 
-WrapQuotesMenu.Add("&7  `%  Percentage Sign"  ,WrapQuotesFunc) ; percentage sign %% 
-WrapQuotesMenu.Add("&8  ‘’  Single Quotation" ,WrapQuotesFunc) ; single quotes ‘’ 
+WrapQuotesMenu.Add("&3  (  Round Breackets"   ,WrapQuotesFunc) ; round breackets ()
+WrapQuotesMenu.Add("&4  [  Square Brackets"   ,WrapQuotesFunc) ; square brackets []
+WrapQuotesMenu.Add("&5  *  Asterix"           ,WrapQuotesFunc) ; flower brackets {}
+WrapQuotesMenu.Add("&6  ``  Accent/Backtick"  ,WrapQuotesFunc) ; accent/backtick ``
+WrapQuotesMenu.Add("&7  `%  Percentage Sign"  ,WrapQuotesFunc) ; percentage sign %%
+WrapQuotesMenu.Add("&8  ‘’  Single Quotation" ,WrapQuotesFunc) ; single quotes ‘’
 WrapQuotesMenu.Add("&9  “”  Double Quotation" ,WrapQuotesFunc) ; double quotes “”
 WrapQuotesMenu.Add("&0  Remove All Quotes"    ,WrapQuotesFunc) ; remove quotes
 WrapQuotesMenu.Show
@@ -229,9 +229,9 @@ CallClipboard(2)
 inverted := ""
 Loop Parse A_Clipboard {     ; Code Credit #2
   if (StrLower(A_LoopField) == A_LoopField) ; * Code Credit #3
-    inverted .= StrUpper(A_LoopField)       ; * 
-  else                                      ; * 
-    inverted .= StrLower(A_LoopField)       ; * 
+    inverted .= StrUpper(A_LoopField)       ; *
+  else                                      ; *
+    inverted .= StrLower(A_LoopField)       ; *
     }
 A_Clipboard := inverted
 CaseConvert()
@@ -273,7 +273,7 @@ HasVal(haystack, needle) {
 
 ToggleOSCheck() {
 Global ShowSuperHidden_Status
-ShowSuperHidden_Status := RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden") 
+ShowSuperHidden_Status := RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
 If (ShowSuperHidden_Status = 0)
     A_TrayMenu.UnCheck "&Toggle OS files"
 Else {
@@ -288,7 +288,7 @@ If (ShowSuperHidden_Status = 0) { ; enable if disabled
     RegWrite "1", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     ToggleOSCheck()
     WindowsRefreshOrRun()
-    } Else { ; disable if enabled 
+    } Else { ; disable if enabled
     RegWrite "0", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     ToggleOSCheck()
     WindowsRefreshOrRun()
@@ -304,7 +304,7 @@ if WinExist("ahk_class CabinetWClass") { ; refresh explorer if window exists
     Send "{F5}" ; refresh
 } else { ; open new explorer window if one doesn't already exist ; remove this section if not desired
     Run 'explorer.exe',,"max"
-    WinWait("ahk_class CabinetWClass",,10) ; timeout 10 secs
+    WinWait("ahk_class CabinetWClass",, 10) ; timeout 10 secs
     WinActivate
     }
 }
@@ -340,7 +340,7 @@ CallClipboard(secs) {
 clipSave := ClipboardAll()
 A_Clipboard := ""
 Send "^c"
-If !ClipWait(secs) {   
+If !ClipWait(secs) {
     MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
     ; ToolTip A_ThisHotkey ":: Clip Failed"           ; Alternatively to MyNotification
     ; SetTimer () => ToolTip(), -2000
@@ -352,13 +352,12 @@ Return clipSave
 }
 
 CallClipboardShort(secs) {
-If !ClipWait(secs) {   
+If !ClipWait(secs) {
     MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
     ; ToolTip A_ThisHotkey ":: Clip Failed"           ; Alternatively to MyNotification
     ; SetTimer () => ToolTip(), -2000
     Exit
     }
-Return clipSave
 }
 
 ;------------------------------------------------------------------------------
@@ -370,9 +369,9 @@ If position = 1
 Else if position = 2
     EncQuote(Chr(34),Chr(34))   ; enclose in double quotes ""
 Else if position = 3
-    EncQuote("(",")")           ; enclose in round breackets () 
+    EncQuote("(",")")           ; enclose in round breackets ()
 Else if position = 4
-    EncQuote("[","]")           ; enclose in square brackets [] 
+    EncQuote("[","]")           ; enclose in square brackets []
 Else if position = 5
     EncQuote("{{}","{}}")       ; enclose in flower brackets {}
 Else if position = 6
