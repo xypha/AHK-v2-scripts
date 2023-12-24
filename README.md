@@ -15,6 +15,13 @@ Any suggestions for improving script code are welcome.
   
 - Check & Reload AHK -\
   Create shortcuts to check the functions of a script using `ListLines`, and `Reload` a script after making changes using keyboard shortcuts.
+
+- Remap Keys -\
+  Script includes methods to disable keys that you don't use or trigger accidentally too often; or ways to change a key's function to suit your needs - such as pressing `ALT & m` keys to minimise a window, instead of moving your mouse cursor to the "Minimize" button in the title bar. 
+
+- CapsLock -\
+  Do you accidentally trigger `CapsLock` when trying to press `a` or `Ctrl+A` or `Alt+Tab`? AutoHotkey can ensure this never happens.
+  Do you want to temporarily enable CapsLock and have it automatically turn off after 10 seconds? Check the script for an example.
   
 - Control Panel Tools Menu -\
   Add items missing in `Win + X` menu to a AutoHotkey Menu() triggered by `Win + Shift + X`.
