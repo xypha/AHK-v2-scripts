@@ -1,8 +1,10 @@
 # AHK v2 scripts  
 
-AutoHotkey scripts with examples of commonly used commands and shortcut keys with several small functions, written in AHK v2. 
+[AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts with examples of commonly used commands and shortcut keys with several small functions, written in AHK v2. 
 
-Script #1 - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/AHK%20v2%20%231.ahk)  
+Any suggestions to improve the above code are welcome.
+
+### Script #1 - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/AHK%20v2%20%231.ahk)  
 
 - Toggle protected operating system (OS) files -\
   Show/hide protected operating system files in Windows File Explorer from AHK tray menu
@@ -22,7 +24,7 @@ Script #1 - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/AHK%20v2%20
   
 - Change the case of text -\
   Pop up menu that allows you to change the text to `Lower, Upper, Sentence, Title or Invert` case, in-line using a pop-up menu.
-  This works even with special characters such as `é → É` and `Â → â` (unicode compatible). search for `TestString` in the script for a more comprehensive example.
+  This works even with special characters such as `é → É` and `Â → â` (unicode compatible). Search for `TestString` in the script for a more comprehensive example.
   
 - HasVal Function -\
   Check if value is already in an array and retrieve it's `Index` if present.
