@@ -2,7 +2,7 @@
 
 [AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts with examples of commonly used commands and shortcut keys with several small functions, written in AHK v2. 
 
-Any suggestions to improve the above code are welcome.
+Any suggestions for improving script code are welcome.
 
 ### Script #1 - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/AHK%20v2%20%231.ahk)  
 
