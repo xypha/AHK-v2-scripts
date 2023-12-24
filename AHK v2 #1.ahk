@@ -242,8 +242,8 @@ CaseConvert()
 ;                  . "abcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñ"
 
 CaseConvert() {
-Len := "0"
-Len := "+{left " Strlen(A_Clipboard) "}"
+LenTemp := StrReplace(A_Clipboard, "`r`n", "`n") ; correct count for len
+Len := "+{left " Strlen(LenTemp) "}"
 Send "^v" ; Pastes new text
 Send Len  ; and selects it
 }
