@@ -1,6 +1,3 @@
-; https://github.com/xypha/AHK-v2-scripts/edit/main/README.md
-; https://github.com/xypha/AHK-v2-scripts/edit/main/AHK%20v2%20%231.ahk
-
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
 ; Search for below commands/functions by using control + F to search on the help webpage - https://www.autohotkey.com/docs/v2/lib/
 
@@ -16,6 +13,8 @@
 ;  = Tray Icon
 ; Hotkeys
 ;  = Check & Reload AHK
+;  = Remap Keys
+;  = CapsLock
 ; Control Panel Tools Menu
 ; Capitalise first letter of a sentence
 ; Change the case of text
@@ -71,7 +70,7 @@ If FileExist(I_Icon)
 
 SetTimer EndMyNotif, -1000 ; reset notification timer to 1s after code in auto-execute section has finished running
 
-Return ; ends auto-execute
+Return ; end auto-execute
 
 ; Below code can be placed anywhere in your script
 
@@ -94,6 +93,59 @@ WinMaximize "ahk - AutoHotkey"
 ^!Numpad1:: { ; CTRL & ALT & Numpad1 keys pressed together
 MyNotificationFunc("Updating AHK 1 v2", "500", "1650", "985", "0") ; use sleep coz reload cancels timers
 Reload
+}
+
+;-------------------------------------------------------------------------------
+;  = Remap Keys
+
+; Disable keys that I don't use or trigger accidentally too often or become annoying
+; many such keys are hardware specific - desktop vs. laptop, and regional differences
+; comment out the ones that don't apply to you
+$ScrollLock::               ; disable Scroll Lock ; $ prefix forces keyboard hook
+$NumLock::                  ; disable Num Lock
++NumpadDot::                ; Numpad delete (Modifier key - Shift)
+NumpadDel::
+Insert::                    ; Insert mode
++Insert::                   ; Shift + Insert
+#Insert::                   ; Win + Insert
++Numpad0::                  ; Numpad Insert
+NumpadIns:: {
+}
+
+!Insert::Insert    ; Use Alt + Insert to toggle the 'Insert mode' ; Source: https://gist.github.com/endolith/823381
+
+LWin & Tab::AltTab          ; Left WIN key works as left ALT key - disables taskview
+
+RAlt::!space       ; ALT + space brings up window menu
+
+^RCtrl::MButton    ; press Left & Right CTRL button to simulate mouse Middle Click
+
+RCtrl & Up::Send "{PgUp}"       ; page up
+RCtrl & Down::Send "{PgDn}"     ; page down
+RCtrl & Left::Send "{Home}"
+RCtrl & Right::Send "{End}"
+
+!m::WinMinimize "A"         ; Minimize active window
+
+;-------------------------------------------------------------------------------
+;  = CapsLock
+
+^CapsLock::^a        ; select all
+<#CapsLock::AltTab   ; switch windows with Right Win + CapsLock
+
++CapsLock:: {
+SetCapsLockState "On"
+MyNotificationFunc("CapsLock ON", "10000", "960", "985", "1")   ; duration 10s
+KeyWait "Esc", "d t10" ; esc skips 10s wait and disables CapsLock immediately
+SetCapsLockState "Off"
+MyNotification.Destroy()
+}
+
+CapsLock:: { ; turn off CapsLock if on ; locks +CapsLock for 10s for some reason?!
+If (GetKeyState("Capslock", "T")) {
+    SetCapsLockState "Off"
+    MyNotification.Destroy()
+    }
 }
 
 ;-------------------------------------------------------------------------------
@@ -395,8 +447,6 @@ QuoteString := RegExReplace(QuoteString,'[\[\]\*`'\(\)\{\}%`"“”‘’]+|``')
 QuoteString := RegExReplace(QuoteString,'^\s+|\s+$')     ; RegEx remove leading/trailing space
 QuoteString := q QuoteString p
 QuoteString := StrReplace(QuoteString, "`r`n" p, p)
-Len1 := "0"
-Len2 := "0"
 If q ~= "{" ; RegEx match
     Len1 := Strlen(QuoteString) - 4 ; to account for extra {} in q and p
 Else
