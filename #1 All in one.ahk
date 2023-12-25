@@ -254,7 +254,7 @@ ControlPanelMenu.Show
 ; Capitalise first letter of a sentence
 ; modified from a script posted here by Xtra - https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
 
-~NumpadEnter::
+~NumpadEnter:: ; triggers
 ~Enter::
 ~NumpadDot::
 ~.::
