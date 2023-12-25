@@ -21,7 +21,7 @@
 ; Control Panel Tools Menu
 ; Capitalise first letter of a sentence
 ; Change the case of text
-; Wrap Text In Quotes keys
+; Wrap Text In Quotes or Symbols keys
 ; User-defined Functions
 ;  = Case Conversion Function
 ;  = HasVal Function
@@ -29,7 +29,7 @@
 ;  = Windows Refresh Or Run
 ;  = Notification Function
 ;  = Call Clipboard and ClipWait
-;  = Wrap Text In Quotes Function
+;  = Wrap Text In Quotes or Symbols Function
 ;  = Control Panel Tools Function
 
 ;------------------------------------------------------------------------------
@@ -287,49 +287,49 @@ if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols - e
 ; inspired by a v1 script from https://geekdrop.com/content/super-handy-AutoHotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 
 !c:: { ; ALT + C
-WrapQuotesMenu := Menu()
-WrapQuotesMenu.Delete
-WrapQuotesMenu.Add("&1 lower case"      ,ConvertLower)
-WrapQuotesMenu.Add("&2 Sentence case"   ,ConvertSentence)
-WrapQuotesMenu.Add("&3 Title Case"      ,ConvertTitle)
-WrapQuotesMenu.Add("&4 UPPER CASE"      ,ConvertUpper)
-WrapQuotesMenu.Add("&5 iNVERT cASE"     ,ConvertInvert)
-WrapQuotesMenu.Show
+ChangeCaseMenu := Menu()
+ChangeCaseMenu.Delete
+ChangeCaseMenu.Add("&1 lower case"      ,ConvertLower)
+ChangeCaseMenu.Add("&2 Sentence case"   ,ConvertSentence)
+ChangeCaseMenu.Add("&3 Title Case"      ,ConvertTitle)
+ChangeCaseMenu.Add("&4 UPPER CASE"      ,ConvertUpper)
+ChangeCaseMenu.Add("&5 iNVERT cASE"     ,ConvertInvert)
+ChangeCaseMenu.Show
 }
 
 ;------------------------------------------------------------------------------
-; Wrap Text In Quotes keys
+; Wrap Text In Quotes or Symbols keys
 ; Inspired by two old AHK v1 scripts from https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 ; and https://www.autohotkey.com/board/topic/9805-easy-encloseenquote/?p=61995
 
 #HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts
 
 ; ALT + number row
-!1::EncQuote("`'","`'")         ; enclose in single quotes '' - ' U+0027 : APOSTROPHE
-!2::EncQuote(Chr(34),Chr(34))   ; enclose in double quotes "" - " U+0022 : QUOTATION MARK
-!3::EncQuote("(",")")           ; enclose in round breackets ()
-!4::EncQuote("[","]")           ; enclose in square brackets []
-!5::EncQuote("{{}","{}}")       ; enclose in flower brackets {}
-!6::EncQuote(Chr(96),Chr(96))   ; enclose in accent/backtick ``
-!7::EncQuote("%","%")           ; enclose in percentage sign %%
-!8::EncQuote("‘","’")           ; enclose in single quotes ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
-!9::EncQuote("“","”")           ; enclose in double quotes “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
-!0::EncQuote("","")             ; remove above quotes
+!1::EncText("`'","`'")         ; enclose in single quotes '' - ' U+0027 : APOSTROPHE
+!2::EncText(Chr(34),Chr(34))   ; enclose in double quotes "" - " U+0022 : QUOTATION MARK
+!3::EncText("(",")")           ; enclose in round breackets ()
+!4::EncText("[","]")           ; enclose in square brackets []
+!5::EncText("{{}","{}}")       ; enclose in flower brackets {}
+!6::EncText(Chr(96),Chr(96))   ; enclose in accent/backtick ``
+!7::EncText("%","%")           ; enclose in percentage sign %%
+!8::EncText("‘","’")           ; enclose in single quotes ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+!9::EncText("“","”")           ; enclose in double quotes “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+!0::EncText("","")             ; remove above quotes
 
 !q:: {
-WrapQuotesMenu := Menu()
-WrapQuotesMenu.Delete
-WrapQuotesMenu.Add("&1  `'  Single Quotes"    ,WrapQuotesFunc) ; single quotes ''
-WrapQuotesMenu.Add("&2  `"  Double Quotes"    ,WrapQuotesFunc) ;" double quotes ""
-WrapQuotesMenu.Add("&3  (  Round Breackets"   ,WrapQuotesFunc) ; round breackets ()
-WrapQuotesMenu.Add("&4  [  Square Brackets"   ,WrapQuotesFunc) ; square brackets []
-WrapQuotesMenu.Add("&5  *  Asterix"           ,WrapQuotesFunc) ; flower brackets {}
-WrapQuotesMenu.Add("&6  ``  Accent/Backtick"  ,WrapQuotesFunc) ; accent/backtick ``
-WrapQuotesMenu.Add("&7  `%  Percentage Sign"  ,WrapQuotesFunc) ; percentage sign %%
-WrapQuotesMenu.Add("&8  ‘’  Single Quotation" ,WrapQuotesFunc) ; single quotes ‘’
-WrapQuotesMenu.Add("&9  “”  Double Quotation" ,WrapQuotesFunc) ; double quotes “”
-WrapQuotesMenu.Add("&0  Remove All Quotes"    ,WrapQuotesFunc) ; remove quotes
-WrapQuotesMenu.Show
+WrapTextMenu := Menu()
+WrapTextMenu.Delete
+WrapTextMenu.Add("&1  `'  Single Quotes `'"    ,WrapTextFunc) ; single quotes ''
+WrapTextMenu.Add("&2  `"  Double Quotes `""    ,WrapTextFunc) ; double quotes ""
+WrapTextMenu.Add("&3  (  Round Breackets )"    ,WrapTextFunc) ; round breackets ()
+WrapTextMenu.Add("&4  [  Square Brackets ]"    ,WrapTextFunc) ; square brackets []
+WrapTextMenu.Add("&5  { Flower Brackets }"     ,WrapTextFunc) ; flower brackets {}
+WrapTextMenu.Add("&6  ``  Accent/Backtick ``"  ,WrapTextFunc) ; accent/backtick ``
+WrapTextMenu.Add("&7  `%  Percentage Sign `%"  ,WrapTextFunc) ; percentage sign %%
+WrapTextMenu.Add("&8  ‘  Single Quotation ’"   ,WrapTextFunc) ; single quotes ‘’
+WrapTextMenu.Add("&9  “  Double Quotation ”"   ,WrapTextFunc) ; double quotes “”
+WrapTextMenu.Add("&0  Remove all"              ,WrapTextFunc) ; remove quotes
+WrapTextMenu.Show
 }
 
 #HotIf
@@ -508,55 +508,55 @@ If !ClipWait(secs) {
 }
 
 ;------------------------------------------------------------------------------
-;  = Wrap Text In Quotes Function
+;  = Wrap Text In Quotes or Symbols Function
 
-WrapQuotesFunc(item, position, WrapQuotesMenu) {
+WrapTextFunc(item, position, WrapTextMenu) {
 If position = 1
-    EncQuote("'","'")           ; enclose in single quotes ''
+    EncText("'","'")           ; enclose in single quotes ''
 Else if position = 2
-    EncQuote(Chr(34),Chr(34))   ; enclose in double quotes ""
+    EncText(Chr(34),Chr(34))   ; enclose in double quotes ""
 Else if position = 3
-    EncQuote("(",")")           ; enclose in round breackets ()
+    EncText("(",")")           ; enclose in round breackets ()
 Else if position = 4
-    EncQuote("[","]")           ; enclose in square brackets []
+    EncText("[","]")           ; enclose in square brackets []
 Else if position = 5
-    EncQuote("{{}","{}}")       ; enclose in flower brackets {}
+    EncText("{{}","{}}")       ; enclose in flower brackets {}
 Else if position = 6
-    EncQuote(Chr(96),Chr(96))   ; enclose in accent/backtick ``
+    EncText(Chr(96),Chr(96))   ; enclose in accent/backtick ``
 Else if position = 7
-    EncQuote("%","%")           ; enclose in percentage sign %%
+    EncText("%","%")           ; enclose in percentage sign %%
 Else if position = 8
-    EncQuote("‘","’")           ; enclose in single quotes ‘’
+    EncText("‘","’")           ; enclose in single quotes ‘’
 Else if position = 9
-    EncQuote("“","”")           ; enclose in double quotes “”
+    EncText("“","”")           ; enclose in double quotes “”
 Else if position = 10
-    EncQuote("","")             ; remove quotes
+    EncText("","")             ; remove quotes
 }
 
-EncQuote(q,p) {
+EncText(q,p) {
 CallClipboard(2) ; 2s
-QuoteStringInitial := A_Clipboard
-QuoteString := A_Clipboard
-QuoteString := StrReplace(QuoteString, "`r`n", "`n")
-QuoteString := RegExReplace(QuoteString,'[\[\]\*`'\(\)\{\}%`"“”‘’]+|``')     ;"; remove "*`'(){}%“”‘’[]
-QuoteString := RegExReplace(QuoteString,'^\s+|\s+$')     ; RegEx remove leading/trailing space
-QuoteString := q QuoteString p
-QuoteString := StrReplace(QuoteString, "`r`n" p, p)
+TextStringInitial := A_Clipboard
+TextString := A_Clipboard
+TextString := StrReplace(TextString, "`r`n", "`n")
+TextString := RegExReplace(TextString,'[\[\]\*`'\(\)\{\}%`"“”‘’]+|``')     ;"; remove "*`'(){}%“”‘’[]
+TextString := RegExReplace(TextString,'^\s+|\s+$')     ; RegEx remove leading/trailing space
+TextString := q TextString p
+TextString := StrReplace(TextString, "`r`n" p, p)
 If q ~= "{" ; RegEx match
-    Len1 := Strlen(QuoteString) - 4 ; to account for extra {} in q and p
+    Len1 := Strlen(TextString) - 4 ; to account for extra {} in q and p
 Else
-    Len1 := Strlen(QuoteString)
+    Len1 := Strlen(TextString)
 ; if you regularly include leading/trailing spaces within quotes, comment out above RegEx and below if statements
-If (RegExMatch(QuoteStringInitial, "^\s+")) {   ; if initial string has Leading space
-    QuoteString := " " QuoteString              ; add Leading space to string
-    Len1++                                      ; add 1 to len
+If (RegExMatch(TextStringInitial, "^\s+")) {   ; if initial string has Leading space
+    TextString := " " TextString               ; add Leading space to string
+    Len1++                                     ; add 1 to len
     }
-If (RegExMatch(QuoteStringInitial, "\s+$")) {   ; if initial string has Trailing space
-    QuoteString .= " "                          ; append trailing space to string
-    Len1++                                      ; add 1 to len
+If (RegExMatch(TextStringInitial, "\s+$")) {   ; if initial string has Trailing space
+    TextString .= " "                          ; append trailing space to string
+    Len1++                                     ; add 1 to len
     }
 Len2 := "+{left " Len1 "}"
-Send QuoteString    ; send string with quotes
+Send TextString    ; send string with quotes
 Send Len2           ; and select it
 }
 
