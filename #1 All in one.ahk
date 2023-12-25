@@ -11,10 +11,13 @@
 ; Auto-execute
 ;  = Toggle OS files
 ;  = Tray Icon
+;  = Horizontal Scrolling Group
+;  = End auto-execute
 ; Hotkeys
 ;  = Check & Reload AHK
 ;  = Remap Keys
 ;  = CapsLock
+;  = Horizontal Scrolling
 ; Control Panel Tools Menu
 ; Capitalise first letter of a sentence
 ; Change the case of text
@@ -50,7 +53,7 @@ SetScrollLockState "Off"
 ; always at the top of your script
 
 ; Show notification with parameters - text, duration in milliseconds, position on screen xAxis, yAxis, use timeout timer (1) or use sleep (0)
-MyNotificationFunc("Loading AHK 1 v2", "10000", "1650", "985", "1") ; use timer for 10 seconds
+MyNotificationFunc("Loading AHK 1 v2", "10000", "1650", "985", "1") ; use timer for 10 seconds, position bottom right corner on 1920×1080 display resolution
 
 ;  = Toggle OS files
 
@@ -68,9 +71,17 @@ I_Icon := A_ScriptDir "\icons\1-512.ico"
 If FileExist(I_Icon)
     TraySetIcon I_Icon
 
+;  = Horizontal Scrolling Group
+
+GroupAdd "HorizontalScroll1", "ahk_class ApplicationFrameWindow"       ; Modern UWP apps like calc and screen snip
+GroupAdd "HorizontalScroll1", "ahk_class MozillaWindowClass"           ; Firefox
+GroupAdd "HorizontalScroll1", "ahk_class SALFRAME"                     ; LibreOffice
+
+;  = End auto-execute
+
 SetTimer EndMyNotif, -1000 ; reset notification timer to 1s after code in auto-execute section has finished running
 
-Return ; end auto-execute
+Return ; ends auto-execute
 
 ; Below code can be placed anywhere in your script
 
@@ -135,18 +146,90 @@ RCtrl & Right::Send "{End}"
 
 +CapsLock:: {
 SetCapsLockState "On"
-MyNotificationFunc("CapsLock ON", "10000", "960", "985", "1")   ; duration 10s
+MyNotificationFunc("CapsLock ON", "10000", "960", "985", "1")   ; Show notification for 10s
 KeyWait "Esc", "d t10" ; esc skips 10s wait and disables CapsLock immediately
 SetCapsLockState "Off"
 MyNotification.Destroy()
 }
 
-CapsLock:: { ; turn off CapsLock if on ; locks +CapsLock for 10s for some reason?!
-If (GetKeyState("Capslock", "T")) {
-    SetCapsLockState "Off"
-    MyNotification.Destroy()
-    }
+;-------------------------------------------------------------------------------
+;  = Horizontal Scrolling
+; One of these four methods should work in most situations. If not, 
+; search the interent for other methods and send me a msg if you find one that works for you.
+
+
+; Method #1 - send window message(WM) directly to move scroll bar(SB) horizontally
+; default method
+
++WheelUp::SendMessage 0x0114, 0, 0, ControlGetFocus("A")        ; scroll left - 0x114 is WM_HSCROLL, 0 is SB_LINELEFT
++WheelDown::SendMessage 0x0114, 1, 0, ControlGetFocus("A")      ; scroll right - 1 is SB_LINERIGHT ; same as loop 1
+
+/* (disabled by comment)
+
+; add additional 'Loop' command to this method to increase the speed of scrolling
+
++WheelUp:: {
+Loop 3         ; increase the number for faster scrolling ; if number is omitted, causes infinite loop (which is BAD)
+    SendMessage 0x0114, 0, 0, ControlGetFocus("A")
 }
+
++WheelDown:: {
+Loop 3
+    SendMessage 0x0114, 1, 0, ControlGetFocus("A")
+}
+
+*/
+
+;-----
+; Method #2 - simulate horizontal mouse wheel action
+; test if method #2 works using Win + Shift + Wheel Up/Down keys (3-key combo),
+; then add window title/class to group #1 in auto-execute section
+; to enable simpler Shift + Wheel Up/Down (2-key combo) via #HotIf command
+; source: https://www.AutoHotkey.com/boards/viewtopic.php?t=76415
+
+#+WheelUp::WheelLeft
+#+WheelDown::WheelRight
+
+; Group "HorizontalScroll1" is defined in auto-execute section
+#HotIf WinActive("ahk_group HorizontalScroll1")                ; group #1
+
++WheelUp::Send "{WheelLeft}"
++WheelDown::Send "{WheelRight}"
+
+#HotIf
+
+
+/* (disabled by comment)
+
+;-----
+; Method #3 - turn on scroll lock and send arrow keys to scroll horizontally
+
+#HotIf WinActive("ahk_group HorizontalScroll2")                ; group 2 - not yet defined in auto-execute
+
++WheelUp:: {
+SetScrollLockState "On"
+Send "{Left}"
+SetScrollLockState "Off"
+}
+
++WheelDown:: {
+SetScrollLockState "On"
+Send "{Right}"
+SetScrollLockState "Off"
+}
+
+#HotIf
+
+;-----
+; Method #4 - send arrow keys directly if other methods don't work
+
+#HotIf WinActive("ahk_group HorizontalScroll3")                ; group 3 - not yet defined in auto-execute
+
++WheelUp::Send "{Left 3}"
++WheelDown::Send "{Right 3}"
+
+#HotIf
+*/
 
 ;-------------------------------------------------------------------------------
 ; Control Panel Tools Menu
@@ -171,26 +254,31 @@ ControlPanelMenu.Show
 ; Capitalise first letter of a sentence
 ; modified from a script posted here by Xtra - https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
 
-~NumpadEnter:: ; triggers
+~NumpadEnter::
 ~Enter::
+~NumpadDot::
 ~.::
 ~!::
 ~?::
 {
-cfc1 := InputHook("L1 V C"," {LShift}{RShift}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A (trigger alphabet)
+cfc1 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
 cfc1.Start()
 cfc1.Wait()
 if (cfc1.EndReason = "Match") {
-    send "{Backspace}+" cfc1.Input
+    if (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; if ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
+        send "{Backspace} +" cfc1.Input
+    else
+        send "{Backspace}+" cfc1.Input ; if . or numdot is the trigger, don't add space, coz typing website address is problematic
     exit
 }
-cfc2 := InputHook("L1 V C"," {LShift}{RShift}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A (trigger space alphabet)
-cfc2.Start()
-cfc2.Wait()
-if (cfc2.EndReason = "Match")
-    send "{Backspace}+" cfc2.Input
+if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols - eg: 0.2ms is not changed to 0.2Ms
+    cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
+    cfc2.Start()
+    cfc2.Wait()
+    if (cfc2.EndReason = "Match")
+        send "{Backspace}+" cfc2.Input
+    }
 }
-
 ; there are several other AHK v1 auto-capitalisation scripts, and some of them are good -
 ; such as the one by Xtra linked above and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
 
@@ -323,7 +411,27 @@ HasVal(haystack, needle) {
 ;  = Toggle OS Function
 ; inspiration from a post by gonzax - https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
 
-ToggleOSCheck() {
+ToggleOS(*) {
+ToggleOSCheck()
+If (ShowSuperHidden_Status = 0) { ; enable if disabled
+    RegWrite "1", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
+    CheckRegWrite(ShowSuperHidden_Status)
+    ToggleOSCheck()
+    WindowsRefreshOrRun()
+    } Else { ; disable if enabled
+    RegWrite "0", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
+    CheckRegWrite(ShowSuperHidden_Status)
+    ToggleOSCheck()
+    WindowsRefreshOrRun()
+    }
+}
+
+CheckRegWrite(key) { ; check if RegWrite was success
+    if key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+        msgbox "ToggleOS Failed"
+}
+
+ToggleOSCheck() { ; tray tick mark
 Global ShowSuperHidden_Status
 ShowSuperHidden_Status := RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
 If (ShowSuperHidden_Status = 0)
@@ -331,19 +439,6 @@ If (ShowSuperHidden_Status = 0)
 Else {
     ShowSuperHidden_Status := 1
     A_TrayMenu.Check "&Toggle OS files"
-    }
-}
-
-ToggleOS(*) {
-ToggleOSCheck()
-If (ShowSuperHidden_Status = 0) { ; enable if disabled
-    RegWrite "1", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
-    ToggleOSCheck()
-    WindowsRefreshOrRun()
-    } Else { ; disable if enabled
-    RegWrite "0", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
-    ToggleOSCheck()
-    WindowsRefreshOrRun()
     }
 }
 
