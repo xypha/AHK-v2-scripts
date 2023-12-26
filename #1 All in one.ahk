@@ -155,7 +155,7 @@ MyNotification.Destroy()
 ;-------------------------------------------------------------------------------
 ;  = Horizontal Scrolling
 ; One of these four methods should work in most situations. If not,
-; search the interent for other methods and send me a msg if you find one that works for you.
+; search the internet for other methods and send me a msg if you find one that works for you.
 
 
 ; Method #1 - send window message(WM) directly to move scroll bar(SB) horizontally
@@ -268,10 +268,10 @@ if (cfc1.EndReason = "Match") {
     if (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; if ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
         send "{Backspace} +" cfc1.Input
     else
-        send "{Backspace}+" cfc1.Input ; if . or numdot is the trigger, don't add space, coz typing website address is problematic
+        send "{Backspace}+" cfc1.Input ; if dot or numdot is the trigger, don't add space, coz typing website address is problematic
     exit
 }
-if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols - eg: 0.2ms is not changed to 0.2Ms
+if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
     cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
     cfc2.Start()
     cfc2.Wait()
@@ -305,30 +305,30 @@ ChangeCaseMenu.Show
 #HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts
 
 ; ALT + number row
-!1::EncText("`'","`'")         ; enclose in single quotes '' - ' U+0027 : APOSTROPHE
-!2::EncText(Chr(34),Chr(34))   ; enclose in double quotes "" - " U+0022 : QUOTATION MARK
+!1::EncText("`'","`'")         ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
+!2::EncText(Chr(34),Chr(34))   ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
 !3::EncText("(",")")           ; enclose in round breackets ()
 !4::EncText("[","]")           ; enclose in square brackets []
 !5::EncText("{{}","{}}")       ; enclose in flower brackets {}
 !6::EncText(Chr(96),Chr(96))   ; enclose in accent/backtick ``
-!7::EncText("%","%")           ; enclose in percentage sign %%
-!8::EncText("‘","’")           ; enclose in single quotes ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
-!9::EncText("“","”")           ; enclose in double quotes “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+!7::EncText("%","%")           ; enclose in percent sign %%
+!8::EncText("‘","’")           ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+!9::EncText("“","”")           ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
 !0::EncText("","")             ; remove above quotes
 
 !q:: {
 WrapTextMenu := Menu()
 WrapTextMenu.Delete
-WrapTextMenu.Add("&1  `'  Single Quotes `'"    ,WrapTextFunc) ; single quotes ''
-WrapTextMenu.Add("&2  `"  Double Quotes `""    ,WrapTextFunc) ; double quotes ""
-WrapTextMenu.Add("&3  (  Round Breackets )"    ,WrapTextFunc) ; round breackets ()
-WrapTextMenu.Add("&4  [  Square Brackets ]"    ,WrapTextFunc) ; square brackets []
-WrapTextMenu.Add("&5  { Flower Brackets }"     ,WrapTextFunc) ; flower brackets {}
-WrapTextMenu.Add("&6  ``  Accent/Backtick ``"  ,WrapTextFunc) ; accent/backtick ``
-WrapTextMenu.Add("&7  `%  Percentage Sign `%"  ,WrapTextFunc) ; percentage sign %%
-WrapTextMenu.Add("&8  ‘  Single Quotation ’"   ,WrapTextFunc) ; single quotes ‘’
-WrapTextMenu.Add("&9  “  Double Quotation ”"   ,WrapTextFunc) ; double quotes “”
-WrapTextMenu.Add("&0  Remove all"              ,WrapTextFunc) ; remove quotes
+WrapTextMenu.Add("&1   `'  Single Quotation `'"     ,WrapTextFunc) ; single quotation '' ; ordered in decreasing frequency of use; reorder as needed
+WrapTextMenu.Add("&2   `" Double Quotation `""      ,WrapTextFunc) ; double quotation ""
+WrapTextMenu.Add("&3   (  Round Brackets )"         ,WrapTextFunc) ; round breackets ()
+WrapTextMenu.Add("&4   [  Square Brackets ]"        ,WrapTextFunc) ; square brackets []
+WrapTextMenu.Add("&5   {  Flower Brackets }"        ,WrapTextFunc) ; flower brackets {}
+WrapTextMenu.Add("&6   ``  Accent/Backtick ``"      ,WrapTextFunc) ; accent/backtick ``
+WrapTextMenu.Add("&7  `% Percent Sign `%"           ,WrapTextFunc) ; percent sign %%
+WrapTextMenu.Add("&8   ‘  Single Comma Quotation ’" ,WrapTextFunc) ; single turned comma ‘’
+WrapTextMenu.Add("&9   “ Double Comma Quotation ”"  ,WrapTextFunc) ; double turned comma “”
+WrapTextMenu.Add("&0  Remove all"                   ,WrapTextFunc) ; remove quotes
 WrapTextMenu.Show
 }
 
@@ -450,7 +450,7 @@ if WinExist("ahk_class CabinetWClass") { ; refresh explorer if window exists
     Sleep 500  ; change as per your system performance
     Send "{F5}" ; refresh
 } else { ; open new explorer window if one doesn't already exist ; remove this section if not desired
-    Run 'explorer.exe',,"max"
+    Run 'explorer.exe',,"Max"
     WinWait("ahk_class CabinetWClass",, 10) ; timeout 10 secs
     WinActivate
     }
@@ -512,9 +512,9 @@ If !ClipWait(secs) {
 
 WrapTextFunc(item, position, WrapTextMenu) {
 If position = 1
-    EncText("'","'")           ; enclose in single quotes ''
+    EncText("'","'")           ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
 Else if position = 2
-    EncText(Chr(34),Chr(34))   ; enclose in double quotes ""
+    EncText(Chr(34),Chr(34))   ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
 Else if position = 3
     EncText("(",")")           ; enclose in round breackets ()
 Else if position = 4
@@ -524,24 +524,25 @@ Else if position = 5
 Else if position = 6
     EncText(Chr(96),Chr(96))   ; enclose in accent/backtick ``
 Else if position = 7
-    EncText("%","%")           ; enclose in percentage sign %%
+    EncText("%","%")           ; enclose in percent sign %%
 Else if position = 8
-    EncText("‘","’")           ; enclose in single quotes ‘’
+    EncText("‘","’")           ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
 Else if position = 9
-    EncText("“","”")           ; enclose in double quotes “”
+    EncText("“","”")           ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
 Else if position = 10
-    EncText("","")             ; remove quotes
+    EncText("","")             ; remove above quotes
 }
 
 EncText(q,p) {
 CallClipboard(2) ; 2s
 TextStringInitial := A_Clipboard
 TextString := A_Clipboard
-TextString := StrReplace(TextString, "`r`n", "`n")
-TextString := RegExReplace(TextString,'[\[\]\*`'\(\)\{\}%`"“”‘’]+|``')     ;"; remove "*`'(){}%“”‘’[]
-TextString := RegExReplace(TextString,'^\s+|\s+$')     ; RegEx remove leading/trailing space
+TextString := StrReplace(TextString, "`r`n", "`n")      ; fix for carriage return + line feed
+TextString := RegExReplace(TextString,'^\s+|\s+$')      ; RegEx remove leading/trailing space
+TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading ['({%"“‘`
+TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`
 TextString := q TextString p
-TextString := StrReplace(TextString, "`r`n" p, p)
+TextString := StrReplace(TextString, "`n" p, p)
 If q ~= "{" ; RegEx match
     Len1 := Strlen(TextString) - 4 ; to account for extra {} in q and p
 Else
@@ -556,8 +557,8 @@ If (RegExMatch(TextStringInitial, "\s+$")) {   ; if initial string has Trailing 
     Len1++                                     ; add 1 to len
     }
 Len2 := "+{left " Len1 "}"
-Send TextString    ; send string with quotes
-Send Len2           ; and select it
+Send TextString    ; send string with quotation marks
+Send Len2          ; and select it
 }
 
 ;-------------------------------------------------------------------------------
