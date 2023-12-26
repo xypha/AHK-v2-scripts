@@ -305,16 +305,16 @@ ChangeCaseMenu.Show
 #HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts
 
 ; ALT + number row
-!1::EncText("`'","`'")         ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
-!2::EncText(Chr(34),Chr(34))   ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
-!3::EncText("(",")")           ; enclose in round breackets ()
-!4::EncText("[","]")           ; enclose in square brackets []
-!5::EncText("{{}","{}}")       ; enclose in flower brackets {}
-!6::EncText(Chr(96),Chr(96))   ; enclose in accent/backtick ``
-!7::EncText("%","%")           ; enclose in percent sign %%
-!8::EncText("‘","’")           ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
-!9::EncText("“","”")           ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
-!0::EncText("","")             ; remove above quotes
+!1::EncText("`'","`'")        ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
+!2::EncText(Chr(34),Chr(34))  ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
+!3::EncText("(",")")          ; enclose in round breackets ()
+!4::EncText("[","]")          ; enclose in square brackets []
+!5::EncText("{","}")          ; enclose in flower brackets {}
+!6::EncText(Chr(96),Chr(96))  ; enclose in accent/backtick ``
+!7::EncText("%","%")          ; enclose in percent sign %%
+!8::EncText("‘","’")          ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+!9::EncText("“","”")          ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+!0::EncText("","")            ; remove above quotes
 
 !q:: {
 WrapTextMenu := Menu()
@@ -520,7 +520,7 @@ Else if position = 3
 Else if position = 4
     EncText("[","]")           ; enclose in square brackets []
 Else if position = 5
-    EncText("{{}","{}}")       ; enclose in flower brackets {}
+    EncText("{","}")           ; enclose in flower brackets {}
 Else if position = 6
     EncText(Chr(96),Chr(96))   ; enclose in accent/backtick ``
 Else if position = 7
@@ -537,16 +537,14 @@ EncText(q,p) {
 CallClipboard(2) ; 2s
 TextStringInitial := A_Clipboard
 TextString := A_Clipboard
-TextString := StrReplace(TextString, "`r`n", "`n")      ; fix for carriage return + line feed
+TextString := StrReplace(TextString, "`r`n", "`n")      ; fix for carriage return + line feed 
 TextString := RegExReplace(TextString,'^\s+|\s+$')      ; RegEx remove leading/trailing space
 TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading ['({%"“‘`
 TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`
 TextString := q TextString p
 TextString := StrReplace(TextString, "`n" p, p)
-If q ~= "{" ; RegEx match
-    Len1 := Strlen(TextString) - 4 ; to account for extra {} in q and p
-Else
-    Len1 := Strlen(TextString)
+Len1 := Strlen(TextString)
+
 ; if you regularly include leading/trailing spaces within quotes, comment out above RegEx and below if statements
 If (RegExMatch(TextStringInitial, "^\s+")) {   ; if initial string has Leading space
     TextString := " " TextString               ; add Leading space to string
@@ -556,9 +554,14 @@ If (RegExMatch(TextStringInitial, "\s+$")) {   ; if initial string has Trailing 
     TextString .= " "                          ; append trailing space to string
     Len1++                                     ; add 1 to len
     }
+
 Len2 := "+{left " Len1 "}"
-Send TextString    ; send string with quotation marks
-Send Len2          ; and select it
+
+; Send "{raw}" TextString    ; send string with quotes
+A_Clipboard := TextString    ; paste from clipboard is faster than send raw, especially for long strings
+Send "^v"
+Send Len2          ; and select textstring
+; A_Clipboard := TextStringInitial  ; restore original text string to clipboard if desired
 }
 
 ;-------------------------------------------------------------------------------
