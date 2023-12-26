@@ -154,7 +154,7 @@ MyNotification.Destroy()
 
 ;-------------------------------------------------------------------------------
 ;  = Horizontal Scrolling
-; One of these four methods should work in most situations. If not, 
+; One of these four methods should work in most situations. If not,
 ; search the interent for other methods and send me a msg if you find one that works for you.
 
 
@@ -254,7 +254,7 @@ ControlPanelMenu.Show
 ; Capitalise first letter of a sentence
 ; modified from a script posted here by Xtra - https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
 
-~NumpadEnter:: ; triggers
+~NumpadEnter:: ; triggers ; add or disable one or more as needed
 ~Enter::
 ~NumpadDot::
 ~.::
@@ -591,7 +591,7 @@ if position = 10
 'Short' list of commands (several personal modifications over the years - NOT comprehensive, at all)
 Original source - https://www.autohotkey.com/boards/viewtopic.php?p=24584#p24584
 
-; already in Win X menu
+; Already in Win + X menu
 ComObject("shell.application").ControlPanelItem("compmgmt.msc")    ; #x   | Computer Management
 ComObject("shell.application").ControlPanelItem("devmgmt.msc")     ; #x   | Device Manager
 ComObject("shell.application").ControlPanelItem("hdwwiz.cpl")      ; #x   | Device Manager ; alt
