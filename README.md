@@ -54,4 +54,4 @@ Standalone scripts for each function will be created soon.
 - **Wrap Text In Quotes or Symbols** -\
   Enclose words and numbers in different types of quotation marks or symbols `'',"",(),[],{},``,%%,‘’,“”` in-line using a pop-up menu & shortcut keys.
 
-  ![Wrap Text In Quotes or Symbols](https://github.com/xypha/AHK-v2-scripts/assets/12472214/fdc70096-1c69-41e6-b7c8-545669071bcf)
+  ![Wrap Text In Quotes or Symbols](https://github.com/xypha/AHK-v2-scripts/assets/12472214/ed53956b-8a5b-47ed-8b08-16fc72e590fa)
