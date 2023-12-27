@@ -18,10 +18,15 @@
 ;  = Remap Keys
 ;  = CapsLock
 ;  = Horizontal Scrolling
-; Control Panel Tools Menu
+;  = Move Mouse Pointer by pixel
+;  = Close or Kill an app window
+;  = Adjust Window Transparency keys
+;  = Monitor off
+;  = Recycle Bin
+;  = Control Panel Tools Menu
+;  = Change the case of text
+;  = Wrap Text In Quotes or Symbols keys
 ; Capitalise first letter of a sentence
-; Change the case of text
-; Wrap Text In Quotes or Symbols keys
 ; User-defined Functions
 ;  = Case Conversion Function
 ;  = HasVal Function
@@ -30,6 +35,7 @@
 ;  = Notification Function
 ;  = Call Clipboard and ClipWait
 ;  = Wrap Text In Quotes or Symbols Function
+;  = Adjust Window Transparency Function
 ;  = Control Panel Tools Function
 
 ;------------------------------------------------------------------------------
@@ -232,7 +238,100 @@ SetScrollLockState "Off"
 */
 
 ;-------------------------------------------------------------------------------
-; Control Panel Tools Menu
+;  = Move Mouse Pointer by pixel
+; Modified from http://www.computoredge.com/AutoHotkey/Downloads/MousePrecise.ahk
+
+#Numpad1::MouseMove -1,  1, 0, "R"    ; Win + Numpad1 move down left    ↓←
+#Numpad2::MouseMove  0,  1, 0, "R"    ; Win + Numpad2 move down         ↓
+#Numpad3::MouseMove  1,  1, 0, "R"    ; Win + Numpad3 move down right   ↓→
+#Numpad4::MouseMove -1,  0, 0, "R"    ; Win + Numpad4 move left         ←
+#Numpad5::MouseMove 960,540           ; Win + Numpad5 move center mouse • (1920×1080 display)
+#Numpad6::MouseMove  1,  0, 0, "R"    ; Win + Numpad6 move right        →
+#Numpad7::MouseMove -1, -1, 0, "R"    ; Win + Numpad7 move up left      ↑←
+#Numpad8::MouseMove  0, -1, 0, "R"    ; Win + Numpad8 move up           ↑
+#Numpad9::MouseMove  1, -1, 0, "R"    ; Win + Numpad9 move up right     ↑→
+
+^#m::MouseMove 960,540 ; Test mouse position
+
+;-------------------------------------------------------------------------------
+;  = Close or Kill an app window
+; Modified from https://superuser.com/a/1554366/391770
+
+Alt & RButton:: { ; ALT + right mouse button ; attempt to close window
+MouseGetPos ,, &id
+winClass := WinGetClass("ahk_id " . id)
+If (winClass != "Shell_TrayWnd")   ; exclude windows taskbar
+; if (winClass != "Shell_TrayWnd" or winClass != "insert yourapp classname") ; exclude other apps using "or"
+    WinClose("ahk_id " . id)  ; sends a WM_CLOSE message to the target window
+    ; PostMessage 0x0112, 0xF060,,, "ahk_id " . id ; alternate method - same as pressing Alt+F4 or clicking the window's close button in its title bar:
+}
+
+; Kill window, usually unresponsive ones if WinClose fails
+^!F4:: {
+MouseGetPos ,, &id
+WinKill ("ahk_id " . id)
+}
+
+;-------------------------------------------------------------------------------
+;  = Adjust Window Transparency keys
+; Modified from https://www.autohotkey.com/board/topic/667-transparent-windows/?p=148102
+
+^+WheelUp:: { ; increases Trans value, makes the window more opaque
+    Trans := GetTrans()
+    if(Trans < 255)
+        Trans := Trans + 20 ; add 20, change for slower/faster transition
+    if(Trans >= 255)
+        Trans := "Off"
+    SetTrans(Trans)
+}
+
+^+WheelDown:: { ; decreases Trans value, makes the window more transparent
+    Trans := GetTrans()
+    if(Trans > 30)
+        Trans := Trans - 20 ; subtract 20, change for slower/faster transition
+    SetTrans(Trans)
+}
+
+
+F8:: {
+SetTransMenu := Menu()
+SetTransMenu.Delete
+SetTransMenu.Add("&1 255 Opaque"            ,SetTransFunc)
+SetTransMenu.Add("&2 190 Translucent"       ,SetTransFunc)      ; Semi-opaque
+SetTransMenu.Add("&3 125 Semi-transparent"  ,SetTransFunc)
+SetTransMenu.Add("&4  65 Nearly Invisible"  ,SetTransFunc)
+SetTransMenu.Add("&5   0 Invisible"         ,SetTransFunc)
+SetTransMenu.Show
+}
+
+;-------------------------------------------------------------------------------
+;  = Recycle Bin
+
+^del:: {
+If WinActive("Recycle Bin ahk_class CabinetWClass") ; if explorer is active and recycle bin is already displayed, empty Bin
+    FileRecycleEmpty
+Else If Winexist("Recycle Bin ahk_class CabinetWClass") ; if explorer is inactive but showing recycle bin, activate it
+    WinActivate
+; Else If Winexist("ahk_class CabinetWClass") { ; if explorer is open but not showing recycle bin, change to Bin (uncomment this section if desired)
+;     WinActivate
+;     Sleep 1000
+;     Send "{F4}"
+;     Sleep 500
+;     Send "{raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
+} else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"    ; if explorer is not open, then open Bin in explorer
+}
+
+;-------------------------------------------------------------------------------
+;  = Monitor off
+; modified from AHK docs
+
+^esc:: {
+Sleep 1000  ; Give user a chance to release keys (in case their release would wake up the monitor again)
+SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
+}
+
+;-------------------------------------------------------------------------------
+;  = Control Panel Tools Menu
 
 #+x:: { ; Win & Shift & x
 ControlPanelMenu := Menu() ; starts building a pop-up menu
@@ -251,39 +350,7 @@ ControlPanelMenu.Show
 }
 
 ;------------------------------------------------------------------------------
-; Capitalise first letter of a sentence
-; modified from a script posted here by Xtra - https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
-
-~NumpadEnter:: ; triggers ; add or disable one or more as needed
-~Enter::
-~NumpadDot::
-~.::
-~!::
-~?::
-{
-cfc1 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
-cfc1.Start()
-cfc1.Wait()
-if (cfc1.EndReason = "Match") {
-    if (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; if ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
-        send "{Backspace} +" cfc1.Input
-    else
-        send "{Backspace}+" cfc1.Input ; if dot or numdot is the trigger, don't add space, coz typing website address is problematic
-    exit
-}
-if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
-    cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
-    cfc2.Start()
-    cfc2.Wait()
-    if (cfc2.EndReason = "Match")
-        send "{Backspace}+" cfc2.Input
-    }
-}
-; there are several other AHK v1 auto-capitalisation scripts, and some of them are good -
-; such as the one by Xtra linked above and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
-
-;------------------------------------------------------------------------------
-; Change the case of text
+;  = Change the case of text
 ; inspired by a v1 script from https://geekdrop.com/content/super-handy-AutoHotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 
 !c:: { ; ALT + C
@@ -298,7 +365,7 @@ ChangeCaseMenu.Show
 }
 
 ;------------------------------------------------------------------------------
-; Wrap Text In Quotes or Symbols keys
+;  = Wrap Text In Quotes or Symbols keys
 ; Inspired by two old AHK v1 scripts from https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 ; and https://www.autohotkey.com/board/topic/9805-easy-encloseenquote/?p=61995
 
@@ -333,6 +400,39 @@ WrapTextMenu.Show
 }
 
 #HotIf
+
+;------------------------------------------------------------------------------
+; Capitalise first letter of a sentence
+; modified from a script by Xtra - https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
+
+~NumpadEnter:: ; triggers ; add or disable one or more as needed
+~Enter::
+~NumpadDot::
+~.::
+~!::
+~?::
+{
+cfc1 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
+cfc1.Start()
+cfc1.Wait()
+if (cfc1.EndReason = "Match") {
+    if (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; if ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
+        send "{Backspace} +" cfc1.Input
+    else
+        send "{Backspace}+" cfc1.Input ; if dot or numdot is the trigger, don't add space, coz typing website address is problematic
+    exit
+}
+if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
+    cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
+    cfc2.Start()
+    cfc2.Wait()
+    if (cfc2.EndReason = "Match")
+        send "{Backspace}+" cfc2.Input
+    }
+}
+; several other AHK v1 auto-capitalisation scripts are good, such as the one by Xtra linked above
+; and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
+; and many others that use different methods to achieve this goal. Try a few and see what works for you.
 
 ;-------------------------------------------------------------------------------
 ; User-defined Functions
@@ -495,7 +595,8 @@ If !ClipWait(secs) {
     clipSave := ""
     Exit
     }
-Return clipSave
+else
+    Return clipSave
 }
 
 CallClipboardShort(secs) {
@@ -537,9 +638,9 @@ EncText(q,p) {
 CallClipboard(2) ; 2s
 TextStringInitial := A_Clipboard
 TextString := A_Clipboard
-TextString := StrReplace(TextString, "`r`n", "`n")      ; fix for carriage return + line feed 
+TextString := StrReplace(TextString, "`r`n", "`n")      ; fix carriage return + line feed for Strlen
 TextString := RegExReplace(TextString,'^\s+|\s+$')      ; RegEx remove leading/trailing space
-TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading ['({%"“‘`
+TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading  ['({%"“‘`
 TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`
 TextString := q TextString p
 TextString := StrReplace(TextString, "`n" p, p)
@@ -562,6 +663,32 @@ A_Clipboard := TextString    ; paste from clipboard is faster than send raw, esp
 Send "^v"
 Send Len2          ; and select textstring
 ; A_Clipboard := TextStringInitial  ; restore original text string to clipboard if desired
+}
+
+;-------------------------------------------------------------------------------
+;  = Adjust Window Transparency Function
+
+GetTrans() {
+    ToolTip() ; disable previous tooltip if any
+    MouseGetPos ,, &WinID
+    Trans := WinGetTransparent("ahk_id " WinID)
+    if(!Trans)
+        Trans := 255
+    return Trans
+}
+
+SetTrans(Transparency) {
+    Trans := Transparency
+    ToolTip("Transparency: " Trans)
+    SetTimer () => ToolTip(), -500
+    MouseGetPos ,, &WinID
+    WinSetTransparent Trans, "ahk_id " WinID
+}
+
+SetTransFunc(item, position, SetTransMenu) {
+MouseGetPos ,, &WinID
+Trans := Trim(SubStr(item, 4, 3))
+WinSetTransparent Trans, "ahk_id " WinID
 }
 
 ;-------------------------------------------------------------------------------
