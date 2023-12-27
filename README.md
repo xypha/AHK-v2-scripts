@@ -21,7 +21,7 @@ Standalone scripts for each function will be created soon.
   Create shortcuts to check the functions of a script using `ListLines`, and to `Reload` a script after making changes to it.
 
 - **Remap Keys** -\
-  Script includes methods to disable keys that you don't use or trigger accidentally too often. See examples of ways to change a key's function to suit your needs, such as pressing `ALT + M` to minimise a window instantly, instead of moving your mouse cursor to the "Minimise" button in the title bar. 
+  This script includes methods to disable keys that you don't use or trigger accidentally too often. See examples of ways to change a key's function to suit your needs, such as pressing `ALT + M` to minimise a window instantly, instead of moving your mouse cursor to the "Minimise" button in the title bar. 
 
 - **CapsLock** -\
   Do you accidentally trigger `CapsLock` when trying to press `a` or `Ctrl + A` or `Alt + Tab`? AutoHotkey can ensure this never happens.
@@ -31,6 +31,29 @@ Standalone scripts for each function will be created soon.
   Whether you have a mouse with or without a tilt wheel, some applications refuse to scroll horizontally.
   This script demonstrates four methods that simulate tilt wheel actions that try to force even the most recalcitrant windows to scroll sideways.
 
+- **Move Mouse Pointer by pixel** -\
+  Here is an example of how you can move your mouse pointer with precision, pixel by pixel, using Numpad shortcuts. It is easily customisable to your needs.
+
+- **Close or Kill an app window with shortcuts** -\
+  Close any app or window instantly with a keyboard shortcut without having to navigate to the 'Close' button in the title bar. Annoyed by unresponsive windows? See an example for killing unresponsive windows with a shortcut immediately, instead of searching for the malfunctioning app in Task Manager.
+  
+- **Adjust Window Transparency** -\
+  Managing multiple windows on your desktop? Here is a handy way to work with them - Adjust the transparency of an app or window in customisable increments using mouse keys, or quickly alter transparency to pre-defined levels through a shortcut-triggered pop-up menu.
+
+  ![Adjust Window Transparency](https://github.com/xypha/AHK-v2-scripts/assets/12472214/2896aeb3-f0a3-4b0c-a9b5-5e789d67532a)
+
+- **Recycle Bin** -\
+  Do you find yourself opening the Recycle Bin multiple times? Or do you want to avoid minimising all windows to go to the desktop or scrolling the navigation pane to find the Recycle Bin icon? Here is a single shortcut `CTRL + Delete` that allows you to do the following -  
+    * Open the Recycle Bin directly when Explorer is not open, or  
+    * Navigate to the Recycle Bin when Explorer is open, or  
+    * Bring the Recycle Bin Explorer window in the background to the foreground, or  
+    * Empty the bin, when the Recycle Bin Explorer window is in the foreground.
+      
+  Alternatively, one or more of these actions can be assigned to work with different keyboard shortcuts. Autothotkey is awesome like that :)
+
+- **Monitor off** -\
+  A simple keyboard shortcut `CTRL + Esc` to turn off your monitor.
+  
 - **Control Panel Tools Menu** -\
   Add items missing in the `Win + X` menu to a customisable AutoHotkey Menu triggered by `Win + Shift + X`.
   
