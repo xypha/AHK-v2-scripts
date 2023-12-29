@@ -10,23 +10,33 @@
 ; Default state of lock keys
 ; Auto-execute
 ;  = Toggle OS files
-;  = Tray Icon
+;  = Customise Tray Icon
 ;  = Horizontal Scrolling Group
 ;  = End auto-execute
 ; Hotkeys
 ;  = Check & Reload AHK
 ;  = Remap Keys
-;  = CapsLock
+;  = Customise CapsLock
 ;  = Horizontal Scrolling
 ;  = Move Mouse Pointer by pixel
 ;  = Close or Kill an app window
 ;  = Adjust Window Transparency keys
 ;  = Monitor off
-;  = Recycle Bin
-;  = Control Panel Tools Menu
+;  = Recycle Bin shortcut
+;  = Add Control Panel Tools to a Menu
 ;  = Change the case of text
 ;  = Wrap Text In Quotes or Symbols keys
+;  = Exchange adjacent letters
+;  = Toggle Window On Top
 ; Capitalise first letter of a sentence
+; #HotIf
+;  = Firefox
+;  = Telegram
+;  = Windows Explorer
+;    + Symbols In File Names Keys
+;    + Copy full path
+;    + Copy file name without path
+;    + Copy file name without extension and path
 ; User-defined Functions
 ;  = Case Conversion Function
 ;  = HasVal Function
@@ -69,7 +79,7 @@ A_TrayMenu.Add()                                ; add a separator
 A_TrayMenu.AddStandard()                        ; restore standard menu
 ToggleOSCheck()                                 ; check value of ShowSuperHidden_Status
 
-;  = Tray Icon
+;  = Customise Tray Icon
 
 I_Icon := A_ScriptDir "\icons\1-512.ico"
 ; Icon source: https://www.iconsdb.com/caribbean-blue-icons/1-icon.html     ; CC License
@@ -145,7 +155,7 @@ RCtrl & Right::Send "{End}"
 !m::WinMinimize "A"         ; Minimize active window
 
 ;-------------------------------------------------------------------------------
-;  = CapsLock
+;  = Customise CapsLock
 
 ^CapsLock::^a        ; select all
 <#CapsLock::AltTab   ; switch windows with Right Win + CapsLock
@@ -305,7 +315,7 @@ SetTransMenu.Show
 }
 
 ;-------------------------------------------------------------------------------
-;  = Recycle Bin
+;  = Recycle Bin shortcut
 
 ^del:: {
 If WinActive("Recycle Bin ahk_class CabinetWClass") ; if explorer is active and recycle bin is already displayed, empty Bin
@@ -322,7 +332,7 @@ Else If Winexist("Recycle Bin ahk_class CabinetWClass") ; if explorer is inactiv
 }
 
 ;-------------------------------------------------------------------------------
-;  = Monitor off
+;  = Display Off shortcut
 ; modified from AHK docs
 
 ^esc:: {
@@ -331,7 +341,7 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 }
 
 ;-------------------------------------------------------------------------------
-;  = Control Panel Tools Menu
+;  = Add Control Panel Tools to a Menu
 
 #+x:: { ; Win & Shift & x
 ControlPanelMenu := Menu() ; starts building a pop-up menu
@@ -402,6 +412,39 @@ WrapTextMenu.Show
 #HotIf
 
 ;------------------------------------------------------------------------------
+;  = Exchange adjacent letters
+; place cursor between 2 letters. The letters reverse positions - `ab|c` becomes `ac|b`.
+; Modified from http://www.computoredge.com/AutoHotkey/Downloads/LetterSwap.ahk
+
+$!l:: { ; ALT + L
+clipSave := ClipboardAll()
+A_Clipboard := ""
+Send "{Left}+{Right 2}^c"
+CallClipboardShort(2) ; 2s
+SwappedLetters := SubStr(A_Clipboard,2) . SubStr(A_Clipboard,1,1)
+Send SwappedLetters "{Left}"
+A_Clipboard := clipSave
+clipSaved := ""
+}
+
+;------------------------------------------------------------------------------
+;  = Toggle Window On Top
+; Modified from https://www.autohotkey.com/board/topic/94627-button-for-always-on-top/?p=596509
+
+!t:: {                          ; ALT + t
+Title_When_On_Top := "! "       ; change title "! " as required
+t := WinGetTitle("A")
+ExStyle := WinGetExStyle(t)
+if (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
+    WinSetAlwaysOnTop 0, t      ; Turn OFF and remove Title_When_On_Top
+    WinSetTitle (RegexReplace(t, Title_When_On_Top)), "A"
+} else {
+    WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
+    WinSetTitle Title_When_On_Top . t, t
+    }
+}
+
+;------------------------------------------------------------------------------
 ; Capitalise first letter of a sentence
 ; modified from a script by Xtra - https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
 
@@ -433,6 +476,112 @@ if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Ex
 ; several other AHK v1 auto-capitalisation scripts are good, such as the one by Xtra linked above
 ; and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
 ; and many others that use different methods to achieve this goal. Try a few and see what works for you.
+
+;-------------------------------------------------------------------------------
+; #HotIf
+; Tailor keyboard shortcuts, commands and functions to specific windows, apps or pre-defined groups of both
+
+;  = Firefox
+
+#HotIf WinActive("ahk_exe firefox.exe")
+
+^+o:: {      ; CTRL + Shift + O to open library / bookmark manager
+Send "^t"
+Sleep 500
+Send "^l"
+Sleep 500
+Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
+}
+
+^+q::Return     ; disable Exit shortcut
+
+#HotIf
+
+;------------------------------------------------------------------------------
+;  = Telegram
+
+#HotIf WinActive("ahk_exe Telegram.exe")
+
+^q::Send "^w"     ; minimise to tray, instead of quit
+
+#HotIf
+
+;------------------------------------------------------------------------------
+;  = Windows Explorer
+
+#HotIf WinActive("ahk_class CabinetWClass")
+
+F1::F2 ; disable opening help in MS edge
+
+; Unselect - Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
+^+a::Send "{F5}"
+
+;-------
+;    + Symbols In File Names Keys
+
+; replace \/:*?"<>| with ＼⧸ ： ✲ ？＂＜＞｜
+; comment out the ones you don't desire, like \ → ＼
+
+; :?*:\::{U+FF3C}                     ; \ → ＼ | replace U+005C REVERSE SOLIDUS : backslash            → U+FF3C FULLWIDTH REVERSE SOLIDUS   ; disabled
+:?*:/::{U+29F8}                     ; / → ⧸  | replace U+002F SOLIDUS : slash, forward slash, virgule → U+29F8 BIG SOLIDUS
+:?*b0::+::{bs}{U+FF1A}              ; : → ：  | replace U+003A COLON                                  → U+FF1A FULLWIDTH COLON
+:?*:*::{U+2732}                     ; * → ✲ | replace U+002A ASTERISK : star                         → U+2732 OPEN CENTRE ASTERISK
+:?*:?::{U+FF1F}                     ; ? → ？ | replace U+003F QUESTION MARK                          → U+FF1F FULLWIDTH QUESTION MARK
+:?*:"::{U+FF02}                     ; " → ＂ | replace U+0022 QUOTATION MARK : double quote          → U+FF02 FULLWIDTH QUOTATION MARK
+:?*:<::{U+FF1C}                     ; < → ＜ | replace U+003C LESS-THAN SIGN                         → U+FF1C FULLWIDTH LESS-THAN SIGN
+:?*:>::{U+FF1E}                     ; > → ＞ | replace U+003E GREATER-THAN SIGN                      → U+FF1E FULLWIDTH GREATER-THAN SIGN
+:?*:|::{U+FF5C}                     ; | → ｜ | replace U+007C VERTICAL LINE : vertical bar, pipe     → U+FF5C FULLWIDTH VERTICAL LINE
+
+; :*:*::{U+}                     ; ? → ? | replace ?     → ?
+
+;-------
+;    + Horizontal Scrolling
+; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=466527&sid=6dc4a701e678a7b9ee1241ab0043ebd8#p466527
+
++WheelUp:: {
+Loop 3        ; WM_HSCROLL SB_LINELEFT
+    PostMessage 0x0114, 0,, "ScrollBar1"
+}
+
++WheelDown:: {
+Loop 3        ; WM_HSCROLL SB_LINERIGHT
+    PostMessage 0x0114, 1,, "ScrollBar1"
+}
+
+;-------
+;    + Copy full path
+; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=61084#p61084
+
+^+c:: { ; CTRL + Shift + C
+CallClipboard(2) ; Timeout 2s
+A_Clipboard := A_Clipboard
+}
+D:\Rise_of_the_Devourer 19-50.5.epub
+
+;-------
+;    + Copy file name without path
+
+!n:: { ; ALT + N
+CallClipboard(2) ; Timeout 2s
+A_Clipboard := A_Clipboard
+files := A_Clipboard
+files := RegExReplace(files, "\w:\\|\w+\\") ; remove path
+A_Clipboard := files
+}
+
+;-------
+;    + Copy file name without extension and path
+
+^!n:: { ; CTRL + ALT + N
+CallClipboard(2) ; Timeout 2s
+A_Clipboard := A_Clipboard
+files := A_Clipboard
+files := RegExReplace(files, "\w:\\|\w+\\") ; remove path
+files := RegExReplace(files, "\.[\w]+(`r`n)","`n") ; remove ext, CR
+files := RegExReplace(files, "\.[\w]+$") ; remove last ext
+A_Clipboard := files
+}
+#HotIf
 
 ;-------------------------------------------------------------------------------
 ; User-defined Functions
@@ -730,9 +879,6 @@ ComObject("shell.application").ControlPanelItem("diskmgmt.msc")    ; #x   | Disk
 ComObject("shell.application").ControlPanelItem("eventvwr.msc")    ; #x   | Event Viewer
 
 ; Added to Control Panel Tools function
-ComObject("shell.application").ControlPanelItem("calc")            ; Calculator
-ComObject("shell.application").ControlPanelItem("notepad")         ; Notepad
-ComObject("shell.application").ControlPanelItem("snippingtool")    ; Snipping Tool ; Opens modern app
 ComObject("shell.application").ControlPanelItem("control")         ; Control Panel
 run 'explorer.exe "ms-settings:appsfeatures"'                      ; Installed Apps ; Modern Add/Remove Programs
 ComObject("shell.application").ControlPanelItem("appwiz.cpl")      ; Add/Remove Programs ; Legacy Control Panel
@@ -745,6 +891,8 @@ run 'explorer.exe "ms-settings:windowsupdate"'                     ; Windows Upd
 ComObject("shell.application").ControlPanelItem("winver")          ; Windows version
 
 ; Add to Control Panel Tools as desired
+Run '"::{21EC2020-3AEA-1069-A2DD-08002B30309D}"',,"Max"            ; Control Panel ; alternate
+Run 'rundll32 sysdm.cpl`,EditEnvironmentVariables'                 ; Environmental Variables
 ComObject("shell.application").ControlPanelItem("calc")            ; Calculator
 ComObject("shell.application").ControlPanelItem("notepad")         ; Notepad
 ComObject("shell.application").ControlPanelItem("snippingtool")    ; Snipping Tool ; Opens modern app
