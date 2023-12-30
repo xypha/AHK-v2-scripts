@@ -24,7 +24,7 @@
 ;  = Recycle Bin shortcut
 ;  = Display Off shortcut
 ;  = Add Control Panel Tools to a Menu
-;  = Change the case of text
+;  = Change Text Case
 ;  = Wrap Text In Quotes or Symbols keys
 ;  = Exchange adjacent letters
 ;  = Toggle Window On Top
@@ -39,14 +39,14 @@
 ;    + Copy file name without extension and path
 ; Capitalise the first letter of a sentence
 ; User-defined Functions
-;  = Case Conversion Function
+;  = Notification Function
 ;  = Toggle OS Function
 ;  = Windows Refresh Or Run
-;  = Notification Function
+;  = Adjust Window Transparency Function
+;  = Change Text Case Function
 ;  = ToolTip Function
 ;  = Call Clipboard and ClipWait
 ;  = Wrap Text In Quotes or Symbols Function
-;  = Adjust Window Transparency Function
 ;  = Control Panel Tools Function
 
 ;------------------------------------------------------------------------------
@@ -370,7 +370,7 @@ ControlPanelMenu.Show
 }
 
 ;------------------------------------------------------------------------------
-;  = Change the case of text
+;  = Change Text Case
 ; inspired by a v1 script from https://geekdrop.com/content/super-handy-AutoHotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 
 !c:: { ; ALT + C
@@ -520,12 +520,12 @@ F1::F2 ; disable opening help in MS edge
 
 /* add Loop (integer) for faster scrolling
 +WheelUp:: {
-Loop 3       
+Loop 3
     PostMessage 0x0114, 0,, "ScrollBar1"
 }
 
 +WheelDown:: {
-Loop 3       
+Loop 3
     PostMessage 0x0114, 1,, "ScrollBar1"
 }
 
@@ -602,7 +602,107 @@ if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Ex
 ;-------------------------------------------------------------------------------
 ; User-defined Functions
 
-;  = Case Conversion Function
+;  = Notification Function
+
+MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {
+Global MyNotification
+MyNotification := Gui()
+MyNotification.Opt("+AlwaysOnTop -Caption +ToolWindow")  ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
+MyNotification.BackColor := "EEEEEE"  ; White background
+MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
+MyNotification.Add("Text", "cBlack w181 Left", mytext)  ; black text
+MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
+WinMove xAxis, yAxis,,, MyNotification
+if timer = 1
+    SetTimer EndMyNotif, myduration * -1
+if timer = 0 {
+    Sleep myduration
+    EndMyNotif
+    }
+}
+
+EndMyNotif() {
+    MyNotification.Destroy()
+}
+
+;-------------------------------------------------------------------------------
+;  = Toggle OS Function
+; inspiration from a post by gonzax - https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
+
+ToggleOS(*) {
+ToggleOSCheck()
+If (ShowSuperHidden_Status = 0) { ; enable if disabled
+    RegWrite "1", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
+    CheckRegWrite(ShowSuperHidden_Status)
+    ToggleOSCheck()
+    WindowsRefreshOrRun()
+    } Else { ; disable if enabled
+    RegWrite "0", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
+    CheckRegWrite(ShowSuperHidden_Status)
+    ToggleOSCheck()
+    WindowsRefreshOrRun()
+    }
+}
+
+CheckRegWrite(key) { ; check if RegWrite was success
+    if key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+        msgbox "ToggleOS Failed"
+}
+
+ToggleOSCheck() { ; tray tick mark
+Global ShowSuperHidden_Status
+ShowSuperHidden_Status := RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+If (ShowSuperHidden_Status = 0)
+    A_TrayMenu.UnCheck "&Toggle OS files"
+Else {
+    ShowSuperHidden_Status := 1
+    A_TrayMenu.Check "&Toggle OS files"
+    }
+}
+
+;-------------------------------------------------------------------------------
+;  = Windows Refresh Or Run
+
+WindowsRefreshOrRun() {
+if WinExist("ahk_class CabinetWClass") { ; refresh explorer if window exists
+    WinActivate
+    Sleep 500  ; change as per your system performance
+    Send "{F5}" ; refresh
+} else { ; open new explorer window if one doesn't already exist ; remove this section if not desired
+    Run 'explorer.exe',,"Max"
+    WinWait("ahk_class CabinetWClass",, 10) ; timeout 10 secs
+    WinActivate
+    }
+}
+
+;-------------------------------------------------------------------------------
+;  = Adjust Window Transparency Function
+
+GetTrans() {
+    ToolTip() ; disable previous tooltip if any
+    MouseGetPos ,, &WinID
+    Trans := WinGetTransparent("ahk_id " WinID)
+    if(!Trans)
+        Trans := 255
+    return Trans
+}
+
+SetTrans(Transparency) {
+    Trans := Transparency
+    ToolTip("Transparency: " Trans)
+    SetTimer () => ToolTip(), -500
+    MouseGetPos ,, &WinID
+    WinSetTransparent Trans, "ahk_id " WinID
+}
+
+SetTransFunc(item, position, SetTransMenu) {
+MouseGetPos ,, &WinID
+Trans := Trim(SubStr(item, 4, 3))
+WinSetTransparent Trans, "ahk_id " WinID
+}
+
+;-------------------------------------------------------------------------------
+;  = Change Text Case Function
 
 ConvertLower(*) {
 CallClipboard(2)
@@ -658,89 +758,6 @@ Send Len  ; and selects it
 ; Code Credit #3 - 4 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a auto-query to DuckDuckGPT by KudoAI via https://greasyfork.org/en/scripts/459849-duckduckgpt
 
 ;-------------------------------------------------------------------------------
-;  = Toggle OS Function
-; inspiration from a post by gonzax - https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
-
-ToggleOS(*) {
-ToggleOSCheck()
-If (ShowSuperHidden_Status = 0) { ; enable if disabled
-    RegWrite "1", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
-    CheckRegWrite(ShowSuperHidden_Status)
-    ToggleOSCheck()
-    WindowsRefreshOrRun()
-    } Else { ; disable if enabled
-    RegWrite "0", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
-    CheckRegWrite(ShowSuperHidden_Status)
-    ToggleOSCheck()
-    WindowsRefreshOrRun()
-    }
-}
-
-CheckRegWrite(key) { ; check if RegWrite was success
-    if key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
-        msgbox "ToggleOS Failed"
-}
-
-ToggleOSCheck() { ; tray tick mark
-Global ShowSuperHidden_Status
-ShowSuperHidden_Status := RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
-If (ShowSuperHidden_Status = 0)
-    A_TrayMenu.UnCheck "&Toggle OS files"
-Else {
-    ShowSuperHidden_Status := 1
-    A_TrayMenu.Check "&Toggle OS files"
-    }
-}
-
-;  = Windows Refresh Or Run
-
-WindowsRefreshOrRun() {
-if WinExist("ahk_class CabinetWClass") { ; refresh explorer if window exists
-    WinActivate
-    Sleep 500  ; change as per your system performance
-    Send "{F5}" ; refresh
-} else { ; open new explorer window if one doesn't already exist ; remove this section if not desired
-    Run 'explorer.exe',,"Max"
-    WinWait("ahk_class CabinetWClass",, 10) ; timeout 10 secs
-    WinActivate
-    }
-}
-
-;-------------------------------------------------------------------------------
-;  = Notification Function
-
-MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {
-Global MyNotification
-MyNotification := Gui()
-MyNotification.Opt("+AlwaysOnTop -Caption +ToolWindow")  ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
-MyNotification.BackColor := "EEEEEE"  ; White background
-MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
-MyNotification.Add("Text", "cBlack w181 Left", mytext)  ; black text
-MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
-WinMove xAxis, yAxis,,, MyNotification
-if timer = 1
-    SetTimer EndMyNotif, myduration * -1
-if timer = 0 {
-    Sleep myduration
-    EndMyNotif
-    }
-}
-
-EndMyNotif() {
-    MyNotification.Destroy()
-}
-
-;-------------------------------------------------------------------------------
-;  = ToolTip Function
-
-ToolTipFunc(ToolTiptext) {
-    ToolTip() ; turn off any previous tooltip
-    ToolTip ToolTiptext
-    SetTimer () => ToolTip(), -2000
-    return
-}
-
-;-------------------------------------------------------------------------------
 ;  = Call Clipboard and ClipWait
 
 CallClipboard(secs) {
@@ -764,6 +781,16 @@ If !ClipWait(secs) {
     ; ToolTipFunc(A_ThisHotkey ":: Clip Failed") ; Alternative to MyNotification
     Exit
     }
+}
+
+;-------------------------------------------------------------------------------
+;  = ToolTip Function
+
+ToolTipFunc(ToolTiptext) {
+    ToolTip() ; turn off any previous tooltip
+    ToolTip ToolTiptext
+    SetTimer () => ToolTip(), -2000
+    return
 }
 
 ;------------------------------------------------------------------------------
@@ -821,32 +848,6 @@ A_Clipboard := TextString    ; paste from clipboard is faster than send raw, esp
 Send "^v"
 Send Len2          ; and select textstring
 ; A_Clipboard := TextStringInitial  ; restore original text string to clipboard if desired
-}
-
-;-------------------------------------------------------------------------------
-;  = Adjust Window Transparency Function
-
-GetTrans() {
-    ToolTip() ; disable previous tooltip if any
-    MouseGetPos ,, &WinID
-    Trans := WinGetTransparent("ahk_id " WinID)
-    if(!Trans)
-        Trans := 255
-    return Trans
-}
-
-SetTrans(Transparency) {
-    Trans := Transparency
-    ToolTip("Transparency: " Trans)
-    SetTimer () => ToolTip(), -500
-    MouseGetPos ,, &WinID
-    WinSetTransparent Trans, "ahk_id " WinID
-}
-
-SetTransFunc(item, position, SetTransMenu) {
-MouseGetPos ,, &WinID
-Trans := Trim(SubStr(item, 4, 3))
-WinSetTransparent Trans, "ahk_id " WinID
 }
 
 ;-------------------------------------------------------------------------------
