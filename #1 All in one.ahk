@@ -28,21 +28,23 @@
 ;  = Wrap Text In Quotes or Symbols keys
 ;  = Exchange adjacent letters
 ;  = Toggle Window On Top
-; Capitalise first letter of a sentence
 ; #HotIf
 ;  = Firefox
 ;  = Telegram
 ;  = Windows Explorer
 ;    + Symbols In File Names Keys
+;    + Horizontal Scrolling
 ;    + Copy full path
 ;    + Copy file name without path
 ;    + Copy file name without extension and path
+; Capitalise first letter of a sentence
 ; User-defined Functions
 ;  = Case Conversion Function
 ;  = HasVal Function
 ;  = Toggle OS Function
 ;  = Windows Refresh Or Run
 ;  = Notification Function
+;  = ToolTip Function
 ;  = Call Clipboard and ClipWait
 ;  = Wrap Text In Quotes or Symbols Function
 ;  = Adjust Window Transparency Function
@@ -182,7 +184,7 @@ MyNotification.Destroy()
 
 /* (disabled by comment)
 
-; add additional 'Loop' command to this method to increase the speed of scrolling
+; add additional 'Loop' command to any method to increase the speed of scrolling. For example, in method 1
 
 +WheelUp:: {
 Loop 3         ; increase the number for faster scrolling ; if number is omitted, causes infinite loop (which is BAD)
@@ -209,6 +211,7 @@ Loop 3
 ; Group "HorizontalScroll1" is defined in auto-execute section
 #HotIf WinActive("ahk_group HorizontalScroll1")                ; group #1
 
+; +WheelUp::WheelLeft ; doesn't work. Explanation: https://www.autohotkey.com/boards/viewtopic.php?p=551456#p551456
 +WheelUp::Send "{WheelLeft}"
 +WheelDown::Send "{WheelRight}"
 
@@ -245,6 +248,11 @@ SetScrollLockState "Off"
 +WheelDown::Send "{Right 3}"
 
 #HotIf
+
+;-----
+; Method #5 - horizontal scrolling for windows explorer
+see the section under ";    + Horizontal Scrolling"
+
 */
 
 ;-------------------------------------------------------------------------------
@@ -299,6 +307,8 @@ WinKill ("ahk_id " . id)
     Trans := GetTrans()
     if(Trans > 30)
         Trans := Trans - 20 ; subtract 20, change for slower/faster transition
+    if(Trans < 21)
+        Trans := 1  ; never set to zero, causes error
     SetTrans(Trans)
 }
 
@@ -307,10 +317,10 @@ F8:: {
 SetTransMenu := Menu()
 SetTransMenu.Delete
 SetTransMenu.Add("&1 255 Opaque"            ,SetTransFunc)
-SetTransMenu.Add("&2 190 Translucent"       ,SetTransFunc)      ; Semi-opaque
+SetTransMenu.Add("&2 190 Translucent"       ,SetTransFunc) ; Semi-opaque
 SetTransMenu.Add("&3 125 Semi-transparent"  ,SetTransFunc)
 SetTransMenu.Add("&4  65 Nearly Invisible"  ,SetTransFunc)
-SetTransMenu.Add("&5   0 Invisible"         ,SetTransFunc)
+SetTransMenu.Add("&5   1 Invisible"         ,SetTransFunc) ; never set to zero, causes error
 SetTransMenu.Show
 }
 
@@ -318,9 +328,9 @@ SetTransMenu.Show
 ;  = Recycle Bin shortcut
 
 ^del:: {
-If WinActive("Recycle Bin ahk_class CabinetWClass") ; if explorer is active and recycle bin is already displayed, empty Bin
+If WinActive("Recycle Bin ahk_class CabinetWClass") ; if explorer is active and recycle bin is in the foreground, empty Bin
     FileRecycleEmpty
-Else If Winexist("Recycle Bin ahk_class CabinetWClass") ; if explorer is inactive but showing recycle bin, activate it
+Else If Winexist("Recycle Bin ahk_class CabinetWClass") ; if explorer is showing recycle bin but is in the background, activate it
     WinActivate
 ; Else If Winexist("ahk_class CabinetWClass") { ; if explorer is open but not showing recycle bin, change to Bin (uncomment this section if desired)
 ;     WinActivate
@@ -328,7 +338,8 @@ Else If Winexist("Recycle Bin ahk_class CabinetWClass") ; if explorer is inactiv
 ;     Send "{F4}"
 ;     Sleep 500
 ;     Send "{raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
-} else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"    ; if explorer is not open, then open Bin in explorer
+; }
+else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"    ; if explorer is not open, then open Bin in explorer
 }
 
 ;-------------------------------------------------------------------------------
@@ -444,6 +455,118 @@ if (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
     }
 }
 
+;-------------------------------------------------------------------------------
+; #HotIf
+; Tailor keyboard shortcuts, commands and functions to specific windows, apps or pre-defined groups of both
+
+;  = Firefox
+
+#HotIf WinActive("ahk_class MozillaWindowClass") ; main window ; excludes other dialogue boxes like "Save As" from ahk_exe firefox.exe
+
+^+o:: {      ; CTRL + Shift + O to open library / bookmark manager
+Send "^t"
+Sleep 500
+Send "^l"
+Sleep 500
+Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
+}
+
+^+q::Return     ; disable Exit shortcut
+
+#HotIf
+
+;------------------------------------------------------------------------------
+;  = Telegram
+
+#HotIf WinActive("ahk_exe Telegram.exe")
+
+^q::Send "^w"     ; minimise to tray, instead of quit
+
+#HotIf
+
+;------------------------------------------------------------------------------
+;  = Windows Explorer
+
+#HotIf WinActive("ahk_class CabinetWClass")
+
+F1::F2 ; disable opening help in MS edge
+
+; Unselect multiple files/folders - Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
+^+a::F5
+
+;-------
+;    + Symbols In File Names Keys
+
+; replace \/:*?"<>| with ＼⧸ ： ✲ ？＂＜＞｜
+; comment out the ones you don't desire, like \ → ＼
+
+; :?*:\::{U+FF3C}                     ; \ → ＼ | replace U+005C REVERSE SOLIDUS : backslash            → U+FF3C FULLWIDTH REVERSE SOLIDUS   ; disabled
+:?*:/::{U+29F8}                     ; / → ⧸  | replace U+002F SOLIDUS : slash, forward slash, virgule → U+29F8 BIG SOLIDUS
+:?*b0::+::{bs}{U+FF1A}              ; : → ：  | replace U+003A COLON                                  → U+FF1A FULLWIDTH COLON
+:?*:*::{U+2732}                     ; * → ✲ | replace U+002A ASTERISK : star                         → U+2732 OPEN CENTRE ASTERISK
+:?*:?::{U+FF1F}                     ; ? → ？ | replace U+003F QUESTION MARK                          → U+FF1F FULLWIDTH QUESTION MARK
+:?*:"::{U+FF02}                     ; " → ＂ | replace U+0022 QUOTATION MARK : double quote          → U+FF02 FULLWIDTH QUOTATION MARK
+:?*:<::{U+FF1C}                     ; < → ＜ | replace U+003C LESS-THAN SIGN                         → U+FF1C FULLWIDTH LESS-THAN SIGN
+:?*:>::{U+FF1E}                     ; > → ＞ | replace U+003E GREATER-THAN SIGN                      → U+FF1E FULLWIDTH GREATER-THAN SIGN
+:?*:|::{U+FF5C}                     ; | → ｜ | replace U+007C VERTICAL LINE : vertical bar, pipe     → U+FF5C FULLWIDTH VERTICAL LINE
+
+; :*:*::{U+}                     ; ? → ? | replace ?     → ?
+
+;-------
+;    + Horizontal Scrolling
+; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=466527&sid=6dc4a701e678a7b9ee1241ab0043ebd8#p466527
+
++WheelUp::PostMessage 0x0114, 0,, "ScrollBar1"      ; WM_HSCROLL SB_LINELEFT
++WheelDown::PostMessage 0x0114, 1,, "ScrollBar1"    ; WM_HSCROLL SB_LINERIGHT
+
+/* add Loop (integer) for faster scrolling
++WheelUp:: {
+Loop 3       
+    PostMessage 0x0114, 0,, "ScrollBar1"
+}
+
++WheelDown:: {
+Loop 3       
+    PostMessage 0x0114, 1,, "ScrollBar1"
+}
+
+*/
+
+;-------
+;    + Copy full path
+; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=61084#p61084
+
+^+c:: { ; CTRL + Shift + C
+CallClipboard(2) ; Timeout 2s
+A_Clipboard := A_Clipboard
+}
+
+;-------
+;    + Copy file name without path
+
+!n:: { ; ALT + N
+CallClipboard(2) ; Timeout 2s
+A_Clipboard := A_Clipboard
+files := A_Clipboard
+files := RegExReplace(files, "\w:\\|\w+\\") ; remove path
+A_Clipboard := files
+}
+
+;-------
+;    + Copy file name without extension and path
+
+^!n:: { ; CTRL + ALT + N
+CallClipboard(2) ; Timeout 2s
+A_Clipboard := A_Clipboard
+files := A_Clipboard
+files := RegExReplace(files, "\w:\\|\w+\\") ; remove path
+files := RegExReplace(files, "\.[\w]+(`r`n)","`n") ; remove ext, CR
+files := RegExReplace(files, "\.[\w]+$") ; remove last ext
+A_Clipboard := files
+}
+
+#HotIf
+
 ;------------------------------------------------------------------------------
 ; Capitalise first letter of a sentence
 ; modified from a script by Xtra - https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
@@ -476,112 +599,6 @@ if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Ex
 ; several other AHK v1 auto-capitalisation scripts are good, such as the one by Xtra linked above
 ; and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
 ; and many others that use different methods to achieve this goal. Try a few and see what works for you.
-
-;-------------------------------------------------------------------------------
-; #HotIf
-; Tailor keyboard shortcuts, commands and functions to specific windows, apps or pre-defined groups of both
-
-;  = Firefox
-
-#HotIf WinActive("ahk_exe firefox.exe")
-
-^+o:: {      ; CTRL + Shift + O to open library / bookmark manager
-Send "^t"
-Sleep 500
-Send "^l"
-Sleep 500
-Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
-}
-
-^+q::Return     ; disable Exit shortcut
-
-#HotIf
-
-;------------------------------------------------------------------------------
-;  = Telegram
-
-#HotIf WinActive("ahk_exe Telegram.exe")
-
-^q::Send "^w"     ; minimise to tray, instead of quit
-
-#HotIf
-
-;------------------------------------------------------------------------------
-;  = Windows Explorer
-
-#HotIf WinActive("ahk_class CabinetWClass")
-
-F1::F2 ; disable opening help in MS edge
-
-; Unselect - Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
-^+a::Send "{F5}"
-
-;-------
-;    + Symbols In File Names Keys
-
-; replace \/:*?"<>| with ＼⧸ ： ✲ ？＂＜＞｜
-; comment out the ones you don't desire, like \ → ＼
-
-; :?*:\::{U+FF3C}                     ; \ → ＼ | replace U+005C REVERSE SOLIDUS : backslash            → U+FF3C FULLWIDTH REVERSE SOLIDUS   ; disabled
-:?*:/::{U+29F8}                     ; / → ⧸  | replace U+002F SOLIDUS : slash, forward slash, virgule → U+29F8 BIG SOLIDUS
-:?*b0::+::{bs}{U+FF1A}              ; : → ：  | replace U+003A COLON                                  → U+FF1A FULLWIDTH COLON
-:?*:*::{U+2732}                     ; * → ✲ | replace U+002A ASTERISK : star                         → U+2732 OPEN CENTRE ASTERISK
-:?*:?::{U+FF1F}                     ; ? → ？ | replace U+003F QUESTION MARK                          → U+FF1F FULLWIDTH QUESTION MARK
-:?*:"::{U+FF02}                     ; " → ＂ | replace U+0022 QUOTATION MARK : double quote          → U+FF02 FULLWIDTH QUOTATION MARK
-:?*:<::{U+FF1C}                     ; < → ＜ | replace U+003C LESS-THAN SIGN                         → U+FF1C FULLWIDTH LESS-THAN SIGN
-:?*:>::{U+FF1E}                     ; > → ＞ | replace U+003E GREATER-THAN SIGN                      → U+FF1E FULLWIDTH GREATER-THAN SIGN
-:?*:|::{U+FF5C}                     ; | → ｜ | replace U+007C VERTICAL LINE : vertical bar, pipe     → U+FF5C FULLWIDTH VERTICAL LINE
-
-; :*:*::{U+}                     ; ? → ? | replace ?     → ?
-
-;-------
-;    + Horizontal Scrolling
-; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=466527&sid=6dc4a701e678a7b9ee1241ab0043ebd8#p466527
-
-+WheelUp:: {
-Loop 3        ; WM_HSCROLL SB_LINELEFT
-    PostMessage 0x0114, 0,, "ScrollBar1"
-}
-
-+WheelDown:: {
-Loop 3        ; WM_HSCROLL SB_LINERIGHT
-    PostMessage 0x0114, 1,, "ScrollBar1"
-}
-
-;-------
-;    + Copy full path
-; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=61084#p61084
-
-^+c:: { ; CTRL + Shift + C
-CallClipboard(2) ; Timeout 2s
-A_Clipboard := A_Clipboard
-}
-D:\Rise_of_the_Devourer 19-50.5.epub
-
-;-------
-;    + Copy file name without path
-
-!n:: { ; ALT + N
-CallClipboard(2) ; Timeout 2s
-A_Clipboard := A_Clipboard
-files := A_Clipboard
-files := RegExReplace(files, "\w:\\|\w+\\") ; remove path
-A_Clipboard := files
-}
-
-;-------
-;    + Copy file name without extension and path
-
-^!n:: { ; CTRL + ALT + N
-CallClipboard(2) ; Timeout 2s
-A_Clipboard := A_Clipboard
-files := A_Clipboard
-files := RegExReplace(files, "\w:\\|\w+\\") ; remove path
-files := RegExReplace(files, "\.[\w]+(`r`n)","`n") ; remove ext, CR
-files := RegExReplace(files, "\.[\w]+$") ; remove last ext
-A_Clipboard := files
-}
-#HotIf
 
 ;-------------------------------------------------------------------------------
 ; User-defined Functions
@@ -730,6 +747,16 @@ EndMyNotif() {
 }
 
 ;-------------------------------------------------------------------------------
+;  = ToolTip Function
+
+ToolTipFunc(ToolTiptext) {
+    ToolTip() ; turn off any previous tooltip
+    ToolTip ToolTiptext
+    SetTimer () => ToolTip(), -2000
+    return
+}
+
+;-------------------------------------------------------------------------------
 ;  = Call Clipboard and ClipWait
 
 CallClipboard(secs) {
@@ -738,8 +765,7 @@ A_Clipboard := ""
 Send "^c"
 If !ClipWait(secs) {
     MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
-    ; ToolTip A_ThisHotkey ":: Clip Failed"           ; Alternatively to MyNotification
-    ; SetTimer () => ToolTip(), -2000
+    ; ToolTipFunc(A_ThisHotkey ":: Clip Failed") ; Alternative to MyNotification
     A_Clipboard := clipSave
     clipSave := ""
     Exit
@@ -751,8 +777,7 @@ else
 CallClipboardShort(secs) {
 If !ClipWait(secs) {
     MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
-    ; ToolTip A_ThisHotkey ":: Clip Failed"           ; Alternatively to MyNotification
-    ; SetTimer () => ToolTip(), -2000
+    ; ToolTipFunc(A_ThisHotkey ":: Clip Failed") ; Alternative to MyNotification
     Exit
     }
 }
