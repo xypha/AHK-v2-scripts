@@ -21,8 +21,8 @@
 ;  = Move Mouse Pointer by pixel
 ;  = Close or Kill an app window
 ;  = Adjust Window Transparency keys
-;  = Monitor off
 ;  = Recycle Bin shortcut
+;  = Display Off shortcut
 ;  = Add Control Panel Tools to a Menu
 ;  = Change the case of text
 ;  = Wrap Text In Quotes or Symbols keys
@@ -37,10 +37,9 @@
 ;    + Copy full path
 ;    + Copy file name without path
 ;    + Copy file name without extension and path
-; Capitalise first letter of a sentence
+; Capitalise the first letter of a sentence
 ; User-defined Functions
 ;  = Case Conversion Function
-;  = HasVal Function
 ;  = Toggle OS Function
 ;  = Windows Refresh Or Run
 ;  = Notification Function
@@ -568,7 +567,7 @@ A_Clipboard := files
 #HotIf
 
 ;------------------------------------------------------------------------------
-; Capitalise first letter of a sentence
+; Capitalise the first letter of a sentence
 ; modified from a script by Xtra - https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
 
 ~NumpadEnter:: ; triggers ; add or disable one or more as needed
@@ -657,21 +656,6 @@ Send Len  ; and selects it
 ; Code Credit #1 NeedleRegEx pattern modified from pattern posted by ManaUser - https://www.autohotkey.com/board/topic/24431-convert-text-uppercase-lowercase-capitalized-or-inverted/?p=158295
 ; Code Credit #2 idea for loop from kon's post - https://www.autohotkey.com/boards/viewtopic.php?p=58417#p58417
 ; Code Credit #3 - 4 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a auto-query to DuckDuckGPT by KudoAI via https://greasyfork.org/en/scripts/459849-duckduckgpt
-
-;-------------------------------------------------------------------------------
-;  = HasVal Function
-; Modifed from https://www.autohotkey.com/boards/viewtopic.php?p=109173#p109173
-; not for associative arrays
-
-HasVal(haystack, needle) {
-    ; if !(IsObject(haystack)) || (haystack.Length() = 0)
-    ;   return -1
-    ; optimise above code to your needs after reading lexikos' comment - https://www.autohotkey.com/boards/viewtopic.php?p=110388#p110388
-    for index, value in haystack
-        if (value == needle) ; case-sensitive
-            return index
-    return 0
-}
 
 ;-------------------------------------------------------------------------------
 ;  = Toggle OS Function
