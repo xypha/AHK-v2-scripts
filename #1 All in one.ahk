@@ -901,7 +901,9 @@ run 'explorer.exe "ms-settings:windowsupdate"'                     ; Windows Upd
 ComObject("shell.application").ControlPanelItem("winver")          ; Windows version
 
 ; Add to Control Panel Tools as desired
-Run '"::{21EC2020-3AEA-1069-A2DD-08002B30309D}"',,"Max"            ; Control Panel ; alternate
+Run '"::{21EC2020-3AEA-1069-A2DD-08002B30309D}"',,"Max"            ; Control Panel (view: small icons) ; alternate
+::{26EE0668-A00A-44D7-9371-BEB064C98683}                           ; Control Panel (view: category) ; alternate
+::{20D04FE0-3AEA-1069-A2D8-08002B30309D}                           ; This PC
 Run 'rundll32 sysdm.cpl`,EditEnvironmentVariables'                 ; Environmental Variables
 ComObject("shell.application").ControlPanelItem("calc")            ; Calculator
 ComObject("shell.application").ControlPanelItem("notepad")         ; Notepad
