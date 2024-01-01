@@ -74,11 +74,11 @@ MyNotificationFunc("Loading AHK 1 v2", "10000", "1650", "985", "1") ; use timer 
 
 ;  = Toggle OS files
 
-A_TrayMenu.Delete()                             ; delete standard menu
-A_TrayMenu.Add "&Toggle OS files", ToggleOS     ; User-defined Function
-A_TrayMenu.Add()                                ; add a separator
-A_TrayMenu.AddStandard()                        ; restore standard menu
-ToggleOSCheck()                                 ; check value of ShowSuperHidden_Status
+A_TrayMenu.Delete                             ; delete standard menu
+A_TrayMenu.Add "&Toggle OS files", ToggleOS   ; User-defined Function
+A_TrayMenu.Add                                ; add a separator
+A_TrayMenu.AddStandard                        ; restore standard menu
+ToggleOSCheck                                 ; check value of ShowSuperHidden_Status
 
 ;  = Customise Tray Icon
 
@@ -97,7 +97,6 @@ GroupAdd "HorizontalScroll1", "ahk_class SALFRAME"                     ; LibreOf
 ;  = End auto-execute
 
 SetTimer EndMyNotif, -1000 ; reset notification timer to 1s after code in auto-execute section has finished running
-
 Return ; ends auto-execute
 
 ; Below code can be placed anywhere in your script
@@ -166,7 +165,7 @@ SetCapsLockState "On"
 MyNotificationFunc("CapsLock ON", "10000", "960", "985", "1")   ; Show notification for 10s
 KeyWait "Esc", "d t10" ; esc skips 10s wait and disables CapsLock immediately
 SetCapsLockState "Off"
-MyNotification.Destroy()
+MyNotification.Destroy
 }
 
 ;-------------------------------------------------------------------------------
@@ -294,34 +293,24 @@ WinKill ("ahk_id " . id)
 ; Modified from https://www.autohotkey.com/board/topic/667-transparent-windows/?p=148102
 
 ^+WheelUp:: { ; increases Trans value, makes the window more opaque
-    Trans := GetTrans()
-    if(Trans < 255)
-        Trans := Trans + 20 ; add 20, change for slower/faster transition
-    if(Trans >= 255)
-        Trans := "Off"
-    SetTrans(Trans)
+Trans := GetTrans()
+if(Trans < 255)
+    Trans := Trans + 20 ; add 20, change for slower/faster transition
+if(Trans >= 255)
+    Trans := "Off"
+SetTrans(Trans)
 }
 
 ^+WheelDown:: { ; decreases Trans value, makes the window more transparent
-    Trans := GetTrans()
-    if(Trans > 30)
-        Trans := Trans - 20 ; subtract 20, change for slower/faster transition
-    if(Trans < 21)
-        Trans := 1  ; never set to zero, causes error
-    SetTrans(Trans)
+Trans := GetTrans()
+if(Trans > 30)
+    Trans := Trans - 20 ; subtract 20, change for slower/faster transition
+if(Trans < 21)
+    Trans := 1  ; never set to zero, causes error
+SetTrans(Trans)
 }
 
-
-F8:: {
-SetTransMenu := Menu()
-SetTransMenu.Delete
-SetTransMenu.Add("&1 255 Opaque"            ,SetTransFunc)
-SetTransMenu.Add("&2 190 Translucent"       ,SetTransFunc) ; Semi-opaque
-SetTransMenu.Add("&3 125 Semi-transparent"  ,SetTransFunc)
-SetTransMenu.Add("&4  65 Nearly Invisible"  ,SetTransFunc)
-SetTransMenu.Add("&5   1 Invisible"         ,SetTransFunc) ; never set to zero, causes error
-SetTransMenu.Show
-}
+F8::SetTransMenuFunc
 
 ;-------------------------------------------------------------------------------
 ;  = Recycle Bin shortcut
@@ -578,8 +567,8 @@ A_Clipboard := files
 ~?::
 {
 cfc1 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
-cfc1.Start()
-cfc1.Wait()
+cfc1.Start
+cfc1.Wait
 if (cfc1.EndReason = "Match") {
     if (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; if ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
         send "{Backspace} +" cfc1.Input
@@ -589,8 +578,8 @@ if (cfc1.EndReason = "Match") {
 }
 if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
     cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
-    cfc2.Start()
-    cfc2.Wait()
+    cfc2.Start
+    cfc2.Wait
     if (cfc2.EndReason = "Match")
         send "{Backspace}+" cfc2.Input
     }
@@ -622,7 +611,7 @@ if timer = 0 {
 }
 
 EndMyNotif() {
-    MyNotification.Destroy()
+    MyNotification.Destroy
 }
 
 ;-------------------------------------------------------------------------------
@@ -630,17 +619,17 @@ EndMyNotif() {
 ; inspiration from a post by gonzax - https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
 
 ToggleOS(*) {
-ToggleOSCheck()
+ToggleOSCheck
 If (ShowSuperHidden_Status = 0) { ; enable if disabled
     RegWrite "1", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     CheckRegWrite(ShowSuperHidden_Status)
-    ToggleOSCheck()
-    WindowsRefreshOrRun()
+    ToggleOSCheck
+    WindowsRefreshOrRun
     } Else { ; disable if enabled
     RegWrite "0", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     CheckRegWrite(ShowSuperHidden_Status)
-    ToggleOSCheck()
-    WindowsRefreshOrRun()
+    ToggleOSCheck
+    WindowsRefreshOrRun
     }
 }
 
@@ -679,7 +668,7 @@ if WinExist("ahk_class CabinetWClass") { ; refresh explorer if window exists
 ;  = Adjust Window Transparency Function
 
 GetTrans() {
-    ToolTip() ; disable previous tooltip if any
+    ToolTip ; disable previous tooltip if any
     MouseGetPos ,, &WinID
     Trans := WinGetTransparent("ahk_id " WinID)
     if(!Trans)
@@ -701,32 +690,43 @@ Trans := Trim(SubStr(item, 4, 3))
 WinSetTransparent Trans, "ahk_id " WinID
 }
 
+SetTransMenuFunc() {
+SetTransMenu := Menu()
+SetTransMenu.Delete
+SetTransMenu.Add("&1 255 Opaque"            ,SetTransFunc)
+SetTransMenu.Add("&2 190 Translucent"       ,SetTransFunc) ; Semi-opaque
+SetTransMenu.Add("&3 125 Semi-transparent"  ,SetTransFunc)
+SetTransMenu.Add("&4  65 Nearly Invisible"  ,SetTransFunc)
+SetTransMenu.Add("&5   1 Invisible"         ,SetTransFunc) ; never set to zero, causes error
+SetTransMenu.Show
+}
+
 ;-------------------------------------------------------------------------------
 ;  = Change Text Case Function
 
 ConvertLower(*) {
 CallClipboard(2)
 A_Clipboard := StrLower(A_Clipboard)
-CaseConvert()
+CaseConvert
 }
 
 ConvertSentence(*) {
 CallClipboard(2)
 lowered := StrLower(A_Clipboard)
 A_Clipboard := RegExReplace(lowered, "(((^\s*|([.!?]+\s*))[a-z])|\Wi\W)", "$U1") ; Code Credit #1
-CaseConvert()
+CaseConvert
 }
 
 ConvertTitle(*) {
 CallClipboard(2)
 A_Clipboard := StrTitle(A_Clipboard)
-CaseConvert()
+CaseConvert
 }
 
 ConvertUpper(*) {
 CallClipboard(2)
 A_Clipboard := StrUpper(A_Clipboard)
-CaseConvert()
+CaseConvert
 }
 
 ConvertInvert(*) {
@@ -735,11 +735,10 @@ inverted := ""
 Loop Parse A_Clipboard {     ; Code Credit #2
   if (StrLower(A_LoopField) == A_LoopField) ; * Code Credit #3
     inverted .= StrUpper(A_LoopField)       ; *
-  else                                      ; *
-    inverted .= StrLower(A_LoopField)       ; *
-    }
+  else inverted .= StrLower(A_LoopField)    ; *
+  }
 A_Clipboard := inverted
-CaseConvert()
+CaseConvert
 }
 ; TestString      := "abcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñ`n"
 ;                  . "ABCDEFGHIJKLMNOPQRSTUVWXYZÉÂÄÀÅÇÊËÈÏÎÌÆÔÖÒÛÙŸÁÍÓÚÑ"
@@ -755,7 +754,7 @@ Send Len  ; and selects it
 
 ; Code Credit #1 NeedleRegEx pattern modified from pattern posted by ManaUser - https://www.autohotkey.com/board/topic/24431-convert-text-uppercase-lowercase-capitalized-or-inverted/?p=158295
 ; Code Credit #2 idea for loop from kon's post - https://www.autohotkey.com/boards/viewtopic.php?p=58417#p58417
-; Code Credit #3 - 4 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a auto-query to DuckDuckGPT by KudoAI via https://greasyfork.org/en/scripts/459849-duckduckgpt
+; Code Credit #3 - 3 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a auto-query to DuckDuckGPT by KudoAI via https://greasyfork.org/en/scripts/459849-duckduckgpt
 
 ;-------------------------------------------------------------------------------
 ;  = Call Clipboard and ClipWait
@@ -766,7 +765,7 @@ A_Clipboard := ""
 Send "^c"
 If !ClipWait(secs) {
     MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
-    ; ToolTipFunc(A_ThisHotkey ":: Clip Failed") ; Alternative to MyNotification
+    ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", 2000) ; Alternative to MyNotification
     A_Clipboard := clipSave
     clipSave := ""
     Exit
@@ -778,7 +777,7 @@ else
 CallClipboardShort(secs) {
 If !ClipWait(secs) {
     MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
-    ; ToolTipFunc(A_ThisHotkey ":: Clip Failed") ; Alternative to MyNotification
+    ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", 2000) ; Alternative to MyNotification
     Exit
     }
 }
@@ -786,11 +785,10 @@ If !ClipWait(secs) {
 ;-------------------------------------------------------------------------------
 ;  = ToolTip Function
 
-ToolTipFunc(ToolTiptext) {
-    ToolTip() ; turn off any previous tooltip
-    ToolTip ToolTiptext
-    SetTimer () => ToolTip(), -2000
-    return
+Tool_TipFunc(ToolText,ToolDuration) {
+ToolTip ; turn off any previous tooltip
+ToolTip ToolText
+SetTimer () => ToolTip(), ToolDuration * -1
 }
 
 ;------------------------------------------------------------------------------
@@ -877,7 +875,6 @@ if position = 10
 }
 
 /*
-
 'Short' list of commands (several personal modifications over the years - NOT comprehensive, at all)
 Original source - https://www.autohotkey.com/boards/viewtopic.php?p=24584#p24584
 
@@ -900,14 +897,11 @@ ComObject("shell.application").ControlPanelItem("resmon.exe")      ; Resource Mo
 run 'explorer.exe "ms-settings:windowsupdate"'                     ; Windows Update
 ComObject("shell.application").ControlPanelItem("winver")          ; Windows version
 
-; Add to Control Panel Tools as desired
 Run '"::{21EC2020-3AEA-1069-A2DD-08002B30309D}"',,"Max"            ; Control Panel (view: small icons) ; alternate
 ::{26EE0668-A00A-44D7-9371-BEB064C98683}                           ; Control Panel (view: category) ; alternate
 ::{20D04FE0-3AEA-1069-A2D8-08002B30309D}                           ; This PC
+Run 'SnippingTool.exe'                                             ; Snipping Tool ; alternate ; Opens modern app
 Run 'rundll32 sysdm.cpl`,EditEnvironmentVariables'                 ; Environmental Variables
-ComObject("shell.application").ControlPanelItem("calc")            ; Calculator
-ComObject("shell.application").ControlPanelItem("notepad")         ; Notepad
-ComObject("shell.application").ControlPanelItem("snippingtool")    ; Snipping Tool ; Opens modern app
 ComObject("shell.application").ControlPanelItem("powercfg.cpl")    ; Power Configuration ; opens Power Options
 ComObject("shell.application").ControlPanelItem("msinfo32")        ; System Information
 ComObject("shell.application").ControlPanelItem("timedate.cpl")    ; Date and Time Properties
@@ -953,11 +947,12 @@ C:\WINDOWS\System32\rstrui.exe                                     ; Restore you
 C:\WINDOWS\System32\regedt32.exe                                   ; Make changes to the Windows registry
 C:\WINDOWS\System32\resmon.exe                                     ; Monitor the performance and resource usage of the local computer
 
-Others
 
 Find more shortcuts to various sections within modern Settings app - https://winaero.com/ms-settings-commands-in-windows-10/
 Shell:AppsFolder ; shortcuts to all apps in start menu
-
+PostMessage 0x0111, 65305,,, "C:\YourScript.ahk ahk_class AutoHotkey" ; Suspend, Toggle
+PostMessage 0x0111, 65306,,, "ScriptFileName.ahk - AutoHotkey" ; Pause, Toggle
+PostMessage 0x0111, 65303,,, "ScriptFileName.ahk - AutoHotkey"  ; Reload.
 */
 
 ; End of script code
