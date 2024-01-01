@@ -6,10 +6,10 @@ Any suggestions for improving the script code are welcome.
 
 Standalone scripts for each function will be created soon.
 
+### Script #1 All in One - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20All%20in%20one.ahk)
 <details>
 <summary>CONTENTS</summary>
   
-* Script #1 All in One
    * Toggle protected operating system (OS) files
    * Customise Tray Icon
    * Check & Reload AHK
@@ -32,9 +32,8 @@ Standalone scripts for each function will be created soon.
      * Windows Explorer
    * Capitalise the first letter of a sentence
    * Notification Function
-</details>
 
-### Script #1 All in One - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20All%20in%20one.ahk)
+</details>
 
 #### **Toggle protected operating system (OS) files** -
   Show/hide protected operating system files in Windows File Explorer from the script tray menu, as an alternative to navigating the labyrinth of Explorer's Folder Options. Also, a handy check mark is displayed when OS files are shown.
