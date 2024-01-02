@@ -44,8 +44,8 @@
 ;  = Windows Refresh Or Run
 ;  = Adjust Window Transparency Function
 ;  = Change Text Case Function
-;  = ToolTip Function
 ;  = Call Clipboard and ClipWait
+;  = ToolTip Function
 ;  = Wrap Text In Quotes or Symbols Function
 ;  = Control Panel Tools Function
 
@@ -58,14 +58,14 @@
 #WinActivateForce
 KeyHistory 500
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ; Default state of lock keys
 
 SetCapsLockState "Off"
 SetNumLockState "On"
 SetScrollLockState "Off"
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ; Auto-execute
 ; always at the top of your script
 
@@ -122,7 +122,7 @@ MyNotificationFunc("Updating AHK 1 v2", "500", "1650", "985", "0") ; use sleep c
 Reload
 }
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Remap Keys
 
 ; Disable keys that I don't use or trigger accidentally too often or become annoying
@@ -154,7 +154,7 @@ RCtrl & Right::Send "{End}"
 
 !m::WinMinimize "A"         ; Minimize active window
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Customise CapsLock
 
 ^CapsLock::^a        ; select all
@@ -168,7 +168,7 @@ SetCapsLockState "Off"
 MyNotification.Destroy
 }
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Horizontal Scrolling
 ; One of these four methods should work in most situations. If not,
 ; search the internet for other methods and send me a msg if you find one that works for you.
@@ -196,7 +196,7 @@ Loop 3
 
 */
 
-;-----
+;--------
 ; Method #2 - simulate horizontal mouse wheel action
 ; test if method #2 works using Win + Shift + Wheel Up/Down keys (3-key combo),
 ; then add window title/class to group #1 in auto-execute section
@@ -218,7 +218,7 @@ Loop 3
 
 /* (disabled by comment)
 
-;-----
+;--------
 ; Method #3 - turn on scroll lock and send arrow keys to scroll horizontally
 
 #HotIf WinActive("ahk_group HorizontalScroll2")                ; group 2 - not yet defined in auto-execute
@@ -237,7 +237,7 @@ SetScrollLockState "Off"
 
 #HotIf
 
-;-----
+;--------
 ; Method #4 - send arrow keys directly if other methods don't work
 
 #HotIf WinActive("ahk_group HorizontalScroll3")                ; group 3 - not yet defined in auto-execute
@@ -247,13 +247,13 @@ SetScrollLockState "Off"
 
 #HotIf
 
-;-----
+;--------
 ; Method #5 - horizontal scrolling for windows explorer
 see the section under ";    + Horizontal Scrolling"
 
 */
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Move Mouse Pointer by pixel
 ; Modified from http://www.computoredge.com/AutoHotkey/Downloads/MousePrecise.ahk
 
@@ -269,7 +269,7 @@ see the section under ";    + Horizontal Scrolling"
 
 ^#m::MouseMove 960,540 ; Test mouse position
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Close or Kill an app window
 ; Modified from https://superuser.com/a/1554366/391770
 
@@ -288,7 +288,7 @@ MouseGetPos ,, &id
 WinKill ("ahk_id " . id)
 }
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Adjust Window Transparency keys
 ; Modified from https://www.autohotkey.com/board/topic/667-transparent-windows/?p=148102
 
@@ -306,13 +306,13 @@ Trans := GetTrans()
 if(Trans > 30)
     Trans := Trans - 20 ; subtract 20, change for slower/faster transition
 if(Trans < 21)
-    Trans := 1  ; never set to zero, causes error
+    Trans := 1  ; never set to zero, causes ERROR
 SetTrans(Trans)
 }
 
 F8::SetTransMenuFunc
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Recycle Bin shortcut
 
 ^del:: {
@@ -326,11 +326,11 @@ Else If Winexist("Recycle Bin ahk_class CabinetWClass") ; if explorer is showing
 ;     Send "{F4}"
 ;     Sleep 500
 ;     Send "{raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
-; }
+;     }
 else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"    ; if explorer is not open, then open Bin in explorer
 }
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Display Off shortcut
 ; modified from AHK docs
 
@@ -339,46 +339,22 @@ Sleep 1000  ; Give user a chance to release keys (in case their release would wa
 SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
 }
 
-;-------------------------------------------------------------------------------
+;--------
 ;  = Add Control Panel Tools to a Menu
 
-#+x:: { ; Win & Shift & x
-ControlPanelMenu := Menu() ; starts building a pop-up menu
-ControlPanelMenu.Delete    ; deletes previously built pop-up menu, if any, and then starts adding items
-ControlPanelMenu.Add("&1 Control Panel"                 ,ControlPanelFunc)
-ControlPanelMenu.Add("&2 Installed Apps"                ,ControlPanelFunc)
-ControlPanelMenu.Add("&3 Add/Remove Programs (Legacy)"  ,ControlPanelFunc)
-ControlPanelMenu.Add("&4 Defragment Interface"          ,ControlPanelFunc)
-ControlPanelMenu.Add("&5 Services"                      ,ControlPanelFunc)
-ControlPanelMenu.Add("&6 Sound Mixer (Legacy)"          ,ControlPanelFunc)
-ControlPanelMenu.Add("&7 Registry Editor"               ,ControlPanelFunc)
-ControlPanelMenu.Add("&8 Resource Monitor"              ,ControlPanelFunc)
-ControlPanelMenu.Add("&9 Windows Update"                ,ControlPanelFunc)
-ControlPanelMenu.Add("&0 Windows version"               ,ControlPanelFunc) ; add more with &abc… or &symbols(/*-+)… triggers
-ControlPanelMenu.Show
-}
+#+x::ControlPanelMenuFunc ; Win & Shift & x
 
-;------------------------------------------------------------------------------
+;--------
 ;  = Change Text Case
-; inspired by a v1 script from https://geekdrop.com/content/super-handy-AutoHotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 
-!c:: { ; ALT + C
-ChangeCaseMenu := Menu()
-ChangeCaseMenu.Delete
-ChangeCaseMenu.Add("&1 lower case"      ,ConvertLower)
-ChangeCaseMenu.Add("&2 Sentence case"   ,ConvertSentence)
-ChangeCaseMenu.Add("&3 Title Case"      ,ConvertTitle)
-ChangeCaseMenu.Add("&4 UPPER CASE"      ,ConvertUpper)
-ChangeCaseMenu.Add("&5 iNVERT cASE"     ,ConvertInvert)
-ChangeCaseMenu.Show
-}
+!c::ChangeCaseMenuFunc ; ALT + C
 
-;------------------------------------------------------------------------------
+;--------
 ;  = Wrap Text In Quotes or Symbols keys
-; Inspired by two old AHK v1 scripts from https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
-; and https://www.autohotkey.com/board/topic/9805-easy-encloseenquote/?p=61995
 
 #HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts
+
+!q::WrapTextMenuFunc ; ALT + Q
 
 ; ALT + number row
 !1::EncText("`'","`'")        ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
@@ -391,22 +367,6 @@ ChangeCaseMenu.Show
 !8::EncText("‘","’")          ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
 !9::EncText("“","”")          ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
 !0::EncText("","")            ; remove above quotes
-
-!q:: {
-WrapTextMenu := Menu()
-WrapTextMenu.Delete
-WrapTextMenu.Add("&1   `'  Single Quotation `'"     ,WrapTextFunc) ; single quotation '' ; ordered in decreasing frequency of use; reorder as needed
-WrapTextMenu.Add("&2   `" Double Quotation `""      ,WrapTextFunc) ; double quotation ""
-WrapTextMenu.Add("&3   (  Round Brackets )"         ,WrapTextFunc) ; round breackets ()
-WrapTextMenu.Add("&4   [  Square Brackets ]"        ,WrapTextFunc) ; square brackets []
-WrapTextMenu.Add("&5   {  Flower Brackets }"        ,WrapTextFunc) ; flower brackets {}
-WrapTextMenu.Add("&6   ``  Accent/Backtick ``"      ,WrapTextFunc) ; accent/backtick ``
-WrapTextMenu.Add("&7  `% Percent Sign `%"           ,WrapTextFunc) ; percent sign %%
-WrapTextMenu.Add("&8   ‘  Single Comma Quotation ’" ,WrapTextFunc) ; single turned comma ‘’
-WrapTextMenu.Add("&9   “ Double Comma Quotation ”"  ,WrapTextFunc) ; double turned comma “”
-WrapTextMenu.Add("&0  Remove all"                   ,WrapTextFunc) ; remove quotes
-WrapTextMenu.Show
-}
 
 #HotIf
 
@@ -437,13 +397,14 @@ ExStyle := WinGetExStyle(t)
 if (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
     WinSetAlwaysOnTop 0, t      ; Turn OFF and remove Title_When_On_Top
     WinSetTitle (RegexReplace(t, Title_When_On_Top)), "A"
-} else {
+    }
+else {
     WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
     WinSetTitle Title_When_On_Top . t, t
     }
 }
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ; #HotIf
 ; Tailor keyboard shortcuts, commands and functions to specific windows, apps or pre-defined groups of both
 
@@ -463,7 +424,7 @@ Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
 
 #HotIf
 
-;------------------------------------------------------------------------------
+;--------
 ;  = Telegram
 
 #HotIf WinActive("ahk_exe Telegram.exe")
@@ -472,7 +433,7 @@ Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
 
 #HotIf
 
-;------------------------------------------------------------------------------
+;--------
 ;  = Windows Explorer
 
 #HotIf WinActive("ahk_class CabinetWClass")
@@ -482,7 +443,7 @@ F1::F2 ; disable opening help in MS edge
 ; Unselect multiple files/folders - Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
 ^+a::F5
 
-;-------
+;--------
 ;    + Symbols In File Names Keys
 
 ; replace \/:*?"<>| with ＼⧸ ： ✲ ？＂＜＞｜
@@ -500,7 +461,7 @@ F1::F2 ; disable opening help in MS edge
 
 ; :*:*::{U+}                     ; ? → ? | replace ?     → ?
 
-;-------
+;--------
 ;    + Horizontal Scrolling
 ; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=466527&sid=6dc4a701e678a7b9ee1241ab0043ebd8#p466527
 
@@ -520,7 +481,7 @@ Loop 3
 
 */
 
-;-------
+;--------
 ;    + Copy full path
 ; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=61084#p61084
 
@@ -528,30 +489,35 @@ Loop 3
 CallClipboard(2) ; Timeout 2s
 A_Clipboard := A_Clipboard
 }
+; Example: C:\Program Files\Mozilla Firefox\firefox.exe
 
-;-------
+;--------
 ;    + Copy file name without path
 
 !n:: { ; ALT + N
 CallClipboard(2) ; Timeout 2s
 A_Clipboard := A_Clipboard
 files := A_Clipboard
-files := RegExReplace(files, "\w:\\|\w+\\") ; remove path
+files := RegExReplace(files, "\w:\\|.+\\") ; remove path
 A_Clipboard := files
 }
 
-;-------
+; Example: firefox.exe
+
+;--------
 ;    + Copy file name without extension and path
 
 ^!n:: { ; CTRL + ALT + N
 CallClipboard(2) ; Timeout 2s
 A_Clipboard := A_Clipboard
 files := A_Clipboard
-files := RegExReplace(files, "\w:\\|\w+\\") ; remove path
+files := RegExReplace(files, "\w:\\|.+\\") ; remove path
 files := RegExReplace(files, "\.[\w]+(`r`n)","`n") ; remove ext, CR
 files := RegExReplace(files, "\.[\w]+$") ; remove last ext
 A_Clipboard := files
 }
+
+; Example: firefox
 
 #HotIf
 
@@ -564,8 +530,7 @@ A_Clipboard := files
 ~NumpadDot::
 ~.::
 ~!::
-~?::
-{
+~?:: {
 cfc1 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
 cfc1.Start
 cfc1.Wait
@@ -575,7 +540,7 @@ if (cfc1.EndReason = "Match") {
     else
         send "{Backspace}+" cfc1.Input ; if dot or numdot is the trigger, don't add space, coz typing website address is problematic
     exit
-}
+    }
 if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
     cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
     cfc2.Start
@@ -588,7 +553,7 @@ if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Ex
 ; and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
 ; and many others that use different methods to achieve this goal. Try a few and see what works for you.
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ; User-defined Functions
 
 ;  = Notification Function
@@ -611,10 +576,10 @@ if timer = 0 {
 }
 
 EndMyNotif() {
-    MyNotification.Destroy
+MyNotification.Destroy
 }
 
-;-------------------------------------------------------------------------------
+;--------
 ;  = Toggle OS Function
 ; inspiration from a post by gonzax - https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
 
@@ -625,7 +590,8 @@ If (ShowSuperHidden_Status = 0) { ; enable if disabled
     CheckRegWrite(ShowSuperHidden_Status)
     ToggleOSCheck
     WindowsRefreshOrRun
-    } Else { ; disable if enabled
+    }
+Else { ; disable if enabled
     RegWrite "0", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     CheckRegWrite(ShowSuperHidden_Status)
     ToggleOSCheck
@@ -634,8 +600,8 @@ If (ShowSuperHidden_Status = 0) { ; enable if disabled
 }
 
 CheckRegWrite(key) { ; check if RegWrite was success
-    if key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
-        msgbox "ToggleOS Failed"
+if key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+    msgbox "ToggleOS Failed"
 }
 
 ToggleOSCheck() { ; tray tick mark
@@ -649,7 +615,7 @@ Else {
     }
 }
 
-;-------------------------------------------------------------------------------
+;--------
 ;  = Windows Refresh Or Run
 
 WindowsRefreshOrRun() {
@@ -657,31 +623,32 @@ if WinExist("ahk_class CabinetWClass") { ; refresh explorer if window exists
     WinActivate
     Sleep 500  ; change as per your system performance
     Send "{F5}" ; refresh
-} else { ; open new explorer window if one doesn't already exist ; remove this section if not desired
+    }
+else { ; open new explorer window if one doesn't already exist ; remove this section if not desired
     Run 'explorer.exe',,"Max"
     WinWait("ahk_class CabinetWClass",, 10) ; timeout 10 secs
     WinActivate
     }
 }
 
-;-------------------------------------------------------------------------------
+;--------
 ;  = Adjust Window Transparency Function
 
 GetTrans() {
-    ToolTip ; disable previous tooltip if any
-    MouseGetPos ,, &WinID
-    Trans := WinGetTransparent("ahk_id " WinID)
-    if(!Trans)
-        Trans := 255
-    return Trans
+ToolTip ; disable previous tooltip if any
+MouseGetPos ,, &WinID
+Trans := WinGetTransparent("ahk_id " WinID)
+if(!Trans)
+    Trans := 255
+return Trans
 }
 
 SetTrans(Transparency) {
-    Trans := Transparency
-    ToolTip("Transparency: " Trans)
-    SetTimer () => ToolTip(), -500
-    MouseGetPos ,, &WinID
-    WinSetTransparent Trans, "ahk_id " WinID
+Trans := Transparency
+ToolTip("Transparency: " Trans)
+SetTimer () => ToolTip(), -500
+MouseGetPos ,, &WinID
+WinSetTransparent Trans, "ahk_id " WinID
 }
 
 SetTransFunc(item, position, SetTransMenu) {
@@ -697,12 +664,24 @@ SetTransMenu.Add("&1 255 Opaque"            ,SetTransFunc)
 SetTransMenu.Add("&2 190 Translucent"       ,SetTransFunc) ; Semi-opaque
 SetTransMenu.Add("&3 125 Semi-transparent"  ,SetTransFunc)
 SetTransMenu.Add("&4  65 Nearly Invisible"  ,SetTransFunc)
-SetTransMenu.Add("&5   1 Invisible"         ,SetTransFunc) ; never set to zero, causes error
+SetTransMenu.Add("&5   1 Invisible"         ,SetTransFunc) ; never set to zero, causes ERROR
 SetTransMenu.Show
 }
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Change Text Case Function
+; inspired by a v1 script from https://geekdrop.com/content/super-handy-AutoHotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
+
+ChangeCaseMenuFunc() {
+ChangeCaseMenu := Menu()
+ChangeCaseMenu.Delete
+ChangeCaseMenu.Add("&1 lower case"      ,ConvertLower)
+ChangeCaseMenu.Add("&2 Sentence case"   ,ConvertSentence)
+ChangeCaseMenu.Add("&3 Title Case"      ,ConvertTitle)
+ChangeCaseMenu.Add("&4 UPPER CASE"      ,ConvertUpper)
+ChangeCaseMenu.Add("&5 iNVERT cASE"     ,ConvertInvert)
+ChangeCaseMenu.Show
+}
 
 ConvertLower(*) {
 CallClipboard(2)
@@ -733,10 +712,10 @@ ConvertInvert(*) {
 CallClipboard(2)
 inverted := ""
 Loop Parse A_Clipboard {     ; Code Credit #2
-  if (StrLower(A_LoopField) == A_LoopField) ; * Code Credit #3
-    inverted .= StrUpper(A_LoopField)       ; *
-  else inverted .= StrLower(A_LoopField)    ; *
-  }
+    if (StrLower(A_LoopField) == A_LoopField)  ; * Code Credit #3
+        inverted .= StrUpper(A_LoopField)      ; *
+    else inverted .= StrLower(A_LoopField)     ; *
+    }
 A_Clipboard := inverted
 CaseConvert
 }
@@ -756,7 +735,7 @@ Send Len  ; and selects it
 ; Code Credit #2 idea for loop from kon's post - https://www.autohotkey.com/boards/viewtopic.php?p=58417#p58417
 ; Code Credit #3 - 3 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a auto-query to DuckDuckGPT by KudoAI via https://greasyfork.org/en/scripts/459849-duckduckgpt
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Call Clipboard and ClipWait
 
 CallClipboard(secs) {
@@ -765,34 +744,51 @@ A_Clipboard := ""
 Send "^c"
 If !ClipWait(secs) {
     MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
-    ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", 2000) ; Alternative to MyNotification
+    ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", -2000) ; Alternative to MyNotification
     A_Clipboard := clipSave
     clipSave := ""
     Exit
     }
-else
-    Return clipSave
+else Return clipSave
 }
 
 CallClipboardShort(secs) {
 If !ClipWait(secs) {
     MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
-    ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", 2000) ; Alternative to MyNotification
+    ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", -2000) ; Alternative to MyNotification
     Exit
     }
 }
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = ToolTip Function
 
 Tool_TipFunc(ToolText,ToolDuration) {
 ToolTip ; turn off any previous tooltip
 ToolTip ToolText
-SetTimer () => ToolTip(), ToolDuration * -1
+SetTimer () => ToolTip(), ToolDuration
 }
 
 ;------------------------------------------------------------------------------
 ;  = Wrap Text In Quotes or Symbols Function
+; Inspired by two old AHK v1 scripts from https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
+; and https://www.autohotkey.com/board/topic/9805-easy-encloseenquote/?p=61995
+
+WrapTextMenuFunc() {
+WrapTextMenu := Menu()
+WrapTextMenu.Delete
+WrapTextMenu.Add("&1   `'  Single Quotation `'"     ,WrapTextFunc) ; single quotation '' ; ordered in decreasing frequency of use; reorder as needed
+WrapTextMenu.Add("&2   `" Double Quotation `""      ,WrapTextFunc) ; double quotation ""
+WrapTextMenu.Add("&3   (  Round Brackets )"         ,WrapTextFunc) ; round breackets ()
+WrapTextMenu.Add("&4   [  Square Brackets ]"        ,WrapTextFunc) ; square brackets []
+WrapTextMenu.Add("&5   {  Flower Brackets }"        ,WrapTextFunc) ; flower brackets {}
+WrapTextMenu.Add("&6   ``  Accent/Backtick ``"      ,WrapTextFunc) ; accent/backtick ``
+WrapTextMenu.Add("&7  `% Percent Sign `%"           ,WrapTextFunc) ; percent sign %%
+WrapTextMenu.Add("&8   ‘  Single Comma Quotation ’" ,WrapTextFunc) ; single turned comma ‘’
+WrapTextMenu.Add("&9   “ Double Comma Quotation ”"  ,WrapTextFunc) ; double turned comma “”
+WrapTextMenu.Add("&0  Remove all"                   ,WrapTextFunc) ; remove quotes
+WrapTextMenu.Show
+}
 
 WrapTextFunc(item, position, WrapTextMenu) {
 If position = 1
@@ -840,7 +836,6 @@ If (RegExMatch(TextStringInitial, "\s+$")) {   ; if initial string has Trailing 
     }
 
 Len2 := "+{left " Len1 "}"
-
 ; Send "{raw}" TextString    ; send string with quotes
 A_Clipboard := TextString    ; paste from clipboard is faster than send raw, especially for long strings
 Send "^v"
@@ -848,8 +843,24 @@ Send Len2          ; and select textstring
 ; A_Clipboard := TextStringInitial  ; restore original text string to clipboard if desired
 }
 
-;-------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ;  = Control Panel Tools Function
+
+ControlPanelMenuFunc() {
+ControlPanelMenu := Menu() ; starts building a pop-up menu
+ControlPanelMenu.Delete    ; deletes previously built pop-up menu, if any, and then starts adding items
+ControlPanelMenu.Add("&1 Control Panel"                 ,ControlPanelFunc)
+ControlPanelMenu.Add("&2 Installed Apps"                ,ControlPanelFunc)
+ControlPanelMenu.Add("&3 Add/Remove Programs (Legacy)"  ,ControlPanelFunc)
+ControlPanelMenu.Add("&4 Defragment Interface"          ,ControlPanelFunc)
+ControlPanelMenu.Add("&5 Services"                      ,ControlPanelFunc)
+ControlPanelMenu.Add("&6 Sound Mixer (Legacy)"          ,ControlPanelFunc)
+ControlPanelMenu.Add("&7 Registry Editor"               ,ControlPanelFunc)
+ControlPanelMenu.Add("&8 Resource Monitor"              ,ControlPanelFunc)
+ControlPanelMenu.Add("&9 Windows Update"                ,ControlPanelFunc)
+ControlPanelMenu.Add("&0 Windows version"               ,ControlPanelFunc) ; add more with &abc… or &symbols(/*-+)… triggers
+ControlPanelMenu.Show
+}
 
 ControlPanelFunc(item, position, ControlPanelMenu) {
 if position = 1
