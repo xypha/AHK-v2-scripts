@@ -1,39 +1,49 @@
 # AHK v2 scripts  
 
-[AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts with examples of commonly used commands and shortcut keys with several small functions, written in AHK v2. 
+[AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts with examples of commonly used commands, shortcut keys and several small functions for various applications, written in AHK v2. 
 
 Any suggestions for improving the script code are welcome.  
 
 Standalone scripts for each function will be created soon.
 
-### Script #1 All in One - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20All%20in%20one.ahk)
+### Script #1 All in One - [Link](https://github.com/xypha/AHK-v2-scripts/raw/main/%231%20All%20in%20One.ahk)
 <details>
 <summary>CONTENTS</summary>
-  
-   * Toggle protected operating system (OS) files
-   * Customise Tray Icon
-   * Check & Reload AHK
-   * Remap Keys
-   * Customise CapsLock
-   * Horizontal Scrolling
-   * Move Mouse Pointer by pixel
-   * Close or Kill an app window with shortcuts
-   * Adjust Window Transparency
-   * Recycle Bin shortcut
-   * Display Off shortcut
-   * Add Control Panel Tools to a Menu
-   * Change Text Case
-   * Wrap Text In Quotes or Symbols
-   * Exchange adjacent letters
-   * Toggle Window On Top
-   * Use cases for #HotIf
-     * Firefox
-     * Telegram
-     * Windows Explorer
-   * Capitalise the first letter of a sentence
-   * Notification Function
+
+  * Set default state of lock keys
+  * Toggle protected operating system (OS) files
+  * Customise Tray Icon
+  * Check & Reload AHK
+  * Remap Keys
+  * Customise CapsLock
+  * Horizontal Scrolling
+  * Move Mouse Pointer by pixel
+  * Close or Kill an app window
+  * Adjust Window Transparency
+  * Recycle Bin shortcut
+  * Display Off shortcut
+  * Add Control Panel Tools to a Menu
+  * Change Text Case
+  * Wrap Text In Quotes or Symbols
+  * Exchange adjacent letters
+  * Toggle Window On Top
+  * Use cases for #HotIf
+    * Firefox
+    * Telegram
+    * Windows Explorer
+  * Capitalise the first letter of a sentence
+  * Notification Function
 
 </details>
+
+
+-----------------
+
+#### **Set default state of lock keys**
+  Set the state of `CapsLock`, `NumLock` and `ScrollLock` On/Off on script start.  
+  Add this script to system [startup](https://www.howtogeek.com/208224/how-to-add-a-program-to-startup-in-windows/#step-two-create-a-shortcut-in-the-quot-startup-quot-folder-to-add-a-program-to-startup) and set lock-state automatically after you login.
+
+-----------------
 
 #### **Toggle protected operating system (OS) files**
   Show/hide protected operating system files in Windows File Explorer from the script tray menu, as an alternative to navigating the labyrinth of Explorer's Folder Options. Also, a handy check mark is displayed when OS files are shown.
@@ -47,34 +57,53 @@ Standalone scripts for each function will be created soon.
   
 -----------------
 #### **Check & Reload AHK**
-  Create a shortcut to check a script's recent actions using `ListLines`, and another shortcut to `Reload` a script after making changes to it.
+  A keyboard shortcut to check the script's recent actions using `ListLines`, and another shortcut to `Reload` the script after making changes to it.
 
 -----------------
 #### **Remap Keys**
-  This section of the script includes methods to disable keys that you don't use or trigger accidentally too often. See examples of ways to change a key's function to suit your needs, such as pressing `ALT + M` to minimise a window instantly, instead of moving your mouse cursor to the "Minimise" button in the title bar.
+  This section of the script includes methods to disable hardware keys that you don't use or trigger accidentally too often.  
+  See examples of methods that allow you to customise a key's function to your needs -  
+  * Minimise a window instantly with `ALT + M`, instead of moving your mouse cursor all the way to the "Minimise" button in the title bar.
+  * Disable `Insert` key from accidentally triggering when you are trying to press adjacent keys like `Delete` or `Pause/Break`
+  * If you don't like **Task view**, remap it's shortcut `Win + Tab` to the invoke the (arguably faster) traditional `AltTab` menu.
+  * Working on a laptop and missing the `Page Up/Down`, `Home` and `End` buttons? Remap `RCtrl + Up/Down/Left/Right` button combos to regain the function of missing keys.
 
 -----------------
 #### **Customise CapsLock**
-  Do you accidentally trigger `CapsLock` when trying to press `a` or `Ctrl + A` or `Alt + Tab`? AutoHotkey can ensure this never happens.
-  Do you want to enable CapsLock briefly and have it automatically turn off after 10 seconds? Check the script for an example.
+  Do you accidentally trigger `CapsLock` when trying to press `a` or `Ctrl + A` or `Alt + Tab`? AutoHotkey can ensure this never happens.  
+  Do you want to enable CapsLock briefly and have it automatically turn off after 10 seconds? Check the script for examples.
+
+  * Disable `CapsLock` key from accidentally turning ON _only_.
+  * Hit `Shift + CapsLock` keys to turn ON CapsLock-state for customisable duration (10s default, range from 250 milliseconds to 49 days), add a quiet notification in the corner and turn it OFF automatically once the timer expires.
+  * Do you want to turn OFF CapsLock sooner? Hit `Esc` key or `CapsLock` (even if this key is disabled).
 
 -----------------
 #### **Horizontal Scrolling**
-  Whether you have a mouse with or without a tilt wheel, some applications refuse to scroll horizontally.
+  Whether you have a mouse with or without a [tilt wheel](https://en.wikipedia.org/wiki/Scroll_wheel#Functionality), some applications refuse to scroll horizontally.
   This section of the script demonstrates four methods that simulate tilt wheel actions and enables you to force even the most recalcitrant windows to scroll sideways.
 
 -----------------
 #### **Move Mouse Pointer by pixel**
-  Here is an example of how you can move your mouse pointer with precision, pixel by pixel, using Numpad shortcuts. It is easily customisable to your needs.
+  Use `Win + Numpad` keys to move your mouse pointer with precision, pixel by pixel.  
+  Cutomise the shortcut commands to your needs by altering one or more of the following -
+  * Starting coordinates (absolute or relative position on Screen, app window or client)
+  * Speed of mouse cursor (range of 0 (fastest, instant), 2 (default) or 100 (slowest))
+  * Degree of mouse movement (relation position by specifying number of pixels).
 
 -----------------
 #### **Close or Kill an app window with shortcuts**
-  Close any app or window instantly with a keyboard shortcut without having to navigate to the 'Close' button in the title bar. Annoyed by unresponsive windows? See an example for killing unresponsive windows with a shortcut immediately, instead of searching for the malfunctioning app in Task Manager.
+  Close any app or window instantly with a keyboard shortcut `Alt + Right Click` without having to navigate to the 'Close' button in the title bar.  
+  This simulates the default `Alt + F4` behaviour (in most apps) or `CTRL + W / Q` action (available in some apps).  
+
+  
+  Annoyed by unresponsive windows?  
+  Instead of performing a long search in Task Manager, kill the unresponsive window immediately with a shortcut `CTRL + ALT + F4`.
 
 -----------------
 #### **Adjust Window Transparency**
-  Managing multiple windows on your desktop? Here is a handy way to work with them.  
-  Adjust the transparency of an app or window in customisable increments using mouse keys, or quickly alter transparency to pre-defined levels through a shortcut-triggered pop-up menu.
+  Here is a handy way to work with multiple windows on your PC.  
+  * Use mouse keys `CTRL + Shift + Wheel Up/Down` to adjust the transparency of an app or window in customisable increments (Mininum `1` to Maximum `255`).
+  * Quickly alter transparency to pre-defined levels in two key presses - Hit `F8` and select an option `1 to 5` in the pop-up menu.
 
   ![Adjust Window Transparency](https://github.com/xypha/AHK-v2-scripts/assets/12472214/317d7536-fa83-456f-93ee-cfdd3ce1fd8b)
 
@@ -97,13 +126,13 @@ Standalone scripts for each function will be created soon.
 
 -----------------
 #### **Add Control Panel Tools to a Menu**
-  Add items missing in the `Win + X` menu to a customisable AutoHotkey Menu triggered by `Win + Shift + X`.
+  Add items missing in the `Win + X` menu to a customisable pop-up menu triggered by `Win + Shift + X`.
 
   ![Control Panel Tools Menu](https://github.com/xypha/AHK-v2-scripts/assets/12472214/efe11010-ed29-4605-bd14-8063bb268062)
 
 -----------------
 #### **Change Text Case**
-  Change any length of text to `lower, UPPER, Sentence, Title or iNVERT` case, in-line through a pop-up menu with a single keyboard shortcut.
+  Change any length of text to `lower, UPPER, Sentence, Title or iNVERT` case, in-line through a pop-up menu using a single keyboard shortcut.  
   This section of the script works with special characters such as `é → É` and `Â → â` and is Unicode compatible. Search for `TestString` in the script for a more comprehensive example.
 
   ![Change the case of text](https://github.com/xypha/AHK-v2-scripts/assets/12472214/e6f3c4dd-0b84-4e71-b2ff-e577fb71d9a8)
