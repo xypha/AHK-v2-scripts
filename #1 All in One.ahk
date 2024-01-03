@@ -7,7 +7,7 @@
 
 ; /* AHK 1 v2  - CONTENTS */
 ; Settings
-; Default state of lock keys
+; Set default state of lock keys
 ; Auto-execute
 ;  = Toggle OS files
 ;  = Customise Tray Icon
@@ -32,11 +32,12 @@
 ;  = Firefox
 ;  = Telegram
 ;  = Windows Explorer
-;    + Symbols In File Names Keys
+;    + General
+;    + Symbols In File Names keys
 ;    + Horizontal Scrolling
 ;    + Copy full path
-;    + Copy file name without path
-;    + Copy file name without extension and path
+;    + Copy file names without path
+;    + Copy file names without extension and path
 ; Capitalise the first letter of a sentence
 ; User-defined Functions
 ;  = Notification Function
@@ -44,7 +45,7 @@
 ;  = Windows Refresh Or Run
 ;  = Adjust Window Transparency Function
 ;  = Change Text Case Function
-;  = Call Clipboard and ClipWait
+;  = Call ClipWait / Clipboard Function
 ;  = ToolTip Function
 ;  = Wrap Text In Quotes or Symbols Function
 ;  = Control Panel Tools Function
@@ -59,7 +60,7 @@
 KeyHistory 500
 
 ;------------------------------------------------------------------------------
-; Default state of lock keys
+; Set default state of lock keys
 
 SetCapsLockState "Off"
 SetNumLockState "On"
@@ -113,8 +114,8 @@ Return ; ends auto-execute
 
 !Numpad1:: { ; CTRL & Numpad1 keys pressed together
 ListLines
-Sleep 500
-WinMaximize "ahk - AutoHotkey"
+if WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, timeout 3s
+    WinMaximize
 }
 
 ^!Numpad1:: { ; CTRL & ALT & Numpad1 keys pressed together
@@ -139,7 +140,10 @@ Insert::                    ; Insert mode
 NumpadIns:: {
 }
 
-!Insert::Insert    ; Use Alt + Insert to toggle the 'Insert mode' ; Source: https://gist.github.com/endolith/823381
+; Use Alt + Insert to toggle the 'Insert mode'
+!Insert::Insert     ; Source: https://gist.github.com/endolith/823381
+
+; Note: ^Insert = Copy(^c) as Windows default - this behaviour is not changed by the above
 
 LWin & Tab::AltTab          ; Left WIN key works as left ALT key - disables taskview
 
@@ -163,9 +167,20 @@ RCtrl & Right::Send "{End}"
 +CapsLock:: {
 SetCapsLockState "On"
 MyNotificationFunc("CapsLock ON", "10000", "960", "985", "1")   ; Show notification for 10s
-KeyWait "Esc", "d t10" ; esc skips 10s wait and disables CapsLock immediately
-SetCapsLockState "Off"
-MyNotification.Destroy
+SetTimer CapsWait, -100 ; 100ms ; add settimer to move KeyWait to new thread and prevent current thread from being paused
+}
+
+CapsWait() { ; runs in new thread and allows for quick toggling of CapsLock-state with +CapsLock / CapsLock / ESC keys in current thread
+KeyWait "Esc", "d t10" ; esc skips 10s wait
+SetCapsLockState "Off" ; and disables CapsLock immediately
+MyNotification.Destroy ; and removes notification
+}
+
+CapsLock:: { ; turn off CapsLock immediately, if on
+If (GetKeyState("Capslock", "T")) {
+    SetCapsLockState "Off"
+    MyNotification.Destroy
+    }
 }
 
 ;------------------------------------------------------------------------------
@@ -356,17 +371,17 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 
 !q::WrapTextMenuFunc ; ALT + Q
 
-; ALT + number row
-!1::EncText("`'","`'")        ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
-!2::EncText(Chr(34),Chr(34))  ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
-!3::EncText("(",")")          ; enclose in round breackets ()
-!4::EncText("[","]")          ; enclose in square brackets []
-!5::EncText("{","}")          ; enclose in flower brackets {}
-!6::EncText(Chr(96),Chr(96))  ; enclose in accent/backtick ``
-!7::EncText("%","%")          ; enclose in percent sign %%
-!8::EncText("‘","’")          ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
-!9::EncText("“","”")          ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
-!0::EncText("","")            ; remove above quotes
+; WrapText Keys - ALT + number row
+!1::EncText("`'","`'")      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
+!2::EncText('`"','`"')      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
+!3::EncText("(",")")        ; enclose in round breackets ()
+!4::EncText("[","]")        ; enclose in square brackets []
+!5::EncText("{","}")        ; enclose in flower brackets {}
+!6::EncText("``","``")      ; enclose in accent/backtick ``
+!7::EncText("%","%")        ; enclose in percent sign %%
+!8::EncText("‘","’")        ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+!9::EncText("“","”")        ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+!0::EncText("","")          ; remove above quotes
 
 #HotIf
 
@@ -376,14 +391,11 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 ; Modified from http://www.computoredge.com/AutoHotkey/Downloads/LetterSwap.ahk
 
 $!l:: { ; ALT + L
-clipSave := ClipboardAll()
-A_Clipboard := ""
-Send "{Left}+{Right 2}^c"
-CallClipboardShort(2) ; 2s
+Send "{Left}+{Right 2}"
+CallClipboard(2) ; 2s
 SwappedLetters := SubStr(A_Clipboard,2) . SubStr(A_Clipboard,1,1)
 Send SwappedLetters "{Left}"
-A_Clipboard := clipSave
-clipSaved := ""
+A_Clipboard := clipSave ; restore Clipboard contents
 }
 
 ;------------------------------------------------------------------------------
@@ -436,15 +448,18 @@ Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
 ;--------
 ;  = Windows Explorer
 
+;    + General
+
 #HotIf WinActive("ahk_class CabinetWClass")
 
 F1::F2 ; disable opening help in MS edge
 
-; Unselect multiple files/folders - Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
+; Unselect multiple files/folders
+; Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
 ^+a::F5
 
 ;--------
-;    + Symbols In File Names Keys
+;    + Symbols In File Names keys
 
 ; replace \/:*?"<>| with ＼⧸ ： ✲ ？＂＜＞｜
 ; comment out the ones you don't desire, like \ → ＼
@@ -487,34 +502,28 @@ Loop 3
 
 ^+c:: { ; CTRL + Shift + C
 CallClipboard(2) ; Timeout 2s
-A_Clipboard := A_Clipboard
+A_Clipboard := A_Clipboard ; change to plain text
 }
 ; Example: C:\Program Files\Mozilla Firefox\firefox.exe
 
 ;--------
-;    + Copy file name without path
+;    + Copy file names without path
 
 !n:: { ; ALT + N
 CallClipboard(2) ; Timeout 2s
-A_Clipboard := A_Clipboard
-files := A_Clipboard
-files := RegExReplace(files, "\w:\\|.+\\") ; remove path
-A_Clipboard := files
+A_Clipboard := RegExReplace(A_Clipboard, "\w:\\|.+\\") ; remove path
 }
 
 ; Example: firefox.exe
 
 ;--------
-;    + Copy file name without extension and path
+;    + Copy file names without extension and path
 
 ^!n:: { ; CTRL + ALT + N
 CallClipboard(2) ; Timeout 2s
-A_Clipboard := A_Clipboard
-files := A_Clipboard
-files := RegExReplace(files, "\w:\\|.+\\") ; remove path
-files := RegExReplace(files, "\.[\w]+(`r`n)","`n") ; remove ext, CR
-files := RegExReplace(files, "\.[\w]+$") ; remove last ext
-A_Clipboard := files
+files := RegExReplace(A_Clipboard, "\w:\\|.+\\")        ; remove path
+files := RegExReplace(files, "\.[\w]+(`r`n|`n)","`n")   ; remove ext, CR
+A_Clipboard := RegExReplace(files, "\.[\w]+$")          ; remove last ext
 }
 
 ; Example: firefox
@@ -523,7 +532,7 @@ A_Clipboard := files
 
 ;------------------------------------------------------------------------------
 ; Capitalise the first letter of a sentence
-; modified from a script by Xtra - https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
+; modified from https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
 
 ~NumpadEnter:: ; triggers ; add or disable one or more as needed
 ~Enter::
@@ -536,9 +545,9 @@ cfc1.Start
 cfc1.Wait
 if (cfc1.EndReason = "Match") {
     if (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; if ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
-        send "{Backspace} +" cfc1.Input
+        Send "{Backspace} +" cfc1.Input
     else
-        send "{Backspace}+" cfc1.Input ; if dot or numdot is the trigger, don't add space, coz typing website address is problematic
+        Send "{Backspace}+" cfc1.Input ; if dot or numdot is the trigger, don't add space, coz typing website address is problematic
     exit
     }
 if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
@@ -546,10 +555,10 @@ if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Ex
     cfc2.Start
     cfc2.Wait
     if (cfc2.EndReason = "Match")
-        send "{Backspace}+" cfc2.Input
+        Send "{Backspace}+" cfc2.Input
     }
 }
-; several other AHK v1 auto-capitalisation scripts are good, such as the one by Xtra linked above
+; several other AHK v1 auto-capitalisation scripts are good, such as the one linked above
 ; and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
 ; and many others that use different methods to achieve this goal. Try a few and see what works for you.
 
@@ -581,7 +590,7 @@ MyNotification.Destroy
 
 ;--------
 ;  = Toggle OS Function
-; inspiration from a post by gonzax - https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
+; inspiration from https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
 
 ToggleOS(*) {
 ToggleOSCheck
@@ -601,7 +610,7 @@ Else { ; disable if enabled
 
 CheckRegWrite(key) { ; check if RegWrite was success
 if key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
-    msgbox "ToggleOS Failed"
+    MsgBox "ToggleOS Failed", , "262144" ; 262144 = Always-on-top
 }
 
 ToggleOSCheck() { ; tray tick mark
@@ -670,7 +679,7 @@ SetTransMenu.Show
 
 ;------------------------------------------------------------------------------
 ;  = Change Text Case Function
-; inspired by a v1 script from https://geekdrop.com/content/super-handy-AutoHotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
+; inspired from https://geekdrop.com/content/super-handy-AutoHotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 
 ChangeCaseMenuFunc() {
 ChangeCaseMenu := Menu()
@@ -685,27 +694,23 @@ ChangeCaseMenu.Show
 
 ConvertLower(*) {
 CallClipboard(2)
-A_Clipboard := StrLower(A_Clipboard)
-CaseConvert
+CaseConvert(StrLower(A_Clipboard))
 }
 
 ConvertSentence(*) {
 CallClipboard(2)
-lowered := StrLower(A_Clipboard)
-A_Clipboard := RegExReplace(lowered, "(((^\s*|([.!?]+\s*))[a-z])|\Wi\W)", "$U1") ; Code Credit #1
-CaseConvert
+transformed := RegExReplace(StrLower(A_Clipboard), "(((^\s*|([.!?]+\s*))[a-z])|\Wi\W)", "$U1") ; Code Credit #1
+CaseConvert(transformed)
 }
 
 ConvertTitle(*) {
 CallClipboard(2)
-A_Clipboard := StrTitle(A_Clipboard)
-CaseConvert
+CaseConvert(StrTitle(A_Clipboard))
 }
 
 ConvertUpper(*) {
 CallClipboard(2)
-A_Clipboard := StrUpper(A_Clipboard)
-CaseConvert
+CaseConvert(StrUpper(A_Clipboard))
 }
 
 ConvertInvert(*) {
@@ -716,46 +721,42 @@ Loop Parse A_Clipboard {     ; Code Credit #2
         inverted .= StrUpper(A_LoopField)      ; *
     else inverted .= StrLower(A_LoopField)     ; *
     }
-A_Clipboard := inverted
-CaseConvert
+CaseConvert(inverted)
 }
-; TestString      := "abcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñ`n"
-;                  . "ABCDEFGHIJKLMNOPQRSTUVWXYZÉÂÄÀÅÇÊËÈÏÎÌÆÔÖÒÛÙŸÁÍÓÚÑ"
-; TestInverted    := "ABCDEFGHIJKLMNOPQRSTUVWXYZÉÂÄÀÅÇÊËÈÏÎÌÆÔÖÒÛÙŸÁÍÓÚÑ`n"
-;                  . "abcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñ"
+; Unicode TestString      := "abcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñABCDEFGHIJKLMNOPQRSTUVWXYZÉÂÄÀÅÇÊËÈÏÎÌÆÔÖÒÛÙŸÁÍÓÚÑ"
+; Unicode iNVERT cASE     := "ABCDEFGHIJKLMNOPQRSTUVWXYZÉÂÄÀÅÇÊËÈÏÎÌÆÔÖÒÛÙŸÁÍÓÚÑabcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñ"
 
-CaseConvert() {
-LenTemp := StrReplace(A_Clipboard, "`r`n", "`n") ; correct count for len
+CaseConvert(caseText) {
+A_Clipboard := caseText
+LenTemp := StrReplace(caseText, "`r`n", "`n") ; correct count for len
 Len := "+{left " Strlen(LenTemp) "}"
 Send "^v" ; Pastes new text
 Send Len  ; and selects it
 }
 
-; Code Credit #1 NeedleRegEx pattern modified from pattern posted by ManaUser - https://www.autohotkey.com/board/topic/24431-convert-text-uppercase-lowercase-capitalized-or-inverted/?p=158295
-; Code Credit #2 idea for loop from kon's post - https://www.autohotkey.com/boards/viewtopic.php?p=58417#p58417
+; Code Credit #1 NeedleRegEx pattern modified from pattern from https://www.autohotkey.com/board/topic/24431-convert-text-uppercase-lowercase-capitalized-or-inverted/?p=158295
+; Code Credit #2 idea for loop from https://www.autohotkey.com/boards/viewtopic.php?p=58417#p58417
 ; Code Credit #3 - 3 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a auto-query to DuckDuckGPT by KudoAI via https://greasyfork.org/en/scripts/459849-duckduckgpt
 
 ;------------------------------------------------------------------------------
-;  = Call Clipboard and ClipWait
+;  = Call ClipWait / Clipboard Function
+
+CallClipWait(secs) {
+If !ClipWait(secs) {
+    MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
+    ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", -2000) ; Alternative to MyNotification
+    Exit
+    }
+}
 
 CallClipboard(secs) {
-clipSave := ClipboardAll()
+global clipSave := ClipboardAll() ; global = return clipSave
 A_Clipboard := ""
 Send "^c"
 If !ClipWait(secs) {
     MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
-    ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", -2000) ; Alternative to MyNotification
     A_Clipboard := clipSave
     clipSave := ""
-    Exit
-    }
-else Return clipSave
-}
-
-CallClipboardShort(secs) {
-If !ClipWait(secs) {
-    MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
-    ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", -2000) ; Alternative to MyNotification
     Exit
     }
 }
@@ -771,7 +772,7 @@ SetTimer () => ToolTip(), ToolDuration
 
 ;------------------------------------------------------------------------------
 ;  = Wrap Text In Quotes or Symbols Function
-; Inspired by two old AHK v1 scripts from https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
+; Inspired by https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 ; and https://www.autohotkey.com/board/topic/9805-easy-encloseenquote/?p=61995
 
 WrapTextMenuFunc() {
@@ -792,25 +793,25 @@ WrapTextMenu.Show
 
 WrapTextFunc(item, position, WrapTextMenu) {
 If position = 1
-    EncText("'","'")           ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
+    EncText("'","'")        ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
 Else if position = 2
-    EncText(Chr(34),Chr(34))   ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
+    EncText('`"','`"')      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
 Else if position = 3
-    EncText("(",")")           ; enclose in round breackets ()
+    EncText("(",")")        ; enclose in round breackets ()
 Else if position = 4
-    EncText("[","]")           ; enclose in square brackets []
+    EncText("[","]")        ; enclose in square brackets []
 Else if position = 5
-    EncText("{","}")           ; enclose in flower brackets {}
+    EncText("{","}")        ; enclose in flower brackets {}
 Else if position = 6
-    EncText(Chr(96),Chr(96))   ; enclose in accent/backtick ``
+    EncText("``","``")      ; enclose in accent/backtick ``
 Else if position = 7
-    EncText("%","%")           ; enclose in percent sign %%
+    EncText("%","%")        ; enclose in percent sign %%
 Else if position = 8
-    EncText("‘","’")           ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+    EncText("‘","’")        ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
 Else if position = 9
-    EncText("“","”")           ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+    EncText("“","”")        ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
 Else if position = 10
-    EncText("","")             ; remove above quotes
+    EncText("","")          ; remove above quotes
 }
 
 EncText(q,p) {
@@ -819,8 +820,8 @@ TextStringInitial := A_Clipboard
 TextString := A_Clipboard
 TextString := StrReplace(TextString, "`r`n", "`n")      ; fix carriage return + line feed for Strlen
 TextString := RegExReplace(TextString,'^\s+|\s+$')      ; RegEx remove leading/trailing space
-TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading  ['({%"“‘`
-TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`
+TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading  ['({%"“‘`  ; customise as your needs in WrapTextMenuFunc and WrapText Keys
+TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`  ; customise as your needs in WrapTextMenuFunc and WrapText Keys
 TextString := q TextString p
 TextString := StrReplace(TextString, "`n" p, p)
 Len1 := Strlen(TextString)
@@ -837,9 +838,9 @@ If (RegExMatch(TextStringInitial, "\s+$")) {   ; if initial string has Trailing 
 
 Len2 := "+{left " Len1 "}"
 ; Send "{raw}" TextString    ; send string with quotes
-A_Clipboard := TextString    ; paste from clipboard is faster than send raw, especially for long strings
+A_Clipboard := TextString    ; pasting from clipboard is faster than send raw, especially for long strings
 Send "^v"
-Send Len2          ; and select textstring
+Send Len2          ; and select textstring ; sometimes it doesn't work properly for unknown reasons :shrug:
 ; A_Clipboard := TextStringInitial  ; restore original text string to clipboard if desired
 }
 
@@ -887,7 +888,7 @@ if position = 10
 
 /*
 'Short' list of commands (several personal modifications over the years - NOT comprehensive, at all)
-Original source - https://www.autohotkey.com/boards/viewtopic.php?p=24584#p24584
+Modified from https://www.autohotkey.com/boards/viewtopic.php?p=24584#p24584
 
 ; Already in Win + X menu
 ComObject("shell.application").ControlPanelItem("compmgmt.msc")    ; #x   | Computer Management
