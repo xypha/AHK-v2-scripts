@@ -28,6 +28,13 @@
 ;  = Wrap Text In Quotes or Symbols keys
 ;  = Exchange adjacent letters
 ;  = Toggle Window On Top
+; Hotstrings
+;  = Find & Replace in Clipboard
+;    + Find & Replace dot with space
+;    + Find & Replace dot with space (RegEx)
+;  = Trim Clipboard
+;  = Date & Time
+;    + Format Date / Time
 ; #HotIf
 ;  = Firefox
 ;  = Telegram
@@ -71,7 +78,7 @@ SetScrollLockState "Off"
 ; always at the top of your script
 
 ; Show notification with parameters - text, duration in milliseconds, position on screen xAxis, yAxis, use timeout timer (1) or use sleep (0)
-MyNotificationFunc("Loading AHK 1 v2", "10000", "1650", "985", "1") ; use timer for 10 seconds, position bottom right corner on 1920×1080 display resolution
+MyNotificationFunc("Loading AHK 1 v2", "10000", "1650", "985", "1") ; use timer for 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1650 y-axis 985) on 1920×1080 display resolution
 
 ;  = Toggle OS files
 
@@ -166,12 +173,12 @@ RCtrl & Right::Send "{End}"
 
 +CapsLock:: {
 SetCapsLockState "On"
-MyNotificationFunc("CapsLock ON", "10000", "960", "985", "1")   ; Show notification for 10s
+MyNotificationFunc("CapsLock ON", "10000", "960", "985", "1")   ; 10000ms = 10s, change to match KeyWait timeout if needed
 SetTimer CapsWait, -100 ; 100ms ; add settimer to move KeyWait to new thread and prevent current thread from being paused
 }
 
 CapsWait() { ; runs in new thread and allows for quick toggling of CapsLock-state with +CapsLock / CapsLock / ESC keys in current thread
-KeyWait "Esc", "d t10" ; esc skips 10s wait
+KeyWait "Esc", "d t10" ; hit esc to skip 10s timeout ; increase timeout duration to keep CapsLock ON for longer
 SetCapsLockState "Off" ; and disables CapsLock immediately
 MyNotification.Destroy ; and removes notification
 }
@@ -415,6 +422,86 @@ else {
     WinSetTitle Title_When_On_Top . t, t
     }
 }
+
+;------------------------------------------------------------------------------
+; Hotstrings
+
+;  = Find & Replace in Clipboard
+
+;    + Find & Replace dot with space
+
+:*:.++:: { ; hotstring ".++"
+A_Clipboard := StrReplace(A_Clipboard,"."," ") ; replace each dot with space
+}
+
+/*
+Find text:          "ABC..def.GHI"
+Replacement text:   "ABC  def GHI"
+*/
+
+;    + Find & Replace dot with space (RegEx)
+
+:*:.r+:: { ; hotstring ".r+"
+A_Clipboard := RegExReplace(A_Clipboard,"\.+"," ") ; replace one or more dots with single space
+}
+
+/*
+Find text:          "ABC..def.GHI"
+Replacement text:   "ABC def GHI"
+*/
+
+;------------------------------------------------------------------------------
+;  = Trim Clipboard
+
+; Trim and change multi-line text to single line
+; Modified from https://www.autohotkey.com/board/topic/89839-pasting-plain-text-from-the-clipboard/?p=568613
+
+:?*:v--:: { ; hotkey "Control Shift V"
+cliptext := StrReplace(A_Clipboard,"  "," ")        ; trim double spaces
+cliptext := RegExReplace(cliptext,"\s+"," ")        ; trim `t `r `n and multiple spaces
+A_Clipboard := RegExReplace(cliptext," +$|^ +")     ; trim leading/trailing spaces
+}
+
+/*
+Example text:
+Line0 ""              (blank line)
+Line1 " FUBFUBFI    " (leading and trailing space)
+Line2 "dvvbvvoe   df" (2+ consecutive spaces)
+Line3 ""              (blank line)
+
+Trimmed text: (new line is replaced with space and Line2 is appended to Line1, blank lines are deleted)
+Line1 "FUBFUBFI dvvbvvoe df"
+*/
+
+; Trim but keep non-blank lines
+
+:?*:v++:: { ; hotstring "v++"
+cliptext := RegExReplace(A_Clipboard,"m) +$|^ +")   ; m) = multi-line, trim leading/trailing spaces
+cliptext := RegExReplace(cliptext,"`r|^`n|`n$")     ; trim CR, leading/trailing LF
+A_Clipboard := RegExReplace(cliptext," +"," ")      ; trim double spaces
+}
+
+/*
+Example text:
+Line0 ""              (blank line)
+Line1 " FUBFUBFI    " (leading and trailing space)
+Line2 "dvvbvvoe   df" (2+ consecutive spaces)
+Line3 ""              (blank line)
+
+Trimmed text: (non-blank lines are kept, spaces are trimmed and blank lines are deleted)
+Line1 "FUBFUBFI"
+Line2 "dvvbvvoe df"
+*/
+
+;------------------------------------------------------------------------------
+;  = Date & Time
+
+;    + Format Date / Time
+
+:*x:d++::      Send FormatTime(, "yyyy.MM.dd") ; sends 2021.02.31
+:*x:date+::    Send FormatTime(, "dd.MM.yyyy") ; sends 28.03.2020
+:*x:time+::    Send FormatTime(, "h:mm tt")    ; sends 6:48 PM
+:*x:datetime+::Send FormatTime(, "dd/MM/yyyy h:mm tt") ; sends 28/03/2020 6:46 PM
 
 ;------------------------------------------------------------------------------
 ; #HotIf
