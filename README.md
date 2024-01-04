@@ -6,7 +6,7 @@ Any suggestions for improving the script code are welcome.
 
 Standalone scripts for each function will be created soon.
 
-### Script #1 All in One - [Link](https://github.com/xypha/AHK-v2-scripts/raw/main/%231%20All%20in%20One.ahk)
+### Script #1 All in One - [Link](https://github.com/xypha/AHK-v2-scripts/raw/main/%231%20All%20In%20One.ahk)
 <details>
 <summary>CONTENTS</summary>
 
@@ -27,6 +27,7 @@ Standalone scripts for each function will be created soon.
   * Wrap Text In Quotes or Symbols
   * Exchange adjacent letters
   * Toggle Window On Top
+  * Use cases for Hotstrings
   * Use cases for #HotIf
     * Firefox
     * Telegram
@@ -150,6 +151,13 @@ Standalone scripts for each function will be created soon.
 -----------------
 #### **Toggle Window On Top**
   Keyboard shortcut `ALT + T` enables you to keep a specified window on top of all other windows (except other always-on-top windows) and toggle it back to normal.
+
+-----------------
+#### **Use cases for Hotstrings**
+ Here are some examples of the wide breath of uses for AutoHotkey hotstrings feature
+ * Find & replace text in Clipboard with and without regular expressions(RegEx).
+ * Trim clipboard text - remove tabs (`\t`), newline markers (`\r \n`), double spaces (`\s+` or "`  `") with and without RegEx.
+ * Type current date and/or time in your referred regional format, or any customisable format really,
 
 -----------------
 #### **Use cases for #HotIf**
