@@ -152,7 +152,7 @@ NumpadIns:: {
 
 ; Note: ^Insert = Copy(^c) as Windows default - this behaviour is not changed by the above
 
-LWin & Tab::AltTab          ; Left WIN key works as left ALT key - disables taskview
+LWin & Tab::AltTab ; Left WIN key works as left ALT key - disables taskview
 
 RAlt::!space       ; ALT + space brings up window menu
 
@@ -279,15 +279,15 @@ see the section under ";    + Horizontal Scrolling"
 ;  = Move Mouse Pointer by pixel
 ; Modified from http://www.computoredge.com/AutoHotkey/Downloads/MousePrecise.ahk
 
-#Numpad1::MouseMove -1,  1, 0, "R"    ; Win + Numpad1 move down left    ↓←
-#Numpad2::MouseMove  0,  1, 0, "R"    ; Win + Numpad2 move down         ↓
-#Numpad3::MouseMove  1,  1, 0, "R"    ; Win + Numpad3 move down right   ↓→
-#Numpad4::MouseMove -1,  0, 0, "R"    ; Win + Numpad4 move left         ←
-#Numpad5::MouseMove 960,540           ; Win + Numpad5 move center mouse • (1920×1080 display)
-#Numpad6::MouseMove  1,  0, 0, "R"    ; Win + Numpad6 move right        →
-#Numpad7::MouseMove -1, -1, 0, "R"    ; Win + Numpad7 move up left      ↑←
-#Numpad8::MouseMove  0, -1, 0, "R"    ; Win + Numpad8 move up           ↑
-#Numpad9::MouseMove  1, -1, 0, "R"    ; Win + Numpad9 move up right     ↑→
+#Numpad1::MouseMove -1,  1, 0, "R"    ; Win + Numpad1 (SC04F) move down left    ↓←
+#Numpad2::MouseMove  0,  1, 0, "R"    ; Win + Numpad2 (SC050) move down         ↓
+#Numpad3::MouseMove  1,  1, 0, "R"    ; Win + Numpad3 (SC051) move down right   ↓→
+#Numpad4::MouseMove -1,  0, 0, "R"    ; Win + Numpad4 (SC04B) move left         ←
+#Numpad5::MouseMove 960,540           ; Win + Numpad5 (SC04C) move center mouse • (1920×1080 display)
+#Numpad6::MouseMove  1,  0, 0, "R"    ; Win + Numpad6 (SC04D) move right        →
+#Numpad7::MouseMove -1, -1, 0, "R"    ; Win + Numpad7 (SC047) move up left      ↑←
+#Numpad8::MouseMove  0, -1, 0, "R"    ; Win + Numpad8 (SC048) move up           ↑
+#Numpad9::MouseMove  1, -1, 0, "R"    ; Win + Numpad9 (SC049) move up right     ↑→
 
 ^#m::MouseMove 960,540 ; Test mouse position
 
@@ -297,17 +297,17 @@ see the section under ";    + Horizontal Scrolling"
 
 Alt & RButton:: { ; ALT + right mouse button ; attempt to close window
 MouseGetPos ,, &id
-winClass := WinGetClass("ahk_id " . id)
+winClass := WinGetClass("ahk_id " id)
 If (winClass != "Shell_TrayWnd")   ; exclude windows taskbar
 ; if (winClass != "Shell_TrayWnd" or winClass != "insert yourapp classname") ; exclude other apps using "or"
-    WinClose("ahk_id " . id)  ; sends a WM_CLOSE message to the target window
-    ; PostMessage 0x0112, 0xF060,,, "ahk_id " . id ; alternate method - same as pressing Alt+F4 or clicking the window's close button in its title bar:
+    WinClose("ahk_id " id)  ; sends a WM_CLOSE message to the target window
+    ; PostMessage 0x0112, 0xF060,,, "ahk_id " id ; alternate method - same as pressing Alt+F4 or clicking the window's close button in its title bar:
 }
 
 ; Kill window, usually unresponsive ones if WinClose fails
 ^!F4:: {
 MouseGetPos ,, &id
-WinKill ("ahk_id " . id)
+WinKill ("ahk_id " id)
 }
 
 ;------------------------------------------------------------------------------
@@ -400,7 +400,7 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 $!l:: { ; ALT + L
 Send "{Left}+{Right 2}"
 CallClipboard(2) ; 2s
-SwappedLetters := SubStr(A_Clipboard,2) . SubStr(A_Clipboard,1,1)
+SwappedLetters := SubStr(A_Clipboard,2) SubStr(A_Clipboard,1,1)
 Send SwappedLetters "{Left}"
 A_Clipboard := clipSave ; restore Clipboard contents
 }
@@ -419,7 +419,7 @@ if (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
     }
 else {
     WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
-    WinSetTitle Title_When_On_Top . t, t
+    WinSetTitle Title_When_On_Top t, t
     }
 }
 
@@ -621,6 +621,8 @@ A_Clipboard := RegExReplace(files, "\.[\w]+$")          ; remove last ext
 ; Capitalise the first letter of a sentence
 ; modified from https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
 
+#HotIf not WinActive("ahk_class #32770") ; exclude 'Save As' dialogue box
+
 ~NumpadEnter:: ; triggers ; add or disable one or more as needed
 ~Enter::
 ~NumpadDot::
@@ -633,8 +635,11 @@ cfc1.Wait
 if (cfc1.EndReason = "Match") {
     if (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; if ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
         Send "{Backspace} +" cfc1.Input
-    else
+    else {
         Send "{Backspace}+" cfc1.Input ; if dot or numdot is the trigger, don't add space, coz typing website address is problematic
+        ; Soundbeep, 1500, 50
+        ; SoundPlay % "C:\Windows\Media\Windows Information Bar.wav"
+        }
     exit
     }
 if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
@@ -645,6 +650,9 @@ if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Ex
         Send "{Backspace}+" cfc2.Input
     }
 }
+
+#HotIf
+
 ; several other AHK v1 auto-capitalisation scripts are good, such as the one linked above
 ; and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
 ; and many others that use different methods to achieve this goal. Try a few and see what works for you.
@@ -740,11 +748,10 @@ return Trans
 }
 
 SetTrans(Transparency) {
-Trans := Transparency
-ToolTip("Transparency: " Trans)
+ToolTip("Transparency: " Transparency)
 SetTimer () => ToolTip(), -500
 MouseGetPos ,, &WinID
-WinSetTransparent Trans, "ahk_id " WinID
+WinSetTransparent Transparency, "ahk_id " WinID
 }
 
 SetTransFunc(item, position, SetTransMenu) {
