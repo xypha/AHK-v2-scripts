@@ -5,13 +5,14 @@
 ; comments can also be show like this - "/*" comment text "*/"
 ; and these two methods can be combined too :)
 
-; /* AHK 1 v2  - CONTENTS */
+; /* AHK v2 #1 Showcase - CONTENTS */
 ; Settings
 ; Set default state of lock keys
 ; Auto-execute
 ;  = Toggle OS files
 ;  = Customise Tray Icon
 ;  = Horizontal Scrolling Group
+;  = Capitalise first letter exclusion Group
 ;  = End auto-execute
 ; Hotkeys
 ;  = Check & Reload AHK
@@ -78,7 +79,7 @@ SetScrollLockState "Off"
 ; always at the top of your script
 
 ; Show notification with parameters - text, duration in milliseconds, position on screen xAxis, yAxis, use timeout timer (1) or use sleep (0)
-MyNotificationFunc("Loading AHK 1 v2", "10000", "1650", "985", "1") ; use timer for 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1650 y-axis 985) on 1920×1080 display resolution
+MyNotificationFunc("Loading AHK v2 #1 Showcase", "10000", "1650", "985", "1") ; use timer for 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1650 y-axis 985) on 1920×1080 display resolution
 
 ;  = Toggle OS files
 
@@ -101,6 +102,10 @@ If FileExist(I_Icon)
 GroupAdd "HorizontalScroll1", "ahk_class ApplicationFrameWindow"       ; Modern UWP apps like calc and screen snip
 GroupAdd "HorizontalScroll1", "ahk_class MozillaWindowClass"           ; Firefox
 GroupAdd "HorizontalScroll1", "ahk_class SALFRAME"                     ; LibreOffice
+
+;  = Capitalise first letter exclusion Group
+
+GroupAdd "CapitaliseFirstLetter", "ahk_class #32770"        ; Save as dialogue
 
 ;  = End auto-execute
 
@@ -126,7 +131,7 @@ if WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, time
 }
 
 ^!Numpad1:: { ; CTRL & ALT & Numpad1 keys pressed together
-MyNotificationFunc("Updating AHK 1 v2", "500", "1650", "985", "0") ; use sleep coz reload cancels timers
+MyNotificationFunc("Updating AHK v2 #1 Showcase", "500", "1650", "985", "0") ; use sleep coz reload cancels timers
 Reload
 }
 
@@ -374,7 +379,7 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 ;--------
 ;  = Wrap Text In Quotes or Symbols keys
 
-#HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts
+#HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts - example: Media Player Classic - Home Cinema
 
 !q::WrapTextMenuFunc ; ALT + Q
 
@@ -512,9 +517,9 @@ Line2 "dvvbvvoe df"
 #HotIf WinActive("ahk_class MozillaWindowClass") ; main window ; excludes other dialogue boxes like "Save As" from ahk_exe firefox.exe
 
 ^+o:: {      ; CTRL + Shift + O to open library / bookmark manager
-Send "^t"
-Sleep 500
-Send "^l"
+if WinActive(" — Mozilla Firefox") ; if not new tab, then open new one
+    Send "^t"
+else Send "^l"  ; if new tab, focus address bar
 Sleep 500
 Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
 }
@@ -621,7 +626,7 @@ A_Clipboard := RegExReplace(files, "\.[\w]+$")          ; remove last ext
 ; Capitalise the first letter of a sentence
 ; modified from https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
 
-#HotIf not WinActive("ahk_class #32770") ; exclude 'Save As' dialogue box
+#HotIf not WinActive("ahk_group CapitaliseFirstLetter") ; exclude 'Save As' dialogue box
 
 ~NumpadEnter:: ; triggers ; add or disable one or more as needed
 ~Enter::
