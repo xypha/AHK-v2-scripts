@@ -8,7 +8,7 @@ Standalone scripts for each function will be created soon.
 
 ### Script #1 Showcase - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)
 
-Table of contents is listed below. Descriptions are [here](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk.md).
+Table of contents is listed below. Descriptions are [here](https://github.com/xypha/AHK-v2-scripts/blob/main/Descriptions%20%231.md).
   * Set default state of lock keys
   * Toggle protected operating system (OS) files
   * Customise Tray Icon
