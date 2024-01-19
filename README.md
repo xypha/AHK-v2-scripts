@@ -19,7 +19,9 @@ Any help would be appreciated. Suggestions for improving the script code are wel
   All in one script - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)  
   <sub>Last updated - 2024.01.19</sub>
 
-  | CONTENTS                       | Standalone | Last Updated |
+#### CONTENTS
+
+  | Title                          | Standalone | Last Updated |
   | :---                           |    :---:   |     ---:     |
   | Set default state of Lock keys | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Set%20default%20state%20of%20lock%20keys.ahk) | 2024.01.19 |
   | Show/Hide OS files             | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Show%E2%A7%B8Hide%20OS%20files) | 2024.01.19 |
