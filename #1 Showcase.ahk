@@ -7,9 +7,9 @@
 
 ; /* AHK v2 #1 Showcase - CONTENTS */
 ; Settings
-; Set default state of lock keys
 ; Auto-execute
-;  = Toggle OS files
+;  = Set default state of Lock keys
+;  = Show/Hide OS files
 ;  = Customise Tray Icon
 ;  = Horizontal Scrolling Group
 ;  = Capitalise first letter exclusion Group
@@ -49,7 +49,7 @@
 ; Capitalise the first letter of a sentence
 ; User-defined Functions
 ;  = Notification Function
-;  = Toggle OS Function
+;  = Toggle protected operating system (OS) files Function
 ;  = Windows Refresh Or Run
 ;  = Adjust Window Transparency Function
 ;  = Change Text Case Function
@@ -66,22 +66,22 @@
 #SingleInstance force
 #WinActivateForce
 KeyHistory 500
-
-;------------------------------------------------------------------------------
-; Set default state of lock keys
-
-SetCapsLockState "Off"
-SetNumLockState "On"
-SetScrollLockState "Off"
+; Persistent                                    ; add for standalone AHK to prevent auto exit 
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
 ; always at the top of your script
 
 ; Show notification with parameters - text, duration in milliseconds, position on screen xAxis, yAxis, use timeout timer (1) or use sleep (0)
-MyNotificationFunc("Loading AHK v2 #1 Showcase", "10000", "1650", "985", "1") ; use timer for 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1650 y-axis 985) on 1920×1080 display resolution
+MyNotificationFunc("Loading AHK v2 #1 Showcase", "10000", "1550", "985", "1") ; use timer for 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution
 
-;  = Toggle OS files
+;  = Set default state of Lock keys
+
+SetCapsLockState "Off"   ; CapsLock     is always off
+SetNumLockState "On"     ; NumLock      is always ON
+SetScrollLockState "Off" ; ScrollLock   is always off
+
+;  = Show/Hide OS files
 
 A_TrayMenu.Delete                             ; delete standard menu
 A_TrayMenu.Add "&Toggle OS files", ToggleOS   ; User-defined Function
@@ -131,7 +131,7 @@ if WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, time
 }
 
 ^!Numpad1:: { ; CTRL & ALT & Numpad1 keys pressed together
-MyNotificationFunc("Updating AHK v2 #1 Showcase", "500", "1650", "985", "0") ; use sleep coz reload cancels timers
+MyNotificationFunc("Updating AHK v2 #1 Showcase", "500", "1550", "985", "0") ; use sleep coz reload cancels timers
 Reload
 }
 
@@ -667,13 +667,12 @@ if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Ex
 
 ;  = Notification Function
 
-MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {
-Global MyNotification
-MyNotification := Gui()
+MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) { ; search for `ToolTipFunc` for alternative
+Global MyNotification := Gui()
 MyNotification.Opt("+AlwaysOnTop -Caption +ToolWindow")  ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
-MyNotification.BackColor := "EEEEEE"  ; White background
+MyNotification.BackColor := "EEEEEE"  ; White background, can be any RGB color (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
-MyNotification.Add("Text", "cBlack w181 Left", mytext)  ; black text
+MyNotification.Add("Text", "cBlack w230 Left", mytext)  ; black text
 MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
 if timer = 1
@@ -689,7 +688,7 @@ MyNotification.Destroy
 }
 
 ;--------
-;  = Toggle OS Function
+;  = Toggle protected operating system (OS) files Function
 ; inspiration from https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
 
 ToggleOS(*) {
@@ -844,7 +843,7 @@ Send Len  ; and selects it
 
 CallClipWait(secs) {
 If !ClipWait(secs) {
-    MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
+    MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1550", "985", "1") ; personal preferrence coz tooltip conflict
     ; Tool_TipFunc(A_ThisHotkey ":: Clip Failed", -2000) ; Alternative to MyNotification
     Exit
     }
@@ -855,7 +854,7 @@ global clipSave := ClipboardAll() ; global = return clipSave
 A_Clipboard := ""
 Send "^c"
 If !ClipWait(secs) {
-    MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1650", "985", "1") ; personal preferrence coz tooltip conflict
+    MyNotificationFunc(A_ThisHotkey ":: Clip Failed", "2000", "1550", "985", "1") ; personal preferrence coz tooltip conflict
     A_Clipboard := clipSave
     clipSave := ""
     Exit
@@ -865,10 +864,10 @@ If !ClipWait(secs) {
 ;------------------------------------------------------------------------------
 ;  = ToolTip Function
 
-Tool_TipFunc(ToolText,ToolDuration) {
+ToolTipFunc(mytext, myduration) {
 ToolTip ; turn off any previous tooltip
-ToolTip ToolText
-SetTimer () => ToolTip(), ToolDuration
+ToolTip mytext
+SetTimer () => ToolTip(), myduration
 }
 
 ;------------------------------------------------------------------------------
