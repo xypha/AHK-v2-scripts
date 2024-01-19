@@ -38,7 +38,7 @@ CONTENTS
   * Capitalise the first letter of a sentence
   * Notification Function
 
-<sub>Click on ⏵ to expand/collapse section containing descriptions of above contents.</sub>
+<sub>Click on ⏵ to show/hide brief descriptions of above contents.</sub>
 <details>
 <summary>DESCRIPTIONS</summary>
 
