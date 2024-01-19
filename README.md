@@ -2,7 +2,8 @@
 
 [AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts with examples of commonly used commands, shortcut keys and several small functions for various applications, written in AHK v2. 
 
-Any suggestions for improving the script code are welcome.  
+I'm not a programmer, but I am learning to script in AHK v2, slowly :)  
+Any help would be appreciated. Any suggestions for improving the script code are welcome.  
 
 Standalone scripts for each function will be created soon.
 
@@ -42,7 +43,7 @@ CONTENTS
 <summary>DESCRIPTIONS</summary>
 
 #### **Set default state of lock keys**
-  Set the state of `CapsLock`, `NumLock` and `ScrollLock` On/Off on script start.  
+  Set the state of `CapsLock`, `NumLock` and `ScrollLock` to On or Off upon script start.  
   Add this script to system [startup](https://www.howtogeek.com/208224/how-to-add-a-program-to-startup-in-windows/#step-two-create-a-shortcut-in-the-quot-startup-quot-folder-to-add-a-program-to-startup) and set lock-state automatically after you login.
 
 -----------------
@@ -185,3 +186,18 @@ CONTENTS
 #### **Notification Function**
   See an example for a custom alert that replaces the depreciated `Progress` command from AHK v1, using `GUI()` in AHK v2. The example allows for personalised notification `text, duration and position`. Alternatively, a similar use of `ToolTip` is also included.
 </details>
+
+-----------------
+### Script #2 MultiClip - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%232%20MultiClip%20v3.ahk)
+
+This script was created as a rudimentary alternative to PhraseExpress's clipboard management function after altering the [ClipStep](https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/) script with inspiration from GeekDrop's [Convert Case Cycle](https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes).  
+The script does the following -  
+ * `ClipArr` contains 20 slots by default, but can be customised to any number - from 1 to infinity.
+ * Hitting `^c` (Copy / `CTRL + C`) or `^x` (Cut / `CTRL + X`) triggers `OnClipboardChange` and saves text[^1] to a slot in clipboard array (`ClipArr`).
+ * Hitting `^c` or `^x` a second time moves previously saved text to the next slot and copies the newly selected text to the first slot in `ClipArr`.
+ * This behaviour continues until all 20 slots are filled. When new text is added to `ClipArr` on the 21st occasion or later, the oldest copied text (now in 20th slot) is lost.
+ * To view text saved in any of the slots, type `c++` to bring up a pop-up menu. Use one of the shortcuts (highlighted by underline) to paste text from corresponding slot.
+
+[^1]: Text includes anything from the clipboard that can be expressed as text, such as filenames (with full path) when files/folders are copied from a Windows File Explorer window via `CTRL + C` or `CTRL + X`. See Script #1 Showcase for examples that show you how to copy full path with or without file extension and path.
+
+An earlier version of MultiClip (AHK v1 script) can be found [here](https://www.autohotkey.com/boards/viewtopic.php?p=332658&sid=72d1fa89ce5797e59c17568838c5ca7e#p332658).
