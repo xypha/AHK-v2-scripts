@@ -12,6 +12,7 @@
 #SingleInstance force
 #WinActivateForce
 KeyHistory 500
+Persistent                                    ; add for standalone AHK to prevent auto exit
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
