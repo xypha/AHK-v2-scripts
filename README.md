@@ -5,16 +5,25 @@
 I'm not a programmer, but I am learning to script in AHK v2, slowly :)  
 Any help would be appreciated. Any suggestions for improving the script code are welcome.  
 
-Standalone scripts for each function will be created soon.
+-----------------
+### Script No. 0 Template
+[Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Template.ahk) to template script.
+
+#### **Notification Function**
+  Create a personalised alert that replaces the depreciated `Progress` command from AHK v1. The alert is written in AHK v2 and uses `GUI()` function. It allows you to customise the notification's `text, duration and position`. 
 
 -----------------
+### Script No. 1 Showcase
 
-### Script No. 1 Showcase - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)
+All in one script - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)
 
-CONTENTS
- 
-  * Set default state of lock keys
-  * Toggle protected operating system (OS) files
+| CONTENTS                       | Standalone |
+| :---                           |    :---:   |
+| Set default state of Lock keys | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Set%20default%20state%20of%20lock%20keys.ahk) |
+| Show/Hide OS files | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Show%E2%A7%B8Hide%20OS%20files) |
+
+Standalone scripts for each remaining function will be created soon.
+
   * Customise Tray Icon
   * Check & Reload AHK
   * Remap Keys
@@ -47,7 +56,6 @@ CONTENTS
   Add this script to system [startup](https://www.howtogeek.com/208224/how-to-add-a-program-to-startup-in-windows/#step-two-create-a-shortcut-in-the-quot-startup-quot-folder-to-add-a-program-to-startup) and set lock-state automatically after you login.
 
 -----------------
-
 #### **Toggle protected operating system (OS) files**
   Show/hide protected operating system files in Windows File Explorer from the script tray menu, as an alternative to navigating the labyrinth of Explorer's Folder Options. Also, a handy check mark is displayed when OS files are shown.
 
@@ -98,7 +106,6 @@ CONTENTS
   Close any app or window instantly with a keyboard shortcut `Alt + Right Click` without having to navigate to the 'Close' button in the title bar.  
   This simulates the default `Alt + F4` behaviour (in most apps) or `CTRL + W / Q` action (available in some apps).  
 
-  
   Annoyed by unresponsive windows?  
   Instead of performing a long search in Task Manager, kill the unresponsive window immediately with a shortcut `CTRL + ALT + F4`.
 
@@ -184,7 +191,8 @@ CONTENTS
 
 -----------------
 #### **Notification Function**
-  See an example for a custom alert that replaces the depreciated `Progress` command from AHK v1, using `GUI()` in AHK v2. The example allows for personalised notification `text, duration and position`. Alternatively, a similar use of `ToolTip` is also included.
+  Create a personalised alert that replaces the depreciated `Progress` command from AHK v1. The alert is written in AHK v2 and uses `GUI()` function. It allows you to customise the notification's `text, duration and position`. Alternatively, a similar use of `ToolTip` is also included.
+
 </details>
 
 -----------------
