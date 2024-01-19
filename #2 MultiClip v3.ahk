@@ -248,14 +248,14 @@ PasteThis(Result)
 ClipMenuFunc(FuncName) {
 global ClipMenu := Menu()
 ClipMenu.Delete
-ClipMenu.Add("&1  = "   ClipTrimFunc(1)   ,FuncName)
-ClipMenu.Add("&2  = "   ClipTrimFunc(2)   ,FuncName)
-ClipMenu.Add("&3  = "   ClipTrimFunc(3)   ,FuncName)
-ClipMenu.Add("&4  = "   ClipTrimFunc(4)   ,FuncName)
+ClipMenu.Add("&1  = "   ClipTrimFunc(1)   ,FuncName) ; Customise the shortcuts by altering the character after `&` in lines containing `ClipMenu.Add`
+ClipMenu.Add("&2  = "   ClipTrimFunc(2)   ,FuncName) ; Explantation: 
+ClipMenu.Add("&3  = "   ClipTrimFunc(3)   ,FuncName) ; When the menu is displayed, a character preceded by an ampersand (&) can be selected by pressing the corresponding key on the keyboard.
+ClipMenu.Add("&4  = "   ClipTrimFunc(4)   ,FuncName) ; To display a literal ampersand, specify two consecutive ampersands as in this example: "Save && Exit"
 ClipMenu.Add("&5  = "   ClipTrimFunc(5)   ,FuncName)
-ClipMenu.Add("&6  = "   ClipTrimFunc(6)   ,FuncName)
-ClipMenu.Add("&7  = "   ClipTrimFunc(7)   ,FuncName)
-ClipMenu.Add("&8  = "   ClipTrimFunc(8)   ,FuncName)
+ClipMenu.Add("&6  = "   ClipTrimFunc(6)   ,FuncName) ; Shortcuts correspond to the number/alpabet/symbol prior to `=`
+ClipMenu.Add("&7  = "   ClipTrimFunc(7)   ,FuncName) ; Shortcuts are usually underlined, and consist of
+ClipMenu.Add("&8  = "   ClipTrimFunc(8)   ,FuncName) ; numbers from NumPad or number row, and keys from the bottom row of QUERTY keyboard
 ClipMenu.Add("&9  = "   ClipTrimFunc(9)   ,FuncName)
 ClipMenu.Add("&0  = "   ClipTrimFunc(10)  ,FuncName)
 ClipMenu.Add("&z  = "   ClipTrimFunc(11)  ,FuncName)
@@ -264,8 +264,8 @@ ClipMenu.Add("&c  = "   ClipTrimFunc(13)  ,FuncName)
 ClipMenu.Add("&v  = "   ClipTrimFunc(14)  ,FuncName)
 ClipMenu.Add("&b  = "   ClipTrimFunc(15)  ,FuncName)
 ClipMenu.Add("&n  = "   ClipTrimFunc(16)  ,FuncName)
-ClipMenu.Add("&m = "    ClipTrimFunc(17)  ,FuncName)
-ClipMenu.Add("&,    = " ClipTrimFunc(18)  ,FuncName)
+ClipMenu.Add("&m = "    ClipTrimFunc(17)  ,FuncName) ; number of spaces between characters vary in order to improve readability in pop-up menu
+ClipMenu.Add("&,    = " ClipTrimFunc(18)  ,FuncName) ; and can be changed to reflect your system font and display settings
 ClipMenu.Add("&.    = " ClipTrimFunc(19)  ,FuncName)
 ClipMenu.Add("&/   = "  ClipTrimFunc(20)  ,FuncName)
 ClipMenu.Show
