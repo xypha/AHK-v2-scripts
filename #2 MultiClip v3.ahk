@@ -36,18 +36,23 @@ MyNotificationFunc("Loading AHK v2 #2 MultiClip v3", "10000", "1650", "945", "1"
 
 ;  = Intialise ClipArr
 
+; start clipboard array with 20 slots containing alphanumerical text
 global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
-ClipArr.Capacity := 20 ; How many clipboards to maintain in array?
 
+; How many clipboard slots should be saved in array?
+; Limit the number of slots to 20 ; change number to your needs or comment out for infinite slots
+ClipArr.Capacity := 20
+
+; run function whenever clipboard is changed
 OnClipboardChange ClipChanged
 
-; add first clip on start
+; add current clipboard contents to first clipboard slot in ClipArr on start
 startclip := StrReplace(A_Clipboard,"`r`n","`n")            ; Fix for SendInput sending Windows linebreaks
 ClipArr.InsertAt(1, RegExReplace(startclip,"^\s+|\s+$"))    ; remove leading/trailing spaces
 
 ;  = Intialise ClipArr hotstrings
 
-PasteVStrings(20)   ;  = ClipArr Hotstrings Functions
+PasteVStrings(20)   ; see ClipArr Hotstrings Functions
 PasteCStrings(20)
 
 ;  = Customise Tray Icon
@@ -119,7 +124,8 @@ MyNotification.Destroy
 
 ;------------------------------------------------------------------------------
 ;  = ClipArr ClipChanged Function
-; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658 and https://www.autohotkey.com/boards/viewtopic.php?p=326827#p326827
+; Modified from MultiClip v1 https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658
+; and https://www.autohotkey.com/boards/viewtopic.php?p=326827#p326827
 
 ClipChanged(DataType) {
 
