@@ -10,6 +10,7 @@
 
 #Requires AutoHotkey v2.0
 #SingleInstance force
+Persistent                                    ; add for standalone AHK to prevent auto exit 
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
