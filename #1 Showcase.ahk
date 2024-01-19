@@ -39,7 +39,7 @@
 ; #HotIf
 ;  = Firefox
 ;  = Telegram
-;  = Windows Explorer
+;  = Windows File Explorer
 ;    + General
 ;    + Symbols In File Names keys
 ;    + Horizontal Scrolling
@@ -275,7 +275,7 @@ SetScrollLockState "Off"
 #HotIf
 
 ;--------
-; Method #5 - horizontal scrolling for windows explorer
+; Method #5 - horizontal scrolling for windows file explorer
 see the section under ";    + Horizontal Scrolling"
 
 */
@@ -343,18 +343,18 @@ F8::SetTransMenuFunc
 ;  = Recycle Bin shortcut
 
 ^del:: {
-If WinActive("Recycle Bin ahk_class CabinetWClass") ; if explorer is active and recycle bin is in the foreground, empty Bin
+If WinActive("Recycle Bin ahk_class CabinetWClass")         ; if windows file explorer is active and recycle bin is in the foreground, empty Bin
     FileRecycleEmpty
-Else If Winexist("Recycle Bin ahk_class CabinetWClass") ; if explorer is showing recycle bin but is in the background, activate it
+Else If Winexist("Recycle Bin ahk_class CabinetWClass")     ; if explorer is showing recycle bin but is in the background, activate it
     WinActivate
-; Else If Winexist("ahk_class CabinetWClass") { ; if explorer is open but not showing recycle bin, change to Bin (uncomment this section if desired)
+; Else If Winexist("ahk_class CabinetWClass") {             ; if explorer is open but not showing recycle bin, change to Bin (uncomment this section if desired)
 ;     WinActivate
 ;     Sleep 1000
 ;     Send "{F4}"
 ;     Sleep 500
 ;     Send "{raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
 ;     }
-else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"    ; if explorer is not open, then open Bin in explorer
+else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"         ; if explorer is not open, then open Bin in explorer
 }
 
 ;------------------------------------------------------------------------------
@@ -538,7 +538,7 @@ Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
 #HotIf
 
 ;--------
-;  = Windows Explorer
+;  = Windows File Explorer
 
 ;    + General
 
@@ -728,12 +728,14 @@ Else {
 ;  = Windows Refresh Or Run
 
 WindowsRefreshOrRun() {
-if WinExist("ahk_class CabinetWClass") { ; refresh explorer if window exists
+if WinExist("ahk_class CabinetWClass") {
+; if Windows File Explorer window exists
     WinActivate
-    Sleep 500  ; change as per your system performance
-    Send "{F5}" ; refresh
+    Sleep 500       ; change as per your system performance
+    Send "{F5}"     ; refresh
     }
-else { ; open new explorer window if one doesn't already exist ; remove this section if not desired
+else {
+; open new Windows File Explorer window if one doesn't already exist ; remove this section if not desired
     Run 'explorer.exe',,"Max"
     WinWait("ahk_class CabinetWClass",, 10) ; timeout 10 secs
     WinActivate
