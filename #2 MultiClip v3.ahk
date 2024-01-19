@@ -90,11 +90,11 @@ Reload
 
 :?*x:v0+::PasteV(10) ; same as v10+ = j10
 
-:?*x:c1+::Send "{raw}" ClipArr.Get(1) ; Send first entry in raw mode, useful when CTRL + V is disabled such as on banking sites
+:?*x:c++::Send "{raw}" ClipArr.Get(1) ; Send first entry in raw mode, useful when CTRL + V is disabled such as on banking sites
 
 :?*x:c0+::PasteC(10) ; same as c10+
 
-:?*x:c++::ClipMenuFunc(SendClipFunc) ; show ClipMenu
+:?*x:p++::ClipMenuFunc(SendClipFunc) ; show ClipMenu
 
 ;------------------------------------------------------------------------------
 ; User-defined Functions
