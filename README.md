@@ -1,9 +1,9 @@
 # AHK v2 scripts  
 
-[AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts with examples of commonly used commands, shortcut keys and several small functions for various applications, written in AHK v2. 
+[AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts with examples of commonly used commands, shortcut keys and several small functions for various uses, written in AHK v2. 
 
-I'm not a programmer, but I am learning to script in AHK v2, slowly :)  
-Any help would be appreciated. Any suggestions for improving the script code are welcome.  
+I'm not a programmer, but I am learning to script in AHK v2... slowly :)  
+Any help would be appreciated. Suggestions for improving the script code are welcome.  
 
 -----------------
 ### Script No. 0 Template
@@ -15,14 +15,14 @@ Any help would be appreciated. Any suggestions for improving the script code are
 -----------------
 ### Script No. 1 Showcase
 
-All in one script - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)
+  All in one script - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)
 
-| CONTENTS                       | Standalone |
-| :---                           |    :---:   |
-| Set default state of Lock keys | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Set%20default%20state%20of%20lock%20keys.ahk) |
-| Show/Hide OS files | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Show%E2%A7%B8Hide%20OS%20files) |
+  | CONTENTS                       | Standalone |
+  | :---                           |    :---:   |
+  | Set default state of Lock keys | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Set%20default%20state%20of%20lock%20keys.ahk) |
+  | Show/Hide OS files             | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Show%E2%A7%B8Hide%20OS%20files) |
 
-Standalone scripts for each remaining function will be created soon.
+  Standalone scripts for each remaining function will be created soon.
 
   * Customise Tray Icon
   * Check & Reload AHK
