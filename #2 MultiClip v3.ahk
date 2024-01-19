@@ -32,7 +32,7 @@ KeyHistory 500
 ;------------------------------------------------------------------------------
 ; Auto-execute
 
-MyNotificationFunc("Loading AHK v2 #2 MultiClip v3", "10000", "1650", "945", "1") ; 10s
+MyNotificationFunc("Loading AHK v2 #2 MultiClip v3", "10000", "1550", "945", "1") ; 10s
 
 ;  = Intialise ClipArr
 
@@ -80,12 +80,13 @@ if WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, time
 }
 
 ^!Numpad2:: { ; CTRL & ALT & Numpad2 keys pressed together
-MyNotificationFunc("Updating AHK v2 #2 MultiClip v3", "500", "1650", "985", "0") ; use sleep coz reload cancels timers
+MyNotificationFunc("Updating AHK v2 #2 MultiClip v3", "500", "1550", "945", "0") ; use sleep coz reload cancels timers
 Reload
 }
 
 ;------------------------------------------------------------------------------
 ; Hotstrings
+
 ;  = ClipArr keys
 
 :?*x:v0+::PasteV(10) ; same as v10+ = j10
@@ -102,12 +103,11 @@ Reload
 ;  = Notification Function
 
 MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {
-Global MyNotification
-MyNotification := Gui()
+Global MyNotification := Gui()
 MyNotification.Opt("+AlwaysOnTop -Caption +ToolWindow")  ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
-MyNotification.BackColor := "EEEEEE"  ; White background
+MyNotification.BackColor := "EEEEEE"  ; White background, can be any RGB color (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
-MyNotification.Add("Text", "cBlack w181 Left", mytext)  ; black text
+MyNotification.Add("Text", "cBlack w230 Left", mytext)  ; black text
 MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
 if timer = 1
