@@ -7,7 +7,8 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 
 -----------------
 ### Script No. 0 Template
-[Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Template.ahk) to template script.
+  [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Template.ahk) to template script.  
+  <sub>Last updated (yyyy.mm.dd) - 2024.01.19</sub>
 
 #### **Notification Function**
   Create a personalised alert that replaces the depreciated `Progress` command from AHK v1. The alert is written in AHK v2 and uses `GUI()` function. It allows you to customise the notification's `text, duration and position`. 
@@ -15,12 +16,13 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 -----------------
 ### Script No. 1 Showcase
 
-  All in one script - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)
+  All in one script - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)  
+  <sub>Last updated - 2024.01.19</sub>
 
-  | CONTENTS                       | Standalone |
-  | :---                           |    :---:   |
-  | Set default state of Lock keys | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Set%20default%20state%20of%20lock%20keys.ahk) |
-  | Show/Hide OS files             | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Show%E2%A7%B8Hide%20OS%20files) |
+  | CONTENTS                       | Standalone | Last Updated |
+  | :---                           |    :---:   |     ---:     |
+  | Set default state of Lock keys | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Set%20default%20state%20of%20lock%20keys.ahk) | 2024.01.19 |
+  | Show/Hide OS files             | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Show%E2%A7%B8Hide%20OS%20files) | 2024.01.19 |
 
   Standalone scripts for each remaining function will be created soon.
 
@@ -51,15 +53,15 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 <details>
 <summary>DESCRIPTIONS</summary>
 
-#### **Set default state of lock keys**
+#### **Set default state of Lock keys**
   Set the state of `CapsLock`, `NumLock` and `ScrollLock` to On or Off upon script start.  
   Add this script to system [startup](https://www.howtogeek.com/208224/how-to-add-a-program-to-startup-in-windows/#step-two-create-a-shortcut-in-the-quot-startup-quot-folder-to-add-a-program-to-startup) and set lock-state automatically after you login.
 
 -----------------
-#### **Toggle protected operating system (OS) files**
+#### **Show/Hide OS files**
   Show/hide protected operating system files in Windows File Explorer from the script tray menu, as an alternative to navigating the labyrinth of Explorer's Folder Options. Also, a handy check mark is displayed when OS files are shown.
 
-  ![Toggle OS files](https://github.com/xypha/AHK-v2-scripts/assets/12472214/5d409108-ab10-4877-8be5-4c158da140b8)
+  ![Show/Hide OS files](https://github.com/xypha/AHK-v2-scripts/assets/12472214/5d409108-ab10-4877-8be5-4c158da140b8)
 
 -----------------
 #### **Customise Tray Icon**
@@ -196,9 +198,10 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 </details>
 
 -----------------
-### Script No. 2 MultiClip - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%232%20MultiClip%20v3.ahk)
+### Script No. 2 MultiClip
+[Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%232%20MultiClip%20v3.ahk) to script.
 
-This script was created as a rudimentary alternative to PhraseExpress's [clipboard management](https://www.phraseexpress.com/doc/features/clipboard-manager/) function with inspiration from v1 scripts - [ClipStep](https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/) and GeekDrop's [Convert Case Cycle](https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes).  
+This script was created as a rudimentary alternative to PhraseExpress's [clipboard management](https://www.phraseexpress.com/doc/features/clipboard-manager/) function with inspiration from several v1 scripts, including [ClipStep](https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/) and GeekDrop's [Convert Case Cycle](https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes).  
 
 The script does the following -  
  * `ClipArr` contains 20 slots by default, but can be customised to any number - from 1 to infinity.
@@ -206,10 +209,13 @@ The script does the following -
  * Hitting `^c` or `^x` a second time moves previously saved text to the next slot and copies the newly selected text to the first slot in `ClipArr`.
  * This behaviour continues until all 20 slots are filled. When new text is added to `ClipArr` on the 21st occasion or later, the oldest copied text (now in 20th slot) is lost.
  * To view text saved in any of the slots, type `p++` to bring up a pop-up menu. Use any one of the shortcuts[^2] to paste text from corresponding slot.
+ * Paste text directly from a slot using hotstring `v{slot-number}+`. For example, from the test array[^3], typing `v2+` pastes `b2` and `v20+` pastes `t20`.
+ * Paste text from multiple slots using hotstring `c{slot-numbers}+`. For example, from the test array, typing `c2+` pastes text from slot 1 and 2 `a1-b2` and `c10+` pastes text from slot 1 to 10 `a1-b2-c3-d4-e5-f6-g7-h8-i9-j10`.
 
 [^1]: Text includes anything from the clipboard that can be expressed as text, such as filenames (with full path) when files/folders are copied from a Windows File Explorer window via `CTRL + C` or `CTRL + X`. See Script #1 Showcase for examples that show you how to copy full path with or without file extension and path.  
 [^2]: Shortcuts correspond to the number/alpabet/symbol prior to `=`. Shortcuts are usually underlined, and consist of numbers from NumPad or number row, and keys from the bottom row of QUERTY keyboard. Customise the shortcuts by altering the character _after_ `&` in lines containing `ClipMenu.Add`. 
+[^3]: Test array with 20 slots containing alphanumerical text `ClipArr := ["a1", "b2", "c3", "d4", "e5", "f6", "g7", "h8", "i9", "j10", "k11", "l12", "m13", "n14", "o15", "p16", "q17", "r18", "s19", "t20"]`
 
-![MultiClip](https://github.com/xypha/AHK-v2-scripts/assets/12472214/32329607-bf4e-436b-b115-ce1919ab6bc1)
+![MultiClip pop-up menu `p++` with test array](https://github.com/xypha/AHK-v2-scripts/assets/12472214/32329607-bf4e-436b-b115-ce1919ab6bc1)
 
 An earlier version of MultiClip (AHK v1 script) can be found [here](https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658).
