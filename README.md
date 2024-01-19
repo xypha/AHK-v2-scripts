@@ -9,7 +9,7 @@ Standalone scripts for each function will be created soon.
 
 -----------------
 
-### Script #1 Showcase - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)
+### Script No. 1 Showcase - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)
 
 CONTENTS
  
@@ -188,16 +188,20 @@ CONTENTS
 </details>
 
 -----------------
-### Script #2 MultiClip - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%232%20MultiClip%20v3.ahk)
+### Script No. 2 MultiClip - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%232%20MultiClip%20v3.ahk)
 
-This script was created as a rudimentary alternative to PhraseExpress's clipboard management function after altering the [ClipStep](https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/) script with inspiration from GeekDrop's [Convert Case Cycle](https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes).  
+This script was created as a rudimentary alternative to PhraseExpress's [clipboard management](https://www.phraseexpress.com/doc/features/clipboard-manager/) function with inspiration from v1 scripts - [ClipStep](https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/) and GeekDrop's [Convert Case Cycle](https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes).  
+
 The script does the following -  
  * `ClipArr` contains 20 slots by default, but can be customised to any number - from 1 to infinity.
  * Hitting `^c` (Copy / `CTRL + C`) or `^x` (Cut / `CTRL + X`) triggers `OnClipboardChange` and saves text[^1] to a slot in clipboard array (`ClipArr`).
  * Hitting `^c` or `^x` a second time moves previously saved text to the next slot and copies the newly selected text to the first slot in `ClipArr`.
  * This behaviour continues until all 20 slots are filled. When new text is added to `ClipArr` on the 21st occasion or later, the oldest copied text (now in 20th slot) is lost.
- * To view text saved in any of the slots, type `c++` to bring up a pop-up menu. Use one of the shortcuts (highlighted by underline) to paste text from corresponding slot.
+ * To view text saved in any of the slots, type `p++` to bring up a pop-up menu. Use any one of the shortcuts[^2] to paste text from corresponding slot.
 
-[^1]: Text includes anything from the clipboard that can be expressed as text, such as filenames (with full path) when files/folders are copied from a Windows File Explorer window via `CTRL + C` or `CTRL + X`. See Script #1 Showcase for examples that show you how to copy full path with or without file extension and path.
+[^1]: Text includes anything from the clipboard that can be expressed as text, such as filenames (with full path) when files/folders are copied from a Windows File Explorer window via `CTRL + C` or `CTRL + X`. See Script #1 Showcase for examples that show you how to copy full path with or without file extension and path.  
+[^2]: Shortcuts correspond to the number/alpabet/symbol prior to `=`. Shortcuts are usually underlined, and consist of numbers from NumPad or number row, and keys from the bottom row of QUERTY keyboard. Customise the shortcuts by altering the character _after_ `&` in lines containing `ClipMenu.Add`. 
 
-An earlier version of MultiClip (AHK v1 script) can be found [here](https://www.autohotkey.com/boards/viewtopic.php?p=332658&sid=72d1fa89ce5797e59c17568838c5ca7e#p332658).
+![MultiClip](https://github.com/xypha/AHK-v2-scripts/assets/12472214/32329607-bf4e-436b-b115-ce1919ab6bc1)
+
+An earlier version of MultiClip (AHK v1 script) can be found [here](https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658).
