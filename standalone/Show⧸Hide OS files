@@ -15,6 +15,7 @@
 #SingleInstance force
 #WinActivateForce
 KeyHistory 500
+Persistent                                    ; added for standalone AHK to prevent auto exit 
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
@@ -23,7 +24,6 @@ MyNotificationFunc("Loading - Show/Hide OS files", "10000", "1650", "985", "1") 
 
 ;  = Show/Hide OS files
 
-Persistent                                    ; added for standalone AHK to prevent auto exit 
 A_TrayMenu.Delete                             ; delete standard menu
 A_TrayMenu.Add "&Toggle OS files", ToggleOS   ; User-defined Function
 A_TrayMenu.Add                                ; add a separator
