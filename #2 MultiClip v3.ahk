@@ -1,4 +1,4 @@
-; /* AHK v2 #2 Multiclip v3 - CONTENTS */
+; /* AHK v2 #2 MultiClip v3 - CONTENTS */
 ; Settings
 ; Auto-execute
 ;  = Intialise ClipArr
@@ -32,7 +32,7 @@ KeyHistory 500
 ;------------------------------------------------------------------------------
 ; Auto-execute
 
-MyNotificationFunc("Loading AHK v2 #2 Multiclip v3", "10000", "1650", "945", "1") ; 10s
+MyNotificationFunc("Loading AHK v2 #2 MultiClip v3", "10000", "1650", "945", "1") ; 10s
 
 ;  = Intialise ClipArr
 
@@ -75,7 +75,7 @@ if WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, time
 }
 
 ^!Numpad2:: { ; CTRL & ALT & Numpad2 keys pressed together
-MyNotificationFunc("Updating AHK v2 #2 Multiclip v3", "500", "1650", "985", "0") ; use sleep coz reload cancels timers
+MyNotificationFunc("Updating AHK v2 #2 MultiClip v3", "500", "1650", "985", "0") ; use sleep coz reload cancels timers
 Reload
 }
 
