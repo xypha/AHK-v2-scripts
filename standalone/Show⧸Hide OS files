@@ -15,7 +15,7 @@
 #SingleInstance force
 #WinActivateForce
 KeyHistory 500
-Persistent                                    ; added for standalone AHK to prevent auto exit 
+Persistent                                    ; uncomment for standalone AHK to prevent auto exit
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
@@ -48,9 +48,9 @@ MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
 MyNotification.Add("Text", "cBlack w181 Left", mytext)  ; black text
 MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
-if timer = 1
+If timer = 1
     SetTimer EndMyNotif, myduration * -1
-if timer = 0 {
+If timer = 0 {
     Sleep myduration
     EndMyNotif
     }
