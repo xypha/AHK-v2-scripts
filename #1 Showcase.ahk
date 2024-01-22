@@ -66,7 +66,7 @@
 #SingleInstance force
 #WinActivateForce
 KeyHistory 500
-; Persistent                                    ; add for standalone AHK to prevent auto exit 
+; Persistent                                    ; add for standalone AHK to prevent auto exit
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
@@ -76,10 +76,11 @@ KeyHistory 500
 MyNotificationFunc("Loading AHK v2 #1 Showcase", "10000", "1550", "985", "1") ; use timer for 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution
 
 ;  = Set default state of Lock keys
+; turn on/off upon startup (one-time)
 
-SetCapsLockState "Off"   ; CapsLock     is always off
-SetNumLockState "On"     ; NumLock      is always ON
-SetScrollLockState "Off" ; ScrollLock   is always off
+SetCapsLockState "Off"   ; CapsLock     is off - Use SetCapsLockState "AlwaysOff" to force the key to stay off permanently
+SetNumLockState "On"     ; NumLock      is ON
+SetScrollLockState "Off" ; ScrollLock   is off
 
 ;  = Show/Hide OS files
 
@@ -99,13 +100,13 @@ If FileExist(I_Icon)
 
 ;  = Horizontal Scrolling Group
 
-GroupAdd "HorizontalScroll1", "ahk_class ApplicationFrameWindow"       ; Modern UWP apps like calc and screen snip
-GroupAdd "HorizontalScroll1", "ahk_class MozillaWindowClass"           ; Firefox
-GroupAdd "HorizontalScroll1", "ahk_class SALFRAME"                     ; LibreOffice
+GroupAdd "HorizontalScroll1"    , "ahk_class ApplicationFrameWindow"    ; Modern UWP apps like calc and screen snip
+GroupAdd "HorizontalScroll1"    , "ahk_class MozillaWindowClass"        ; Firefox
+GroupAdd "HorizontalScroll1"    , "ahk_class SALFRAME"                  ; LibreOffice
 
 ;  = Capitalise first letter exclusion Group
 
-GroupAdd "CapitaliseFirstLetter", "ahk_class #32770"        ; Save as dialogue
+GroupAdd "CapitaliseFirstLetter", "ahk_class #32770"                    ; Save as dialogue
 
 ;  = End auto-execute
 
@@ -143,13 +144,16 @@ Reload
 ; comment out the ones that don't apply to you
 $ScrollLock::               ; disable Scroll Lock ; $ prefix forces keyboard hook
 $NumLock::                  ; disable Num Lock
+
 +NumpadDot::                ; Numpad delete (Modifier key - Shift)
 NumpadDel::
+
 Insert::                    ; Insert mode
 +Insert::                   ; Shift + Insert
 #Insert::                   ; Win + Insert
 +Numpad0::                  ; Numpad Insert
-NumpadIns:: {
+NumpadIns::
+{ ; do nothing
 }
 
 ; Use Alt + Insert to toggle the 'Insert mode'
@@ -159,7 +163,7 @@ NumpadIns:: {
 
 LWin & Tab::AltTab ; Left WIN key works as left ALT key - disables taskview
 
-RAlt::!space       ; ALT + space brings up window menu
+RAlt::!Space       ; ALT + space brings up window menu
 
 ^RCtrl::MButton    ; press Left & Right CTRL button to simulate mouse Middle Click
 
@@ -212,7 +216,7 @@ If (GetKeyState("Capslock", "T")) {
 ; add additional 'Loop' command to any method to increase the speed of scrolling. For example, in method 1
 
 +WheelUp:: {
-Loop 3         ; increase the number for faster scrolling ; if number is omitted, causes infinite loop (which is BAD)
+Loop 3         ; increase the number for faster scrolling ; If number is omitted, causes infinite loop (which is BAD)
     SendMessage 0x0114, 0, 0, ControlGetFocus("A")
 }
 
@@ -225,7 +229,7 @@ Loop 3
 
 ;--------
 ; Method #2 - simulate horizontal mouse wheel action
-; test if method #2 works using Win + Shift + Wheel Up/Down keys (3-key combo),
+; test whether method #2 works using Win + Shift + Wheel Up/Down keys (3-key combo),
 ; then add window title/class to group #1 in auto-execute section
 ; to enable simpler Shift + Wheel Up/Down (2-key combo) via #HotIf command
 ; source: https://www.AutoHotkey.com/boards/viewtopic.php?t=76415
@@ -304,7 +308,7 @@ Alt & RButton:: { ; ALT + right mouse button ; attempt to close window
 MouseGetPos ,, &id
 winClass := WinGetClass("ahk_id " id)
 If (winClass != "Shell_TrayWnd")   ; exclude windows taskbar
-; if (winClass != "Shell_TrayWnd" or winClass != "insert yourapp classname") ; exclude other apps using "or"
+; If (winClass != "Shell_TrayWnd" or winClass != "insert yourapp classname") ; exclude other apps using "or"
     WinClose("ahk_id " id)  ; sends a WM_CLOSE message to the target window
     ; PostMessage 0x0112, 0xF060,,, "ahk_id " id ; alternate method - same as pressing Alt+F4 or clicking the window's close button in its title bar:
 }
@@ -321,18 +325,18 @@ WinKill ("ahk_id " id)
 
 ^+WheelUp:: { ; increases Trans value, makes the window more opaque
 Trans := GetTrans()
-if(Trans < 255)
+If(Trans < 255)
     Trans := Trans + 20 ; add 20, change for slower/faster transition
-if(Trans >= 255)
+If(Trans >= 255)
     Trans := "Off"
 SetTrans(Trans)
 }
 
 ^+WheelDown:: { ; decreases Trans value, makes the window more transparent
 Trans := GetTrans()
-if(Trans > 30)
+If(Trans > 30)
     Trans := Trans - 20 ; subtract 20, change for slower/faster transition
-if(Trans < 21)
+If(Trans < 21)
     Trans := 1  ; never set to zero, causes ERROR
 SetTrans(Trans)
 }
@@ -343,26 +347,38 @@ F8::SetTransMenuFunc
 ;  = Recycle Bin shortcut
 
 ^del:: {
-If WinActive("Recycle Bin ahk_class CabinetWClass")         ; if windows file explorer is active and recycle bin is in the foreground, empty Bin
+If WinActive("Recycle Bin ahk_class CabinetWClass")         ; If windows file explorer is active and recycle bin is in the foreground, empty Bin
     FileRecycleEmpty
-Else If Winexist("Recycle Bin ahk_class CabinetWClass")     ; if explorer is showing recycle bin but is in the background, activate it
+Else If WinExist("Recycle Bin ahk_class CabinetWClass")     ; If explorer is showing recycle bin but is in the background, activate it
     WinActivate
-; Else If Winexist("ahk_class CabinetWClass") {             ; if explorer is open but not showing recycle bin, change to Bin (uncomment this section if desired)
-;     WinActivate
-;     Sleep 1000
-;     Send "{F4}"
-;     Sleep 500
-;     Send "{raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
-;     }
-else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"         ; if explorer is not open, then open Bin in explorer
+/* If explorer is open but not showing recycle bin, change to Bin (uncomment this section If desired)
+Else If WinExist("ahk_class CabinetWClass") {
+    WinActivate
+    If WinWaitActive(, , 2) { ; = Sleep 1000, but sends next command as soon as activated, instead of waiting for the full 1000ms period
+        Send "{F4}"
+        While (ControlGetClassNN(ControlGetFocus("A")) != "Microsoft.UI.Content.DesktopChildSiteBridge1") { ; = Sleep 500 ; sleep until focus is on address bar, max 500ms
+            Sleep 100
+            If (A_Index > 5) {
+                Tool_TipFunc(A_ThisHotkey ":: Failed to focus address bar", -1000) ; 1s
+                exit
+                }
+            }
+        Send "{raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
+        }
+    }
+*/
+Else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"         ; If explorer is not open, then open Bin in explorer
 }
 
 ;------------------------------------------------------------------------------
 ;  = Display Off shortcut
 ; modified from AHK docs
 
-^esc:: {
-Sleep 1000  ; Give user a chance to release keys (in case their release would wake up the monitor again)
+^Esc:: {
+; Sleep 1000  ; Give user a chance to release keys (in case their release would wake up the monitor again)
+KeyWait "Esc", "T1"     ; use KeyWait instead of sleep for faster execution
+KeyWait "Control", "T1"
+Sleep 100
 SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
 }
 
@@ -418,11 +434,11 @@ A_Clipboard := clipSave ; restore Clipboard contents
 Title_When_On_Top := "! "       ; change title "! " as required
 t := WinGetTitle("A")
 ExStyle := WinGetExStyle(t)
-if (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
+If (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
     WinSetAlwaysOnTop 0, t      ; Turn OFF and remove Title_When_On_Top
     WinSetTitle (RegexReplace(t, Title_When_On_Top)), "A"
     }
-else {
+Else {
     WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
     WinSetTitle Title_When_On_Top t, t
     }
@@ -517,9 +533,9 @@ Line2 "dvvbvvoe df"
 #HotIf WinActive("ahk_class MozillaWindowClass") ; main window ; excludes other dialogue boxes like "Save As" from ahk_exe firefox.exe
 
 ^+o:: {      ; CTRL + Shift + O to open library / bookmark manager
-if WinActive(" — Mozilla Firefox") ; if not new tab, then open new one
+If WinActive(" — Mozilla Firefox") ; If not new tab, then open new one
     Send "^t"
-else Send "^l"  ; if new tab, focus address bar
+Else Send "^l"  ; If new tab, focus address bar
 Sleep 500
 Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
 }
@@ -637,21 +653,21 @@ A_Clipboard := RegExReplace(files, "\.[\w]+$")          ; remove last ext
 cfc1 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
 cfc1.Start
 cfc1.Wait
-if (cfc1.EndReason = "Match") {
-    if (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; if ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
+If (cfc1.EndReason = "Match") {
+    If (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
         Send "{Backspace} +" cfc1.Input
-    else {
-        Send "{Backspace}+" cfc1.Input ; if dot or numdot is the trigger, don't add space, coz typing website address is problematic
+    Else {
+        Send "{Backspace}+" cfc1.Input ; If dot or numdot is the trigger, don't add space, coz typing website address is problematic
         ; Soundbeep, 1500, 50
         ; SoundPlay % "C:\Windows\Media\Windows Information Bar.wav"
         }
     exit
     }
-if cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
+If cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
     cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
     cfc2.Start
     cfc2.Wait
-    if (cfc2.EndReason = "Match")
+    If (cfc2.EndReason = "Match")
         Send "{Backspace}+" cfc2.Input
     }
 }
@@ -675,9 +691,9 @@ MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
 MyNotification.Add("Text", "cBlack w230 Left", mytext)  ; black text
 MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
-if timer = 1
+If timer = 1
     SetTimer EndMyNotif, myduration * -1
-if timer = 0 {
+If timer = 0 {
     Sleep myduration
     EndMyNotif
     }
@@ -708,8 +724,10 @@ Else { ; disable if enabled
 }
 
 CheckRegWrite(key) { ; check if RegWrite was success
-if key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+If key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
     MsgBox "ToggleOS Failed", , "262144" ; 262144 = Always-on-top
+    ; Tool_TipFunc("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
+    ; exit
 }
 
 ToggleOSCheck() { ; tray tick mark
@@ -727,14 +745,12 @@ Else {
 ;  = Windows Refresh Or Run
 
 WindowsRefreshOrRun() {
-if WinExist("ahk_class CabinetWClass") {
-; if Windows File Explorer window exists
+If WinExist("ahk_class CabinetWClass") { ; If Windows File Explorer window exists
     WinActivate
     Sleep 500       ; change as per your system performance
     Send "{F5}"     ; refresh
     }
-else {
-; open new Windows File Explorer window if one doesn't already exist ; remove this section if not desired
+Else { ; open new Windows File Explorer window if one doesn't already exist ; remove this section if not desired
     Run 'explorer.exe',,"Max"
     WinWait("ahk_class CabinetWClass",, 10) ; timeout 10 secs
     WinActivate
@@ -748,7 +764,7 @@ GetTrans() {
 ToolTip ; disable previous tooltip if any
 MouseGetPos ,, &WinID
 Trans := WinGetTransparent("ahk_id " WinID)
-if(!Trans)
+If(!Trans)
     Trans := 255
 return Trans
 }
@@ -817,9 +833,9 @@ ConvertInvert(*) {
 CallClipboard(2)
 inverted := ""
 Loop Parse A_Clipboard {     ; Code Credit #2
-    if (StrLower(A_LoopField) == A_LoopField)  ; * Code Credit #3
+    If (StrLower(A_LoopField) == A_LoopField)  ; * Code Credit #3
         inverted .= StrUpper(A_LoopField)      ; *
-    else inverted .= StrLower(A_LoopField)     ; *
+    Else inverted .= StrLower(A_LoopField)     ; *
     }
 CaseConvert(inverted)
 }
@@ -894,23 +910,23 @@ WrapTextMenu.Show
 WrapTextFunc(item, position, WrapTextMenu) {
 If position = 1
     EncText("'","'")        ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
-Else if position = 2
+Else If position = 2
     EncText('`"','`"')      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
-Else if position = 3
+Else If position = 3
     EncText("(",")")        ; enclose in round breackets ()
-Else if position = 4
+Else If position = 4
     EncText("[","]")        ; enclose in square brackets []
-Else if position = 5
+Else If position = 5
     EncText("{","}")        ; enclose in flower brackets {}
-Else if position = 6
+Else If position = 6
     EncText("``","``")      ; enclose in accent/backtick ``
-Else if position = 7
+Else If position = 7
     EncText("%","%")        ; enclose in percent sign %%
-Else if position = 8
+Else If position = 8
     EncText("‘","’")        ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
-Else if position = 9
+Else If position = 9
     EncText("“","”")        ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
-Else if position = 10
+Else If position = 10
     EncText("","")          ; remove above quotes
 }
 
@@ -926,12 +942,12 @@ TextString := q TextString p
 TextString := StrReplace(TextString, "`n" p, p)
 Len1 := Strlen(TextString)
 
-; if you regularly include leading/trailing spaces within quotes, comment out above RegEx and below if statements
-If (RegExMatch(TextStringInitial, "^\s+")) {   ; if initial string has Leading space
+; If you regularly include leading/trailing spaces within quotes, comment out above RegEx and below If statements
+If (RegExMatch(TextStringInitial, "^\s+")) {   ; If initial string has Leading space
     TextString := " " TextString               ; add Leading space to string
     Len1++                                     ; add 1 to len
     }
-If (RegExMatch(TextStringInitial, "\s+$")) {   ; if initial string has Trailing space
+If (RegExMatch(TextStringInitial, "\s+$")) {   ; If initial string has Trailing space
     TextString .= " "                          ; append trailing space to string
     Len1++                                     ; add 1 to len
     }
@@ -964,25 +980,25 @@ ControlPanelMenu.Show
 }
 
 ControlPanelFunc(item, position, ControlPanelMenu) {
-if position = 1
+If position = 1
     ComObject("shell.application").ControlPanelItem("control")      ; Control Panel
-if position = 2
+If position = 2
     run 'explorer.exe "ms-settings:appsfeatures"'                   ; Installed Apps ; Modern Add/Remove Programs
-if position = 3
+If position = 3
     ComObject("shell.application").ControlPanelItem("appwiz.cpl")   ; Add/Remove Programs ; Legacy Control Panel
-if position = 4
+If position = 4
     ComObject("shell.application").ControlPanelItem("dfrgui")       ; Defragment Interface
-if position = 5
+If position = 5
     ComObject("shell.application").ControlPanelItem("services.msc") ; Services
-if position = 6
+If position = 6
     ComObject("shell.application").ControlPanelItem("sndvol")       ; Sound Mixer (Legacy)
-if position = 7
+If position = 7
     ComObject("shell.application").ControlPanelItem("regedit")      ; Registry Editor
-if position = 8
+If position = 8
     ComObject("shell.application").ControlPanelItem("resmon.exe")   ; Resource Monitor
-if position = 9
+If position = 9
     run 'explorer.exe "ms-settings:windowsupdate"'                  ; Windows Update
-if position = 10
+If position = 10
     ComObject("shell.application").ControlPanelItem("winver")       ; Windows version
 }
 
