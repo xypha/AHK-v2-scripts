@@ -10,7 +10,7 @@
 
 #Requires AutoHotkey v2.0
 #SingleInstance force
-Persistent                                    ; add for standalone AHK to prevent auto exit 
+Persistent                                    ; uncomment for standalone AHK to prevent auto exit
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
@@ -18,10 +18,11 @@ Persistent                                    ; add for standalone AHK to preven
 MyNotificationFunc("Loading - Set default state of Lock keys", "10000", "1550", "985", "1") ; 10s
 
 ;  = Set default state of Lock keys
+; turn on/off upon startup (one-time)
 
-SetCapsLockState "Off"
-SetNumLockState "On"
-SetScrollLockState "Off"
+SetCapsLockState "Off"   ; CapsLock     is off - Use SetCapsLockState "AlwaysOff" to force the key to stay off permanently
+SetNumLockState "On"     ; NumLock      is ON
+SetScrollLockState "Off" ; ScrollLock   is off
 
 ;  = End auto-execute
 
@@ -41,9 +42,9 @@ MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
 MyNotification.Add("Text", "cBlack w230 Left", mytext)  ; black text
 MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
-if timer = 1
+If timer = 1
     SetTimer EndMyNotif, myduration * -1
-if timer = 0 {
+If timer = 0 {
     Sleep myduration
     EndMyNotif
     }
