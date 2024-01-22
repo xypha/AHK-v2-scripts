@@ -76,12 +76,11 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 
 -----------------
 #### **Remap Keys**
-  This section of the script includes methods to disable hardware keys that you don't use or trigger accidentally too often.  
-  See examples of methods that allow you to customise a key's function to your needs -  
-  * Minimise a window instantly by pressing `ALT + M`, instead of having to move your mouse cursor to the "Minimise" button in the title bar.
-  * Disable the `Insert` key from accidentally triggering when you are trying to press adjacent keys like `Delete` or `Pause/Break`.
-  * If you don't like **Task view**, remap its shortcut `Win + Tab` to invoke the (arguably faster) traditional `AltTab` menu.
-  * Working on a laptop and missing the `Page Up/Down`, `Home` and `End` buttons? Remap the `RCtrl + Up/Down/Left/Right` button combos to regain the function of missing keys.
+  See several methods to disable hardware keys that you don't use or trigger accidentally too often, and/or repurpose their function to your needs -  
+  * Disable the `Insert` key from accidentally triggering when you are trying to press adjacent keys like `Delete` or `Pause/Break`.  
+  * If you don't like **Task view**, remap its shortcut `Win + Tab` to invoke the (arguably faster) traditional `AltTab` menu.  
+  * Are you using a laptop and miss the `Page Up/Down`, `Home` and `End` buttons? Remap the `RCtrl + Up/Down/Left/Right` button combos to regain the function of the missing keys.  
+  * Minimise a window instantly by pressing `ALT + M`, instead of having to move your mouse cursor to the "Minimise" button in the title bar.  
 
 -----------------
 #### **Customise CapsLock**
@@ -95,7 +94,7 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 -----------------
 #### **Horizontal Scrolling**
   Whether you have a mouse with or without a [tilt wheel](https://en.wikipedia.org/wiki/Scroll_wheel#Functionality), some applications refuse to scroll horizontally.
-  Here are four methods that simulate tilt wheel actions and force even the most recalcitrant windows to scroll sideways.
+  Here are five methods that simulate tilt wheel actions and force even the most recalcitrant windows to scroll sideways.
 
 -----------------
 #### **Move Mouse Pointer by pixel**
