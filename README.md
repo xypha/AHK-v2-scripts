@@ -17,7 +17,7 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 ### Script No. 1 Showcase
 
   All in one script - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)  
-  <sub>Last updated - 2024.01.22</sub>
+  <sub>Last updated - 2024.01.23</sub>
 
 #### CONTENTS
 
@@ -43,6 +43,7 @@ Any help would be appreciated. Suggestions for improving the script code are wel
   * Wrap Text In Quotes or Symbols
   * Exchange adjacent letters
   * Toggle Window On Top
+  * Process Priority
   * Use cases for Hotstrings
   * Use cases for #HotIf
     * Firefox
@@ -163,6 +164,12 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 -----------------
 #### **Toggle Window On Top**
   Keyboard shortcut `ALT + T` enables you to keep a specified window on top of all other windows (except other always-on-top windows) and toggle it back to normal.
+
+-----------------
+#### **Process Priority**
+  Hit `Win + Z` to select and change the prioty level of a process.
+
+  ![Set Priority](https://github.com/xypha/AHK-v2-scripts/assets/12472214/2d0fd2cc-8c5a-4c43-9afc-599ac5aebd56)
 
 -----------------
 #### **Use cases for Hotstrings**
