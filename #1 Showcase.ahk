@@ -29,6 +29,7 @@
 ;  = Wrap Text In Quotes or Symbols keys
 ;  = Exchange adjacent letters
 ;  = Toggle Window On Top
+;  = Process Priority
 ; Hotstrings
 ;  = Find & Replace in Clipboard
 ;    + Find & Replace dot with space
@@ -66,29 +67,29 @@
 #SingleInstance force
 #WinActivateForce
 KeyHistory 500
-; Persistent                                    ; add for standalone AHK to prevent auto exit
+; Persistent                                    ; uncomment for standalone AHK to prevent auto-exit
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
-; always at the top of your script
+; This section should always be at the top of your script
 
-; Show notification with parameters - text, duration in milliseconds, position on screen xAxis, yAxis, use timeout timer (1) or use sleep (0)
-MyNotificationFunc("Loading AHK v2 #1 Showcase", "10000", "1550", "985", "1") ; use timer for 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution
+; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
+MyNotificationFunc("Loading AHK v2 #1 Showcase", "10000", "1550", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Set default state of Lock keys
-; turn on/off upon startup (one-time)
+; Turn on/off upon startup (one-time)
 
-SetCapsLockState "Off"   ; CapsLock     is off - Use SetCapsLockState "AlwaysOff" to force the key to stay off permanently
-SetNumLockState "On"     ; NumLock      is ON
-SetScrollLockState "Off" ; ScrollLock   is off
+SetCapsLockState "Off"   ; CapsLock   is off - Use SetCapsLockState "AlwaysOff" to force the key to stay off permanently
+SetNumLockState "On"     ; NumLock    is ON
+SetScrollLockState "Off" ; ScrollLock is off
 
 ;  = Show/Hide OS files
 
-A_TrayMenu.Delete                             ; delete standard menu
+A_TrayMenu.Delete                             ; Delete standard menu
 A_TrayMenu.Add "&Toggle OS files", ToggleOS   ; User-defined Function
-A_TrayMenu.Add                                ; add a separator
-A_TrayMenu.AddStandard                        ; restore standard menu
-ToggleOSCheck                                 ; check value of ShowSuperHidden_Status
+A_TrayMenu.Add                                ; Add a separator
+A_TrayMenu.AddStandard                        ; Restore standard menu
+ToggleOSCheck                                 ; Check registry value of ShowSuperHidden_Status
 
 ;  = Customise Tray Icon
 
@@ -110,8 +111,8 @@ GroupAdd "CapitaliseFirstLetter", "ahk_class #32770"                    ; Save a
 
 ;  = End auto-execute
 
-SetTimer EndMyNotif, -1000 ; reset notification timer to 1s after code in auto-execute section has finished running
-Return ; ends auto-execute
+SetTimer EndMyNotif, -1000 ; Reset notification timer to 1s after code in auto-execute section has finished running
+Return ; Ends auto-execute
 
 ; Below code can be placed anywhere in your script
 
@@ -127,7 +128,7 @@ Return ; ends auto-execute
 
 !Numpad1:: { ; CTRL & Numpad1 keys pressed together
 ListLines
-if WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, timeout 3s
+If WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, timeout 3s
     WinMaximize
 }
 
@@ -177,8 +178,8 @@ RCtrl & Right::Send "{End}"
 ;------------------------------------------------------------------------------
 ;  = Customise CapsLock
 
-^CapsLock::^a        ; select all
-<#CapsLock::AltTab   ; switch windows with Right Win + CapsLock
+^CapsLock::^a        ; Select all
+<#CapsLock::AltTab   ; Switch windows with Right Win + CapsLock
 
 +CapsLock:: {
 SetCapsLockState "On"
@@ -187,12 +188,12 @@ SetTimer CapsWait, -100 ; 100ms ; add settimer to move KeyWait to new thread and
 }
 
 CapsWait() { ; runs in new thread and allows for quick toggling of CapsLock-state with +CapsLock / CapsLock / ESC keys in current thread
-KeyWait "Esc", "d t10" ; hit esc to skip 10s timeout ; increase timeout duration to keep CapsLock ON for longer
-SetCapsLockState "Off" ; and disables CapsLock immediately
-MyNotification.Destroy ; and removes notification
+KeyWait "Esc", "d t10" ; hit ESC key to skip 10s timeout ; increase timeout duration to keep CapsLock ON for longer
+SetCapsLockState "Off" ; Disables CapsLock immediately
+MyNotification.Destroy ; and remove notification
 }
 
-CapsLock:: { ; turn off CapsLock immediately, if on
+CapsLock:: { ; Turn off CapsLock immediately, if on
 If (GetKeyState("Capslock", "T")) {
     SetCapsLockState "Off"
     MyNotification.Destroy
@@ -211,12 +212,13 @@ If (GetKeyState("Capslock", "T")) {
 +WheelUp::SendMessage 0x0114, 0, 0, ControlGetFocus("A")        ; scroll left - 0x114 is WM_HSCROLL, 0 is SB_LINELEFT
 +WheelDown::SendMessage 0x0114, 1, 0, ControlGetFocus("A")      ; scroll right - 1 is SB_LINERIGHT ; same as loop 1
 
-/* (disabled by comment)
+/* (disabled - uncomment if needed)
 
 ; add additional 'Loop' command to any method to increase the speed of scrolling. For example, in method 1
 
 +WheelUp:: {
-Loop 3         ; increase the number for faster scrolling ; If number is omitted, causes infinite loop (which is BAD)
+Loop 3         ; increase/decrease the number of loops for faster/slower scrolling
+; WARNING - Do not omit number because it causes infinite loop (which is BAD)
     SendMessage 0x0114, 0, 0, ControlGetFocus("A")
 }
 
@@ -247,22 +249,19 @@ Loop 3
 #HotIf
 
 
-/* (disabled by comment)
+/* (disabled - uncomment if needed)
 
 ;--------
 ; Method #3 - turn on scroll lock and send arrow keys to scroll horizontally
 
 #HotIf WinActive("ahk_group HorizontalScroll2")                ; group 2 - not yet defined in auto-execute
 
-+WheelUp:: {
-SetScrollLockState "On"
-Send "{Left}"
-SetScrollLockState "Off"
-}
++WheelUp::SendKey("{Left}")
++WheelDown::SendKey("{Right}")
 
-+WheelDown:: {
+SendKey(key) {
 SetScrollLockState "On"
-Send "{Right}"
+Send key
 SetScrollLockState "Off"
 }
 
@@ -280,7 +279,7 @@ SetScrollLockState "Off"
 
 ;--------
 ; Method #5 - horizontal scrolling for windows file explorer
-see the section under ";    + Horizontal Scrolling"
+see the section under " + Horizontal Scrolling"
 
 */
 
@@ -323,7 +322,7 @@ WinKill ("ahk_id " id)
 ;  = Adjust Window Transparency keys
 ; Modified from https://www.autohotkey.com/board/topic/667-transparent-windows/?p=148102
 
-^+WheelUp:: { ; increases Trans value, makes the window more opaque
+^+WheelUp:: {           ; increases Trans value, makes the window more opaque
 Trans := GetTrans()
 If(Trans < 255)
     Trans := Trans + 20 ; add 20, change for slower/faster transition
@@ -332,12 +331,12 @@ If(Trans >= 255)
 SetTrans(Trans)
 }
 
-^+WheelDown:: { ; decreases Trans value, makes the window more transparent
+^+WheelDown:: {         ; decreases Trans value, makes the window more transparent
 Trans := GetTrans()
 If(Trans > 30)
     Trans := Trans - 20 ; subtract 20, change for slower/faster transition
 If(Trans < 21)
-    Trans := 1  ; never set to zero, causes ERROR
+    Trans := 1          ; never set to zero, causes ERROR
 SetTrans(Trans)
 }
 
@@ -441,6 +440,38 @@ If (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
 Else {
     WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
     WinSetTitle Title_When_On_Top t, t
+    }
+}
+
+;------------------------------------------------------------------------------
+;  = Process Priority
+; Hit `Win + Z` to select and change the prioty level of a process
+; The current priority level of a process can be seen in the Windows Task Manager.
+
+#z:: { ; Win + Z
+active_pid := WinGetPID("A")
+Process_Name := WinGetProcessName("ahk_pid " active_pid)
+PPGui := Gui("AlwaysOnTop +Resize -MaximizeBox +MinSize250x200", "! Set Priority")
+PPGui.Add("Text",, "Press ESCAPE to cancel.")
+PPGui.Add("Text",, "Window:`n" WinGetTitle("ahk_pid " active_pid) "`n`nProcess:`n" ProcessGetPath(active_pid))
+PPGui.Add("Text",, "Double-click to set a new priority level.")
+LB := PPGui.Add("ListBox", "r5 Choose1", ["Normal","High","Low","BelowNormal","AboveNormal"])
+; Realtime omitted because any process not designed to run at Realtime priority might reduce system stability if set to that level ; add Realtime to listbox if necessary
+LB.OnEvent("DoubleClick", SetPriority)
+PPGui.Add("Button", "default", "OK").OnEvent("Click", SetPriority)
+PPGui.OnEvent("Escape", (*) => PPGui.Destroy)
+PPGui.OnEvent("Close", (*) => PPGui.Destroy)
+PPGui.Show()
+
+SetPriority(*) {
+    PPGui.Hide
+    Try
+        ProcessSetPriority(LB.Text, active_pid)
+    Catch ; if error
+        MyNotificationFunc("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, "5000", "1550", "945", "1")
+    Else ; if successful
+        MyNotificationFunc("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, "5000", "1550", "945", "1")
+    Finally PPGui.Destroy
     }
 }
 
@@ -866,7 +897,7 @@ If !ClipWait(secs) {
 }
 
 CallClipboard(secs) {
-global clipSave := ClipboardAll() ; global = return clipSave
+Global clipSave := ClipboardAll() ; Global = return clipSave
 A_Clipboard := ""
 Send "^c"
 If !ClipWait(secs) {
