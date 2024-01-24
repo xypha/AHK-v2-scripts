@@ -36,10 +36,9 @@ MyNotificationFunc("Loading AHK v2 #2 MultiClip v3", "10000", "1550", "945", "1"
 
 ;  = Intialise ClipArr
 
-; start clipboard array with 20 slots containing alphanumerical text
-global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
+; Start clipboard array with 20 slots containing alphanumerical text
+Global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
 
-; How many clipboard slots should be saved in array?
 ; Limit the number of slots to 20 ; change number to your needs or comment out for infinite slots
 ClipArr.Capacity := 20
 
@@ -47,8 +46,8 @@ ClipArr.Capacity := 20
 OnClipboardChange ClipChanged
 
 ; add current clipboard contents to first clipboard slot in ClipArr on start
-startclip := StrReplace(A_Clipboard,"`r`n","`n")            ; Fix for SendInput sending Windows linebreaks
-ClipArr.InsertAt(1, RegExReplace(startclip,"^\s+|\s+$"))    ; remove leading/trailing spaces
+startClip := StrReplace(A_Clipboard,"`r`n","`n")            ; Fix for SendInput sending Windows linebreaks
+ClipArr.InsertAt(1, RegExReplace(startClip,"^\s+|\s+$"))    ; Remove leading/trailing spaces
 
 ;  = Intialise ClipArr hotstrings
 
@@ -75,7 +74,7 @@ Return
 
 !Numpad2:: { ; CTRL & Numpad2 keys pressed together
 ListLines
-if WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, timeout 3s
+If WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, timeout 3s
     WinMaximize
 }
 
@@ -102,17 +101,16 @@ Reload
 
 ;  = Notification Function
 
-MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {
-Global MyNotification := Gui()
-MyNotification.Opt("+AlwaysOnTop -Caption +ToolWindow")  ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
-MyNotification.BackColor := "EEEEEE"  ; White background, can be any RGB color (it will be made transparent below)
-MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
-MyNotification.Add("Text", "cBlack w230 Left", mytext)  ; black text
-MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
+MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFunc` for alternative
+Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
+MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
+MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
+MyNotification.AddText("cBlack w230 Left", mytext)  ; black text
+MyNotification.Show("x1650 y985 NoActivate")        ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
-if timer = 1
+If timer = 1
     SetTimer EndMyNotif, myduration * -1
-if timer = 0 {
+If timer = 0 {
     Sleep myduration
     EndMyNotif
     }
@@ -129,12 +127,12 @@ MyNotification.Destroy
 
 ClipChanged(DataType) {
 
-if DataType = 0 { ; Clipboard is now empty
+If DataType = 0 { ; Clipboard is now empty
     ; Tool_TipFunc("DataType: 0 - Clipboard is now empty", -1000)
     Exit
     }
 
-if DataType = 2 { ; Clipboard contains something entirely non-text such as a picture
+If DataType = 2 { ; Clipboard contains something entirely non-text such as a picture
     Tool_TipFunc("DataType: 2 - Non-text copied", -1000)
     Exit
     }
@@ -151,12 +149,9 @@ Tool_TipFunc(SubStr(Cliptemp, 1, 600), -500)
 ; Check if Cliptemp is already in an array and retrieve its `Index` if present
 InArr := HasVal(ClipArr, Cliptemp)
 
-If InArr = 0
-    ClipArr.InsertAt(1, Cliptemp)
-else {
+If InArr !== 0
     ClipArr.RemoveAt(InArr)
-    ClipArr.InsertAt(1, Cliptemp)
-    }
+ClipArr.InsertAt(1, Cliptemp)
 }
 
 ;------------------------------------------------------------------------------
@@ -165,13 +160,13 @@ else {
 ; not for associative arrays
 
 HasVal(haystack, needle) {
-; if !(IsObject(haystack)) || (haystack.Length() = 0)
+; If !(IsObject(haystack)) || (haystack.Length() = 0)
 ;   return -1
 ; optimise above code to your needs after reading lexikos' comment - https://www.autohotkey.com/boards/viewtopic.php?p=110388#p110388
-for index, value in haystack
-    if (value == needle) ; case-sensitive
-        return index
-return 0
+For index, value in haystack
+    If (value == needle) ; case-sensitive
+        Return index
+Return 0
 }
 
 ;------------------------------------------------------------------------------
@@ -180,7 +175,7 @@ return 0
 ;    + PasteVStrings
 
 PasteVStrings(number) {
-loop number {
+Loop number {
     Hotstring(":?*x:v" A_Index "+", PasteV)
     }
 }
@@ -197,18 +192,16 @@ loop number {
 PasteV(hk) {
 RegExMatch(hk, "\d+", &SubPat)
 hkey := SubPat[]
-if hkey = 0
-    hkey := 10
-try PasteThis(ClipArr.Get(hkey))
-; try send ClipArr.Get(hkey) ; alternative
+Try PasteThis(ClipArr.Get(hkey))
+; Try send ClipArr.Get(hkey) ; alternative
 }
 
 ;    + PasteCStrings
 
 PasteCStrings(number) {
-loop number {
-    if A_Index = 1
-        continue
+Loop number {
+    If A_Index = 1  ; do not create c1+ hotstring, already assigned to "{raw}" ClipArr.Get(1) 
+        Continue
     Hotstring(":?*x:c" A_Index "+", PasteC)
     }
 }
@@ -225,18 +218,15 @@ loop number {
 
 PasteC(hk) {
 RegExMatch(hk, "\d+", &SubPat)
-hkey := SubPat[]
-if hkey = 0
-    hkey := 10
-PasteAll(hkey)
+PasteAll(SubPat[])
 }
 
 PasteAll(hkey) {
-loop hkey {
-    try clipVar := ClipArr.Get(A_Index)
-    catch IndexError
+Loop hkey {
+    Try clipVar := ClipArr.Get(A_Index)
+    Catch IndexError
         Result .= "`n"
-    else Result .= clipVar "`n"
+    Else Result .= clipVar "`n"
     }
 Result := RegExReplace(Result,"^[`n]+|[`n]+$") ; remove leading/trailing LF
 PasteThis(Result)
@@ -246,7 +236,7 @@ PasteThis(Result)
 ;  = ClipArr ClipMenu Function
 
 ClipMenuFunc(FuncName) {
-global ClipMenu := Menu()
+Global ClipMenu := Menu()
 ClipMenu.Delete
 ClipMenu.Add("&1  = "   ClipTrimFunc(1)   ,FuncName) ; Customise the shortcuts by altering the character after `&` in lines containing `ClipMenu.Add`
 ClipMenu.Add("&2  = "   ClipTrimFunc(2)   ,FuncName) ; Explantation: 
@@ -272,13 +262,13 @@ ClipMenu.Show
 }
 
 ClipTrimFunc(number) {
-try ClipArr.Get(number)
-catch IndexError {
+Try ClipArr.Get(number)
+Catch IndexError {
     ClipArr.InsertAt(number, "")
-    return ""
+    Return ""
     }
-else ClipTrim := SubStr(ClipArr.Get(number), 1, 60)
-return ClipTrim
+Else ClipTrim := SubStr(ClipArr.Get(number), 1, 60)
+Return ClipTrim
 }
 
 ;    + SendClipFunc
@@ -292,23 +282,23 @@ PasteThis(ClipArr.Get(position))
 ; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=483549#p483549 and https://www.autohotkey.com/boards/viewtopic.php?p=483588#p483588
 
 PasteThis(pasteText) {
-if (A_Clipboard !== pasteText) {
+If (A_Clipboard !== pasteText) {
     OnClipboardChange ClipChanged,0
     tmp_clip := ClipboardAll()          ; preserve Clipboard
     A_Clipboard := pasteText            ; copy pastetext to clipboard
     tmp_clip2 := A_Clipboard
     While (tmp_clip2 != pasteText) {    ; validate clipboard
         Sleep 50
-        if (A_Index > 5) {
+        If (A_Index > 5) {
             Tool_TipFunc(A_ThisHotkey ":: PasteThis Copying Failed?", -500)
             OnClipboardChange ClipChanged,1
-            exit
+            Exit
             }
         }
     }
-else tmp_clip := A_Clipboard
+Else tmp_clip := A_Clipboard
 Send "^v"  ; paste
-if (tmp_clip !== pasteText)
+If (tmp_clip !== pasteText)
     SetTimer () => RestoreClip(tmp_clip, tmp_clip2), -100 ; 100ms - don't wait for restoration
 }
 
@@ -316,10 +306,10 @@ RestoreClip(tmp_clip, tmp_clip2) {
 A_Clipboard := ClipboardAll(tmp_clip)   ; restore clipboard
 While (tmp_clip2 == A_Clipboard) {      ; validate clipboard
     Sleep 50
-    if (A_Index > 5) {
+    If (A_Index > 5) {
         Tool_TipFunc(A_ThisHotkey ":: PasteThis Restoration Failed", -5000)
         OnClipboardChange ClipChanged,1
-        exit
+        Exit
         }
     }
 tmp_clip := "", tmp_clip2 := ""
@@ -357,6 +347,6 @@ SetTimer () => ToolTip(), ToolDuration
 
 :*:test++:: {
 A_Clipboard := "a1"
-global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
+Global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
 ClipMenuFunc(SendClipFunc)  ; show menu - ClipMenu
 }
