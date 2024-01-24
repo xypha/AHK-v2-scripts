@@ -11,14 +11,15 @@
 ;  = Set default state of Lock keys
 ;  = Show/Hide OS files
 ;  = Customise Tray Icon
-;  = Horizontal Scrolling Group
 ;  = Capitalise first letter exclusion Group
+;  = Close With Esc/Q/W Group
+;  = Horizontal Scrolling Group
+;  = Symbols In File Names Group
 ;  = End auto-execute
 ; Hotkeys
 ;  = Check & Reload AHK
 ;  = Remap Keys
 ;  = Customise CapsLock
-;  = Horizontal Scrolling
 ;  = Move Mouse Pointer by pixel
 ;  = Close or Kill an app window
 ;  = Adjust Window Transparency keys
@@ -30,6 +31,19 @@
 ;  = Exchange adjacent letters
 ;  = Toggle Window On Top
 ;  = Process Priority
+; #HotIf Apps
+;  = Firefox
+;  = Windows File Explorer
+;    + General
+;    + Horizontal Scrolling
+;    + Copy full path
+;    + Copy file names without path
+;    + Copy file names without extension and path
+; #HotIf Groups
+;  = Capitalise the first letter of a sentence
+;  = Close With Esc/Q/W keys
+;  = Horizontal Scrolling
+;  = Symbols In File Names keys
 ; Hotstrings
 ;  = Find & Replace in Clipboard
 ;    + Find & Replace dot with space
@@ -37,17 +51,7 @@
 ;  = Trim Clipboard
 ;  = Date & Time
 ;    + Format Date / Time
-; #HotIf
-;  = Firefox
-;  = Telegram
-;  = Windows File Explorer
-;    + General
-;    + Symbols In File Names keys
-;    + Horizontal Scrolling
-;    + Copy full path
-;    + Copy file names without path
-;    + Copy file names without extension and path
-; Capitalise the first letter of a sentence
+;  = URL Encode/Decode
 ; User-defined Functions
 ;  = Notification Function
 ;  = Toggle protected operating system (OS) files Function
@@ -57,6 +61,7 @@
 ;  = Call ClipWait / Clipboard Function
 ;  = ToolTip Function
 ;  = Wrap Text In Quotes or Symbols Function
+;  = URL Encode/Decode Function
 ;  = Control Panel Tools Function
 
 ;------------------------------------------------------------------------------
@@ -99,15 +104,28 @@ I_Icon := A_ScriptDir "\icons\1-512.ico"
 If FileExist(I_Icon)
     TraySetIcon I_Icon
 
-;  = Horizontal Scrolling Group
-
-GroupAdd "HorizontalScroll1"    , "ahk_class ApplicationFrameWindow"    ; Modern UWP apps like calc and screen snip
-GroupAdd "HorizontalScroll1"    , "ahk_class MozillaWindowClass"        ; Firefox
-GroupAdd "HorizontalScroll1"    , "ahk_class SALFRAME"                  ; LibreOffice
-
 ;  = Capitalise first letter exclusion Group
 
-GroupAdd "CapitaliseFirstLetter", "ahk_class #32770"                    ; Save as dialogue
+GroupAdd "CapitaliseFirstLetter", "ahk_class #32770"                                ; Save as dialogue
+
+;  = Close With Esc/Q/W Group
+
+; GroupAdd "CloseWithQW"          , "ahk_exe Taskmgr.exe"                             ; Windows Task Manager ; requires UIAccess
+GroupAdd "CloseWithQW"          , "Window Spy for AHKv2 ahk_class AutoHotkeyGUI"    ; AHK window spy
+GroupAdd "CloseWithQW"          , "Telegram ahk_class Qt51512QWindowIcon"           ; Telegram.exe window
+GroupAdd "CloseWithQW"          , "ahk_class CalcFrame"                             ; classic calculator
+
+;  = Horizontal Scrolling Group
+
+GroupAdd "HorizontalScroll1"    , "ahk_class ApplicationFrameWindow"                ; Modern UWP apps like calc and screen snip
+GroupAdd "HorizontalScroll1"    , "ahk_class MozillaWindowClass"                    ; Firefox
+GroupAdd "HorizontalScroll1"    , "ahk_class SALFRAME"                              ; LibreOffice
+
+;  = Symbols In File Names Group
+
+GroupAdd "FileNameSymbols"      , "ahk_class CabinetWClass"                         ; Windows file explorer
+GroupAdd "FileNameSymbols"      , "ahk_class EVERYTHING"                            ; Everything
+GroupAdd "FileNameSymbols"      , "ahk_class #32770"                                ; Save as dialogue
 
 ;  = End auto-execute
 
@@ -168,12 +186,34 @@ RAlt::!Space       ; ALT + space brings up window menu
 
 ^RCtrl::MButton    ; press Left & Right CTRL button to simulate mouse Middle Click
 
-RCtrl & Up::Send "{PgUp}"       ; page up
-RCtrl & Down::Send "{PgDn}"     ; page down
-RCtrl & Left::Send "{Home}"
-RCtrl & Right::Send "{End}"
+RCtrl & Up::Send "{PgUp}"       ; Page up"
+RCtrl & Down::Send "{PgDn}"     ; Page down
+RCtrl & Left::Send "{Home}"     ; Home
+RCtrl & Right::Send "{End}"     ; End
 
-!m::WinMinimize "A"         ; Minimize active window
+/* ; remap media keys to navigation keys - disabled, uncomment to use
+Media_Play_Pause::PgUp
+Media_Stop::PgDn
+Media_Prev::Home
+Media_Next::End
+
++Media_Play_Pause::+PgUp
++Media_Stop::+PgDn
++Media_Prev::+Home
++Media_Next::+End
+
+^Media_Play_Pause::^PgUp
+^Media_Stop::^PgDn
+^Media_Prev::^Home
+^Media_Next::^End
+
+^+Media_Play_Pause::^+PgUp
+^+Media_Stop::^+PgDn
+^+Media_Prev::^+Home
+^+Media_Next::^+End
+*/
+
+!m::WinMinimize "A"         ; Alt+ M = Minimize active window
 
 ;------------------------------------------------------------------------------
 ;  = Customise CapsLock
@@ -199,6 +239,341 @@ If (GetKeyState("Capslock", "T")) {
     MyNotification.Destroy
     }
 }
+
+;------------------------------------------------------------------------------
+;  = Move Mouse Pointer by pixel
+; Modified from http://www.computoredge.com/AutoHotkey/Downloads/MousePrecise.ahk
+
+#Numpad1::MouseMove -1,  1, 0, "R"    ; Win + Numpad1 (SC04F) move down left    ↓←
+#Numpad2::MouseMove  0,  1, 0, "R"    ; Win + Numpad2 (SC050) move down         ↓
+#Numpad3::MouseMove  1,  1, 0, "R"    ; Win + Numpad3 (SC051) move down right   ↓→
+#Numpad4::MouseMove -1,  0, 0, "R"    ; Win + Numpad4 (SC04B) move left         ←
+#Numpad5::MouseMove 960,540           ; Win + Numpad5 (SC04C) move center mouse • (1920×1080 display)
+#Numpad6::MouseMove  1,  0, 0, "R"    ; Win + Numpad6 (SC04D) move right        →
+#Numpad7::MouseMove -1, -1, 0, "R"    ; Win + Numpad7 (SC047) move up left      ↑←
+#Numpad8::MouseMove  0, -1, 0, "R"    ; Win + Numpad8 (SC048) move up           ↑
+#Numpad9::MouseMove  1, -1, 0, "R"    ; Win + Numpad9 (SC049) move up right     ↑→
+
+^#m::MouseMove 960,540 ; Test mouse position
+
+;------------------------------------------------------------------------------
+;  = Close or Kill an app window
+; Modified from https://superuser.com/a/1554366/391770
+; other methods to quit app - https://www.xda-developers.com/how-force-quit-applications-windows/
+; also, see section "Close With Esc/Q/W keys"
+
+Alt & RButton:: { ; ALT + right mouse button ; attempt to close window
+MouseGetPos ,, &id
+winClass := WinGetClass("ahk_id " id)
+If (winClass != "Shell_TrayWnd")   ; exclude windows taskbar
+; If (winClass != "Shell_TrayWnd" or winClass != "insert yourapp classname") ; exclude other apps using "or"
+    WinClose("ahk_id " id)  ; sends a WM_CLOSE message to the target window
+    ; PostMessage 0x0112, 0xF060,,, "ahk_id " id ; alternative - same as pressing Alt+F4 or clicking a window's close button in its title bar
+}
+
+; Kill window with CTRL + ALT + F4, usually unresponsive ones if WinClose fails
+^!F4:: {
+MouseGetPos ,, &id
+WinKill ("ahk_id " id)
+}
+
+;------------------------------------------------------------------------------
+;  = Adjust Window Transparency keys
+; Modified from https://www.autohotkey.com/board/topic/667-transparent-windows/?p=148102
+
+^+WheelUp:: {           ; increases Trans value, makes the window more opaque
+Trans := GetTrans()
+If(Trans < 255)
+    Trans := Trans + 20 ; add 20, change for slower/faster transition
+If(Trans >= 255)
+    Trans := "Off"
+SetTrans(Trans)
+}
+
+^+WheelDown:: {         ; decreases Trans value, makes the window more transparent
+Trans := GetTrans()
+If(Trans > 30)
+    Trans := Trans - 20 ; subtract 20, change for slower/faster transition
+If(Trans < 21)
+    Trans := 1          ; never set to zero, causes ERROR
+SetTrans(Trans)
+}
+
+F8::SetTransMenuFunc
+
+;------------------------------------------------------------------------------
+;  = Recycle Bin shortcut
+
+^del:: {
+If WinActive("Recycle Bin ahk_class CabinetWClass")         ; If windows file explorer is active and recycle bin is in the foreground, empty Bin
+    FileRecycleEmpty
+Else If WinExist("Recycle Bin ahk_class CabinetWClass")     ; If explorer is showing recycle bin but is in the background, activate it
+    WinActivate
+/* ; If explorer is open but not showing recycle bin, change to Bin (disabled, uncomment if desired)
+Else If WinExist("ahk_class CabinetWClass") {
+    WinActivate
+    If WinWaitActive(, , 2) { ; = Sleep 1000, but sends next command as soon as activated, instead of waiting for the full 1000ms period
+        Send "{F4}"
+        While (ControlGetClassNN(ControlGetFocus("A")) != "Microsoft.UI.Content.DesktopChildSiteBridge1") { ; = Sleep 500 ; sleep until focus is on address bar, max 500ms
+            Sleep 100
+            If (A_Index > 5) {
+                Tool_TipFunc(A_ThisHotkey ":: Failed to focus address bar", -1000) ; 1s
+                exit
+                }
+            }
+        Send "{raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
+        }
+    }
+*/
+Else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"         ; If explorer is not open, then open Bin in explorer
+}
+
+;------------------------------------------------------------------------------
+;  = Display Off shortcut
+; modified from AHK docs
+
+^Esc:: {
+; Sleep 1000  ; Give user a chance to release keys (in case their release would wake up the monitor again)
+KeyWait "Esc", "T1"     ; use KeyWait instead of sleep for faster execution
+KeyWait "Control", "T1"
+Sleep 100
+SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
+}
+
+;--------
+;  = Add Control Panel Tools to a Menu
+
+#+x::ControlPanelMenuFunc   ; Win & Shift & x
+
+;--------
+;  = Change Text Case
+
+!c::ChangeCaseMenuFunc      ; ALT + C
+
+;--------
+;  = Wrap Text In Quotes or Symbols keys
+
+#HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts - example: Media Player Classic - Home Cinema
+
+!q::WrapTextMenuFunc ; ALT + Q
+
+; WrapText Keys - ALT + number row
+!1::EncText("`'","`'")      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
+!2::EncText('`"','`"')      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
+!3::EncText("(",")")        ; enclose in round breackets ()
+!4::EncText("[","]")        ; enclose in square brackets []
+!5::EncText("{","}")        ; enclose in flower brackets {}
+!6::EncText("``","``")      ; enclose in accent/backtick ``
+!7::EncText("%","%")        ; enclose in percent sign %%
+!8::EncText("‘","’")        ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+!9::EncText("“","”")        ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+!0::EncText("","")          ; remove above quotes
+
+#HotIf
+
+;------------------------------------------------------------------------------
+;  = Exchange adjacent letters
+; place cursor between 2 letters. The letters reverse positions - `ab|c` becomes `ac|b`.
+; Modified from http://www.computoredge.com/AutoHotkey/Downloads/LetterSwap.ahk
+
+$!l:: { ; ALT + L
+Send "{Left}+{Right 2}"
+CallClipboard(2) ; 2s
+SwappedLetters := SubStr(A_Clipboard,2) SubStr(A_Clipboard,1,1)
+Send SwappedLetters "{Left}"
+A_Clipboard := clipSave ; restore Clipboard contents
+}
+
+;------------------------------------------------------------------------------
+;  = Toggle Window On Top
+; Modified from https://www.autohotkey.com/board/topic/94627-button-for-always-on-top/?p=596509
+
+!t:: {                          ; ALT + t
+Title_When_On_Top := "! "       ; change title "! " as required
+t := WinGetTitle("A")
+ExStyle := WinGetExStyle(t)
+If (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
+    WinSetAlwaysOnTop 0, t      ; Turn OFF and remove Title_When_On_Top
+    WinSetTitle (RegexReplace(t, Title_When_On_Top)), "A"
+    }
+Else {
+    WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
+    WinSetTitle Title_When_On_Top t, t
+    }
+}
+
+;------------------------------------------------------------------------------
+;  = Process Priority
+; Hit `Win + Z` to select and change the prioty level of a process
+; The current priority level of a process can be seen in the Windows Task Manager.
+
+#z:: { ; Win + Z
+active_pid := WinGetPID("A")
+Process_Name := WinGetProcessName("ahk_pid " active_pid)
+PPGui := Gui("AlwaysOnTop +Resize -MaximizeBox +MinSize240x230", "! Set Priority")
+PPGui.AddText(, "Press ESCAPE to cancel.")
+PPGui.AddText(, "Window:`n" WinGetTitle("ahk_pid " active_pid) "`n`nProcess:`n" ProcessGetPath(active_pid))
+PPGui.AddText(, "Double-click to set a new priority level.")
+LB := PPGui.AddListBox("r5 Choose1", ["Normal","High","Low","BelowNormal","AboveNormal"])
+; Realtime omitted because any process not designed to run at Realtime priority might reduce system stability if set to that level ; add Realtime to listbox if necessary
+LB.OnEvent("DoubleClick", SetPriority)
+PPGui.AddButton("default", "OK").OnEvent("Click", SetPriority)
+PPGui.OnEvent("Escape", (*) => PPGui.Destroy)
+PPGui.OnEvent("Close", (*) => PPGui.Destroy)
+PPGui.Show
+
+SetPriority(*) {
+    PPGui.Hide
+    Try
+        ProcessSetPriority(LB.Text, active_pid)
+    Catch ; if error
+        MyNotificationFunc("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, "5000", "1550", "945", "1")
+    Else ; if successful
+        MyNotificationFunc("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, "5000", "1550", "945", "1")
+    Finally PPGui.Destroy
+    }
+}
+
+;------------------------------------------------------------------------------
+; #HotIf Apps
+; Tailor keyboard shortcuts, commands and functions to specific windows, apps or pre-defined groups of both
+
+;  = Firefox
+
+#HotIf WinActive("ahk_class MozillaWindowClass") ; main window ; excludes other dialogue boxes like "Save As" from ahk_exe firefox.exe
+
+^+o:: {      ; CTRL + Shift + O to open library / bookmark manager
+If WinActive(" — Mozilla Firefox") ; If not new tab, then open new one
+    Send "^t"
+Else Send "^l"  ; If new tab, focus address bar
+Sleep 500       ; wait for focus - change as per your system performance
+Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
+}
+
+^+q::Return     ; disable Exit shortcut
+
+#HotIf
+
+;--------
+;  = Windows File Explorer
+
+;    + General
+
+#HotIf WinActive("ahk_class CabinetWClass")
+
+F1::F2 ; disable opening help in MS edge
+
+; Unselect multiple files/folders
+; Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
+^+a::F5
+
+;--------
+;    + Horizontal Scrolling
+; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=466527&sid=6dc4a701e678a7b9ee1241ab0043ebd8#p466527
+
++WheelUp::PostMessage 0x0114, 0,, "ScrollBar1"      ; WM_HSCROLL SB_LINELEFT
++WheelDown::PostMessage 0x0114, 1,, "ScrollBar1"    ; WM_HSCROLL SB_LINERIGHT
+
+/* disabled, uncomment to use - add Loop for faster scrolling
++WheelUp:: {
+Loop 3
+    PostMessage 0x0114, 0,, "ScrollBar1"
+}
+
++WheelDown:: {
+Loop 3
+    PostMessage 0x0114, 1,, "ScrollBar1"
+}
+
+*/
+
+;--------
+;    + Copy full path
+; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=61084#p61084
+
+^+c:: { ; CTRL + Shift + C
+CallClipboard(2) ; Timeout 2s
+A_Clipboard := A_Clipboard ; change to plain text
+}
+; Example: C:\Program Files\Mozilla Firefox\firefox.exe
+
+;--------
+;    + Copy file names without path
+
+!n:: { ; ALT + N
+CallClipboard(2) ; Timeout 2s
+A_Clipboard := RegExReplace(A_Clipboard, "\w:\\|.+\\") ; remove path
+}
+
+; Example: firefox.exe
+
+;--------
+;    + Copy file names without extension and path
+
+^!n:: { ; CTRL + ALT + N
+CallClipboard(2) ; Timeout 2s
+files := RegExReplace(A_Clipboard, "\w:\\|.+\\")        ; remove path
+files := RegExReplace(files, "\.[\w]+(`r`n|`n)","`n")   ; remove ext, CR
+A_Clipboard := RegExReplace(files, "\.[\w]+$")          ; remove last ext
+}
+
+; Example: firefox
+
+#HotIf
+
+;------------------------------------------------------------------------------
+; #HotIf Groups
+
+;  = Capitalise the first letter of a sentence
+; modified from https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
+
+#HotIf not WinActive("ahk_group CapitaliseFirstLetter") ; exclude 'Save As' dialogue box
+
+; triggers ; add or disable one or more as needed
+; ~NumpadEnter:: ; disabled by default because of too many false positives
+; ~Enter::       ; disabled by default - uncomment to use
+~NumpadDot::
+~.::
+~!::
+~?:: {
+cfc1 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
+cfc1.Start
+cfc1.Wait
+If (cfc1.EndReason = "Match") {
+    If (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
+        Send "{Backspace} +" cfc1.Input
+    Else {
+        Send "{Backspace}+" cfc1.Input ; If dot or numdot is the trigger, don't add space, coz typing website address is problematic
+        ; Soundbeep, 1500, 50
+        ; SoundPlay % "C:\Windows\Media\Windows Information Bar.wav"
+        }
+    exit
+    }
+If cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
+    cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
+    cfc2.Start
+    cfc2.Wait
+    If (cfc2.EndReason = "Match")
+        Send "{Backspace}+" cfc2.Input
+    }
+}
+
+#HotIf
+
+; several other AHK v1 auto-capitalisation scripts are good, such as the one linked above
+; and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
+; and many others that use different methods to achieve this goal. Try a few and see what works for you.
+
+;------------------------------------------------------------------------------
+;  = Close With Esc/Q/W keys
+
+#HotIf WinActive("ahk_group CloseWithQW")
+
+Esc::WinClose("A")                     ; sends a WM_CLOSE message to the target window
+^q::!F4                                ; sends ALT + F4
+; ^w::PostMessage 0x0112, 0xF060,,, "A"  ; same as Alt + F4 or clicking a window's close button in its title bar
+
+#HotIf
 
 ;------------------------------------------------------------------------------
 ;  = Horizontal Scrolling
@@ -284,196 +659,27 @@ see the section under " + Horizontal Scrolling"
 */
 
 ;------------------------------------------------------------------------------
-;  = Move Mouse Pointer by pixel
-; Modified from http://www.computoredge.com/AutoHotkey/Downloads/MousePrecise.ahk
+;  = Symbols In File Names keys
 
-#Numpad1::MouseMove -1,  1, 0, "R"    ; Win + Numpad1 (SC04F) move down left    ↓←
-#Numpad2::MouseMove  0,  1, 0, "R"    ; Win + Numpad2 (SC050) move down         ↓
-#Numpad3::MouseMove  1,  1, 0, "R"    ; Win + Numpad3 (SC051) move down right   ↓→
-#Numpad4::MouseMove -1,  0, 0, "R"    ; Win + Numpad4 (SC04B) move left         ←
-#Numpad5::MouseMove 960,540           ; Win + Numpad5 (SC04C) move center mouse • (1920×1080 display)
-#Numpad6::MouseMove  1,  0, 0, "R"    ; Win + Numpad6 (SC04D) move right        →
-#Numpad7::MouseMove -1, -1, 0, "R"    ; Win + Numpad7 (SC047) move up left      ↑←
-#Numpad8::MouseMove  0, -1, 0, "R"    ; Win + Numpad8 (SC048) move up           ↑
-#Numpad9::MouseMove  1, -1, 0, "R"    ; Win + Numpad9 (SC049) move up right     ↑→
+#HotIf WinActive("ahk_group FileNameSymbols")
 
-^#m::MouseMove 960,540 ; Test mouse position
+; replace \/:*?"<>| with ＼⧸ ： ✲ ？＂＜＞｜
+; comment out the ones you don't desire, like \ → ＼
+; :?*:\::{U+FF3C}                     ; \ → ＼ | replace U+005C REVERSE SOLIDUS : backslash            → U+FF3C FULLWIDTH REVERSE SOLIDUS   ; disabled
 
-;------------------------------------------------------------------------------
-;  = Close or Kill an app window
-; Modified from https://superuser.com/a/1554366/391770
+:?*:/::{U+29F8}                     ; / → ⧸  | replace U+002F SOLIDUS : slash, forward slash, virgule → U+29F8 BIG SOLIDUS
+:?*b0::+::{bs}{U+FF1A}              ; : → ：  | replace U+003A COLON                                  → U+FF1A FULLWIDTH COLON
+:?*:*::{U+2732}                     ; * → ✲ | replace U+002A ASTERISK : star                         → U+2732 OPEN CENTRE ASTERISK
+:?*:?::{U+FF1F}                     ; ? → ？ | replace U+003F QUESTION MARK                          → U+FF1F FULLWIDTH QUESTION MARK
+:?*:"::{U+FF02}                     ; " → ＂ | replace U+0022 QUOTATION MARK : double quote          → U+FF02 FULLWIDTH QUOTATION MARK
+:?*:<::{U+FF1C}                     ; < → ＜ | replace U+003C LESS-THAN SIGN                         → U+FF1C FULLWIDTH LESS-THAN SIGN
+:?*:>::{U+FF1E}                     ; > → ＞ | replace U+003E GREATER-THAN SIGN                      → U+FF1E FULLWIDTH GREATER-THAN SIGN
+:?*:|::{U+FF5C}                     ; | → ｜ | replace U+007C VERTICAL LINE : vertical bar, pipe     → U+FF5C FULLWIDTH VERTICAL LINE
 
-Alt & RButton:: { ; ALT + right mouse button ; attempt to close window
-MouseGetPos ,, &id
-winClass := WinGetClass("ahk_id " id)
-If (winClass != "Shell_TrayWnd")   ; exclude windows taskbar
-; If (winClass != "Shell_TrayWnd" or winClass != "insert yourapp classname") ; exclude other apps using "or"
-    WinClose("ahk_id " id)  ; sends a WM_CLOSE message to the target window
-    ; PostMessage 0x0112, 0xF060,,, "ahk_id " id ; alternate method - same as pressing Alt+F4 or clicking the window's close button in its title bar:
-}
-
-; Kill window, usually unresponsive ones if WinClose fails
-^!F4:: {
-MouseGetPos ,, &id
-WinKill ("ahk_id " id)
-}
-
-;------------------------------------------------------------------------------
-;  = Adjust Window Transparency keys
-; Modified from https://www.autohotkey.com/board/topic/667-transparent-windows/?p=148102
-
-^+WheelUp:: {           ; increases Trans value, makes the window more opaque
-Trans := GetTrans()
-If(Trans < 255)
-    Trans := Trans + 20 ; add 20, change for slower/faster transition
-If(Trans >= 255)
-    Trans := "Off"
-SetTrans(Trans)
-}
-
-^+WheelDown:: {         ; decreases Trans value, makes the window more transparent
-Trans := GetTrans()
-If(Trans > 30)
-    Trans := Trans - 20 ; subtract 20, change for slower/faster transition
-If(Trans < 21)
-    Trans := 1          ; never set to zero, causes ERROR
-SetTrans(Trans)
-}
-
-F8::SetTransMenuFunc
-
-;------------------------------------------------------------------------------
-;  = Recycle Bin shortcut
-
-^del:: {
-If WinActive("Recycle Bin ahk_class CabinetWClass")         ; If windows file explorer is active and recycle bin is in the foreground, empty Bin
-    FileRecycleEmpty
-Else If WinExist("Recycle Bin ahk_class CabinetWClass")     ; If explorer is showing recycle bin but is in the background, activate it
-    WinActivate
-/* If explorer is open but not showing recycle bin, change to Bin (uncomment this section If desired)
-Else If WinExist("ahk_class CabinetWClass") {
-    WinActivate
-    If WinWaitActive(, , 2) { ; = Sleep 1000, but sends next command as soon as activated, instead of waiting for the full 1000ms period
-        Send "{F4}"
-        While (ControlGetClassNN(ControlGetFocus("A")) != "Microsoft.UI.Content.DesktopChildSiteBridge1") { ; = Sleep 500 ; sleep until focus is on address bar, max 500ms
-            Sleep 100
-            If (A_Index > 5) {
-                Tool_TipFunc(A_ThisHotkey ":: Failed to focus address bar", -1000) ; 1s
-                exit
-                }
-            }
-        Send "{raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
-        }
-    }
-*/
-Else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"         ; If explorer is not open, then open Bin in explorer
-}
-
-;------------------------------------------------------------------------------
-;  = Display Off shortcut
-; modified from AHK docs
-
-^Esc:: {
-; Sleep 1000  ; Give user a chance to release keys (in case their release would wake up the monitor again)
-KeyWait "Esc", "T1"     ; use KeyWait instead of sleep for faster execution
-KeyWait "Control", "T1"
-Sleep 100
-SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
-}
-
-;--------
-;  = Add Control Panel Tools to a Menu
-
-#+x::ControlPanelMenuFunc ; Win & Shift & x
-
-;--------
-;  = Change Text Case
-
-!c::ChangeCaseMenuFunc ; ALT + C
-
-;--------
-;  = Wrap Text In Quotes or Symbols keys
-
-#HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts - example: Media Player Classic - Home Cinema
-
-!q::WrapTextMenuFunc ; ALT + Q
-
-; WrapText Keys - ALT + number row
-!1::EncText("`'","`'")      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
-!2::EncText('`"','`"')      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
-!3::EncText("(",")")        ; enclose in round breackets ()
-!4::EncText("[","]")        ; enclose in square brackets []
-!5::EncText("{","}")        ; enclose in flower brackets {}
-!6::EncText("``","``")      ; enclose in accent/backtick ``
-!7::EncText("%","%")        ; enclose in percent sign %%
-!8::EncText("‘","’")        ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
-!9::EncText("“","”")        ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
-!0::EncText("","")          ; remove above quotes
+; Template -
+; :*:*::{U+}                     ; ? → ? | replace ?     → ?
 
 #HotIf
-
-;------------------------------------------------------------------------------
-;  = Exchange adjacent letters
-; place cursor between 2 letters. The letters reverse positions - `ab|c` becomes `ac|b`.
-; Modified from http://www.computoredge.com/AutoHotkey/Downloads/LetterSwap.ahk
-
-$!l:: { ; ALT + L
-Send "{Left}+{Right 2}"
-CallClipboard(2) ; 2s
-SwappedLetters := SubStr(A_Clipboard,2) SubStr(A_Clipboard,1,1)
-Send SwappedLetters "{Left}"
-A_Clipboard := clipSave ; restore Clipboard contents
-}
-
-;------------------------------------------------------------------------------
-;  = Toggle Window On Top
-; Modified from https://www.autohotkey.com/board/topic/94627-button-for-always-on-top/?p=596509
-
-!t:: {                          ; ALT + t
-Title_When_On_Top := "! "       ; change title "! " as required
-t := WinGetTitle("A")
-ExStyle := WinGetExStyle(t)
-If (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
-    WinSetAlwaysOnTop 0, t      ; Turn OFF and remove Title_When_On_Top
-    WinSetTitle (RegexReplace(t, Title_When_On_Top)), "A"
-    }
-Else {
-    WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
-    WinSetTitle Title_When_On_Top t, t
-    }
-}
-
-;------------------------------------------------------------------------------
-;  = Process Priority
-; Hit `Win + Z` to select and change the prioty level of a process
-; The current priority level of a process can be seen in the Windows Task Manager.
-
-#z:: { ; Win + Z
-active_pid := WinGetPID("A")
-Process_Name := WinGetProcessName("ahk_pid " active_pid)
-PPGui := Gui("AlwaysOnTop +Resize -MaximizeBox +MinSize250x200", "! Set Priority")
-PPGui.Add("Text",, "Press ESCAPE to cancel.")
-PPGui.Add("Text",, "Window:`n" WinGetTitle("ahk_pid " active_pid) "`n`nProcess:`n" ProcessGetPath(active_pid))
-PPGui.Add("Text",, "Double-click to set a new priority level.")
-LB := PPGui.Add("ListBox", "r5 Choose1", ["Normal","High","Low","BelowNormal","AboveNormal"])
-; Realtime omitted because any process not designed to run at Realtime priority might reduce system stability if set to that level ; add Realtime to listbox if necessary
-LB.OnEvent("DoubleClick", SetPriority)
-PPGui.Add("Button", "default", "OK").OnEvent("Click", SetPriority)
-PPGui.OnEvent("Escape", (*) => PPGui.Destroy)
-PPGui.OnEvent("Close", (*) => PPGui.Destroy)
-PPGui.Show()
-
-SetPriority(*) {
-    PPGui.Hide
-    Try
-        ProcessSetPriority(LB.Text, active_pid)
-    Catch ; if error
-        MyNotificationFunc("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, "5000", "1550", "945", "1")
-    Else ; if successful
-        MyNotificationFunc("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, "5000", "1550", "945", "1")
-    Finally PPGui.Destroy
-    }
-}
 
 ;------------------------------------------------------------------------------
 ; Hotstrings
@@ -556,171 +762,37 @@ Line2 "dvvbvvoe df"
 :*x:datetime+::Send FormatTime(, "dd/MM/yyyy h:mm tt") ; sends 28/03/2020 6:46 PM
 
 ;------------------------------------------------------------------------------
-; #HotIf
-; Tailor keyboard shortcuts, commands and functions to specific windows, apps or pre-defined groups of both
+;  = URL Encode/Decode
 
-;  = Firefox
+:*x:url+::Send UrlEncode(A_Clipboard)
 
-#HotIf WinActive("ahk_class MozillaWindowClass") ; main window ; excludes other dialogue boxes like "Save As" from ahk_exe firefox.exe
-
-^+o:: {      ; CTRL + Shift + O to open library / bookmark manager
-If WinActive(" — Mozilla Firefox") ; If not new tab, then open new one
-    Send "^t"
-Else Send "^l"  ; If new tab, focus address bar
-Sleep 500
-Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
-}
-
-^+q::Return     ; disable Exit shortcut
-
-#HotIf
-
-;--------
-;  = Telegram
-
-#HotIf WinActive("ahk_exe Telegram.exe")
-
-^q::Send "^w"     ; minimise to tray, instead of quit
-
-#HotIf
-
-;--------
-;  = Windows File Explorer
-
-;    + General
-
-#HotIf WinActive("ahk_class CabinetWClass")
-
-F1::F2 ; disable opening help in MS edge
-
-; Unselect multiple files/folders
-; Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
-^+a::F5
-
-;--------
-;    + Symbols In File Names keys
-
-; replace \/:*?"<>| with ＼⧸ ： ✲ ？＂＜＞｜
-; comment out the ones you don't desire, like \ → ＼
-
-; :?*:\::{U+FF3C}                     ; \ → ＼ | replace U+005C REVERSE SOLIDUS : backslash            → U+FF3C FULLWIDTH REVERSE SOLIDUS   ; disabled
-:?*:/::{U+29F8}                     ; / → ⧸  | replace U+002F SOLIDUS : slash, forward slash, virgule → U+29F8 BIG SOLIDUS
-:?*b0::+::{bs}{U+FF1A}              ; : → ：  | replace U+003A COLON                                  → U+FF1A FULLWIDTH COLON
-:?*:*::{U+2732}                     ; * → ✲ | replace U+002A ASTERISK : star                         → U+2732 OPEN CENTRE ASTERISK
-:?*:?::{U+FF1F}                     ; ? → ？ | replace U+003F QUESTION MARK                          → U+FF1F FULLWIDTH QUESTION MARK
-:?*:"::{U+FF02}                     ; " → ＂ | replace U+0022 QUOTATION MARK : double quote          → U+FF02 FULLWIDTH QUOTATION MARK
-:?*:<::{U+FF1C}                     ; < → ＜ | replace U+003C LESS-THAN SIGN                         → U+FF1C FULLWIDTH LESS-THAN SIGN
-:?*:>::{U+FF1E}                     ; > → ＞ | replace U+003E GREATER-THAN SIGN                      → U+FF1E FULLWIDTH GREATER-THAN SIGN
-:?*:|::{U+FF5C}                     ; | → ｜ | replace U+007C VERTICAL LINE : vertical bar, pipe     → U+FF5C FULLWIDTH VERTICAL LINE
-
-; :*:*::{U+}                     ; ? → ? | replace ?     → ?
-
-;--------
-;    + Horizontal Scrolling
-; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=466527&sid=6dc4a701e678a7b9ee1241ab0043ebd8#p466527
-
-+WheelUp::PostMessage 0x0114, 0,, "ScrollBar1"      ; WM_HSCROLL SB_LINELEFT
-+WheelDown::PostMessage 0x0114, 1,, "ScrollBar1"    ; WM_HSCROLL SB_LINERIGHT
-
-/* add Loop (integer) for faster scrolling
-+WheelUp:: {
-Loop 3
-    PostMessage 0x0114, 0,, "ScrollBar1"
-}
-
-+WheelDown:: {
-Loop 3
-    PostMessage 0x0114, 1,, "ScrollBar1"
-}
-
+/* Encode url by
+    Example: https://www.google.com/
+    Copy example url to clipboard
+    Triger `UrlEncode` function by typing `url+`
+    Output: https%3A%2F%2Fwww.google.com%2F
 */
 
-;--------
-;    + Copy full path
-; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=61084#p61084
+:*x:url-::Send UrlDecode(A_Clipboard)
 
-^+c:: { ; CTRL + Shift + C
-CallClipboard(2) ; Timeout 2s
-A_Clipboard := A_Clipboard ; change to plain text
-}
-; Example: C:\Program Files\Mozilla Firefox\firefox.exe
-
-;--------
-;    + Copy file names without path
-
-!n:: { ; ALT + N
-CallClipboard(2) ; Timeout 2s
-A_Clipboard := RegExReplace(A_Clipboard, "\w:\\|.+\\") ; remove path
-}
-
-; Example: firefox.exe
-
-;--------
-;    + Copy file names without extension and path
-
-^!n:: { ; CTRL + ALT + N
-CallClipboard(2) ; Timeout 2s
-files := RegExReplace(A_Clipboard, "\w:\\|.+\\")        ; remove path
-files := RegExReplace(files, "\.[\w]+(`r`n|`n)","`n")   ; remove ext, CR
-A_Clipboard := RegExReplace(files, "\.[\w]+$")          ; remove last ext
-}
-
-; Example: firefox
-
-#HotIf
-
-;------------------------------------------------------------------------------
-; Capitalise the first letter of a sentence
-; modified from https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
-
-#HotIf not WinActive("ahk_group CapitaliseFirstLetter") ; exclude 'Save As' dialogue box
-
-~NumpadEnter:: ; triggers ; add or disable one or more as needed
-~Enter::
-~NumpadDot::
-~.::
-~!::
-~?:: {
-cfc1 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
-cfc1.Start
-cfc1.Wait
-If (cfc1.EndReason = "Match") {
-    If (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
-        Send "{Backspace} +" cfc1.Input
-    Else {
-        Send "{Backspace}+" cfc1.Input ; If dot or numdot is the trigger, don't add space, coz typing website address is problematic
-        ; Soundbeep, 1500, 50
-        ; SoundPlay % "C:\Windows\Media\Windows Information Bar.wav"
-        }
-    exit
-    }
-If cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
-    cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
-    cfc2.Start
-    cfc2.Wait
-    If (cfc2.EndReason = "Match")
-        Send "{Backspace}+" cfc2.Input
-    }
-}
-
-#HotIf
-
-; several other AHK v1 auto-capitalisation scripts are good, such as the one linked above
-; and one from computoredge - http://www.computoredge.com/AutoHotkey/Downloads/AutoSentenceCap.ahk
-; and many others that use different methods to achieve this goal. Try a few and see what works for you.
+/* Decode url by
+    Example: https%3A%2F%2Fwww.google.com%2F
+    Copy example url to clipboard
+    Triger `UrlDecode` function by typing `url-`
+    Output: https://www.google.com/
+*/
 
 ;------------------------------------------------------------------------------
 ; User-defined Functions
 
 ;  = Notification Function
 
-MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) { ; search for `ToolTipFunc` for alternative
-Global MyNotification := Gui()
-MyNotification.Opt("+AlwaysOnTop -Caption +ToolWindow")  ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
-MyNotification.BackColor := "EEEEEE"  ; White background, can be any RGB color (it will be made transparent below)
-MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
-MyNotification.Add("Text", "cBlack w230 Left", mytext)  ; black text
-MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
+MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFunc` for alternative
+Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
+MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
+MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
+MyNotification.AddText("cBlack w230 Left", mytext)  ; black text
+MyNotification.Show("x1650 y985 NoActivate")        ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
 If timer = 1
     SetTimer EndMyNotif, myduration * -1
@@ -992,6 +1064,48 @@ Send Len2          ; and select textstring ; sometimes it doesn't work properly 
 }
 
 ;------------------------------------------------------------------------------
+;  = URL Encode/Decode Function
+; Modified from https://www.autohotkey.com/boards/viewtopic.php?style=7&t=116056#p517193
+
+UrlDecode(Url, Enc := "UTF-8") {
+Pos := 1
+Loop {
+    Pos := RegExMatch(Url, "i)(?:%[\da-f]{2})+", &code, Pos++)
+    If (Pos = 0)
+        Break
+    code := code[0]
+    var := Buffer(StrLen(code) // 3, 0)
+    code := SubStr(code, 2)
+    loop Parse code, "`%"
+        NumPut("UChar", Integer("0x" A_LoopField), var, A_Index - 1)
+    Url := StrReplace(Url, "`%" code, StrGet(var, Enc))
+    }
+Return Url
+}
+
+UrlEncode(str, sExcepts := "-_.", enc := "UTF-8") {
+hex := "00", func := "msvcrt\swprintf"
+buff := Buffer(StrPut(str, enc)), StrPut(str, buff, enc)
+encoded := ""
+Loop {
+    If (!b := NumGet(buff, A_Index - 1, "UChar"))
+        break
+    ch := Chr(b)
+    ; "is alnum" is not used because it is locale dependent.
+    If (b >= 0x41 && b <= 0x5A      ; A-Z
+        || b >= 0x61 && b <= 0x7A   ; a-z
+        || b >= 0x30 && b <= 0x39   ; 0-9
+        || InStr(sExcepts, Chr(b), true))
+        encoded .= Chr(b)
+    Else {
+        DllCall(func, "Str", hex, "Str", "%%%02X", "UChar", b, "Cdecl")
+        encoded .= hex
+        }
+    }
+return encoded
+}
+
+;------------------------------------------------------------------------------
 ;  = Control Panel Tools Function
 
 ControlPanelMenuFunc() {
@@ -1006,7 +1120,7 @@ ControlPanelMenu.Add("&6 Sound Mixer (Legacy)"          ,ControlPanelFunc)
 ControlPanelMenu.Add("&7 Registry Editor"               ,ControlPanelFunc)
 ControlPanelMenu.Add("&8 Resource Monitor"              ,ControlPanelFunc)
 ControlPanelMenu.Add("&9 Windows Update"                ,ControlPanelFunc)
-ControlPanelMenu.Add("&0 Windows version"               ,ControlPanelFunc) ; add more with &abc… or &symbols(/*-+)… triggers
+ControlPanelMenu.Add("&0 Windows version"               ,ControlPanelFunc) ; add more triggers using alphabets (abc…) or symbols (/*-+…)
 ControlPanelMenu.Show
 }
 
