@@ -277,6 +277,18 @@ MouseGetPos ,, &id
 WinKill ("ahk_id " id)
 }
 
+; Kill All Instances Of An App with CTRL + ALT + Shift + F4
+^!+F4:: {
+Process_Name := WinGetProcessName("A")
+Result := MsgBox("Kill all instances of this app?`n" Process_Name, A_ScriptName " - WARNING", "YesNo 262144") ; Yes or No buttons ; 262144 Always on top
+If Result = "Yes"
+    Run A_ComSpec ' /C Taskkill /IM "' Process_Name '" /F'
+    ; /C Carries out the command and then terminates
+    ; open dialogue (Win + R), paste & run "cmd.exe /?" to see other flags
+    ; /IM imagename ;  /F forcefully terminate
+    ; open dialogue (Win + R), paste & run "cmd.exe", paste "Taskkill /?" (without the quotation marks) and press enter to see other flags, filters and examples
+}
+
 ;------------------------------------------------------------------------------
 ;  = Adjust Window Transparency keys
 ; Modified from https://www.autohotkey.com/board/topic/667-transparent-windows/?p=148102
