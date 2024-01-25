@@ -100,7 +100,7 @@ ToggleOSCheck                                 ; Check registry value of ShowSupe
 
 I_Icon := A_ScriptDir "\icons\1-512.ico"
 ; Icon source: https://www.iconsdb.com/caribbean-blue-icons/1-icon.html     ; CC License
-; I like to number scripts 1, 2, 3... and link the scripts to numpad shortcuts for easy editing
+; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing
 If FileExist(I_Icon)
     TraySetIcon I_Icon
 
@@ -137,21 +137,21 @@ Return ; Ends auto-execute
 ;------------------------------------------------------------------------------
 ; Hotkeys
 
-; ^ is Control / CTRL key
-; ! is ALT key
+; ^ is Control / Ctrl key
+; ! is Alt key
 ; # is Windows / Win key
 ; + is Shift key
 
 ;  = Check & Reload AHK
 
-!Numpad1:: { ; CTRL & Numpad1 keys pressed together
+!Numpad1:: { ; Ctrl + Numpad1 keys pressed together
 ListLines
-If WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, timeout 3s
+If WinWait(".ahk - AutoHotkey v",, 3) ; wait for ListLines window to open, timeout 3s
     WinMaximize
 }
 
-^!Numpad1:: { ; CTRL & ALT & Numpad1 keys pressed together
-MyNotificationFunc("Updating AHK v2 #1 Showcase", "500", "1550", "985", "0") ; use sleep coz reload cancels timers
+^!Numpad1:: { ; Ctrl + Alt + Numpad1 keys pressed together
+MyNotificationFunc("Updating AHK v2 #1 Showcase", "500", "1550", "985", "0") ; use Sleep coz reload cancels timers
 Reload
 }
 
@@ -180,11 +180,11 @@ NumpadIns::
 
 ; Note: ^Insert = Copy(^c) as Windows default - this behaviour is not changed by the above
 
-LWin & Tab::AltTab ; Left WIN key works as left ALT key - disables taskview
+LWin & Tab::AltTab ; Left Win key works as left Alt key - disables taskview
 
-RAlt::!Space       ; ALT + space brings up window menu
+RAlt::!Space       ; Alt + space brings up window menu
 
-^RCtrl::MButton    ; press Left & Right CTRL button to simulate mouse Middle Click
+^RCtrl::MButton    ; press Left & Right Ctrl button to simulate mouse Middle Click
 
 RCtrl & Up::Send "{PgUp}"       ; Page up"
 RCtrl & Down::Send "{PgDn}"     ; Page down
@@ -224,7 +224,7 @@ Media_Next::End
 +CapsLock:: {
 SetCapsLockState "On"
 MyNotificationFunc("CapsLock ON", "10000", "960", "985", "1")   ; 10000ms = 10s, change to match KeyWait timeout if needed
-SetTimer CapsWait, -100 ; 100ms ; add settimer to move KeyWait to new thread and prevent current thread from being paused
+SetTimer CapsWait, -100 ; 100ms ; add SetTimer to move KeyWait to new thread and prevent current thread from being paused
 }
 
 CapsWait() { ; runs in new thread and allows for quick toggling of CapsLock-state with +CapsLock / CapsLock / ESC keys in current thread
@@ -262,7 +262,7 @@ If (GetKeyState("Capslock", "T")) {
 ; other methods to quit app - https://www.xda-developers.com/how-force-quit-applications-windows/
 ; also, see section "Close With Esc/Q/W keys"
 
-Alt & RButton:: { ; ALT + right mouse button ; attempt to close window
+Alt & RButton:: { ; Alt + right mouse button ; attempt to close window
 MouseGetPos ,, &id
 winClass := WinGetClass("ahk_id " id)
 If (winClass != "Shell_TrayWnd")   ; exclude windows taskbar
@@ -271,16 +271,28 @@ If (winClass != "Shell_TrayWnd")   ; exclude windows taskbar
     ; PostMessage 0x0112, 0xF060,,, "ahk_id " id ; alternative - same as pressing Alt+F4 or clicking a window's close button in its title bar
 }
 
-; Kill window with CTRL + ALT + F4, usually unresponsive ones if WinClose fails
+; Kill window with Ctrl + Alt + F4, usually unresponsive ones if WinClose fails
 ^!F4:: {
 MouseGetPos ,, &id
 WinKill ("ahk_id " id)
 }
 
-; Kill All Instances Of An App with CTRL + ALT + Shift + F4
+; Kill All Instances Of An App with Ctrl + Alt + Shift + F4
 ^!+F4:: {
 Process_Name := WinGetProcessName("A")
-Result := MsgBox("Kill all instances of this app?`n" Process_Name, A_ScriptName " - WARNING", "YesNo 262144") ; Yes or No buttons ; 262144 Always on top
+Display := "Kill all instances of this app?`n`n"    ; `n = new line
+         . "Name of process:`t" Process_Name        ; `t = tab
+         . "`n`Path of process:`t" WinGetProcessPath("ahk_exe " Process_Name)
+         . "`n`nNo. of visible windows: " WinGetCount("ahk_exe " Process_Name) ; no of windows ≠ no of processes
+         . "`nTitles of visible windows:`n    "     ; 4 spaces to add indent
+         .  GetTitles(WinGetList("ahk_exe " Process_Name))
+DetectHiddenWindows True
+Display .= "`nNo. of all windows: " WinGetCount("ahk_exe " Process_Name) " (incl. hidden)"
+         .  "`nTitles of all windows:`n    "
+         .  GetTitles(WinGetList("ahk_exe " Process_Name))
+DetectHiddenWindows False ; default
+Result := MsgBox(Display, A_ScriptName " - WARNING", "Icon! YesNo Default2 262144")
+; add Exclamation icon ; Yes or No buttons ; make No the default button to ensure explicit consent for TaskKill ; 262144 Always on top
 If Result = "Yes"
     Run A_ComSpec ' /C Taskkill /IM "' Process_Name '" /F'
     ; /C Carries out the command and then terminates
@@ -289,24 +301,35 @@ If Result = "Yes"
     ; open dialogue (Win + R), paste & run "cmd.exe", paste "Taskkill /?" (without the quotation marks) and press enter to see other flags, filters and examples
 }
 
+GetTitles(HWNDs) {
+temp := ""
+Loop HWNDs.Length {
+    t := WinGetTitle(HWNDs[A_Index])
+    If t = ""
+        temp .= A_Index " = #No Title`n    "
+    Else temp .= A_Index " = " t "`n    "
+    }
+    Return temp
+}
+
 ;------------------------------------------------------------------------------
 ;  = Adjust Window Transparency keys
 ; Modified from https://www.autohotkey.com/board/topic/667-transparent-windows/?p=148102
 
 ^+WheelUp:: {           ; increases Trans value, makes the window more opaque
 Trans := GetTrans()
-If(Trans < 255)
+If Trans < 255
     Trans := Trans + 20 ; add 20, change for slower/faster transition
-If(Trans >= 255)
+If Trans >= 255
     Trans := "Off"
 SetTrans(Trans)
 }
 
 ^+WheelDown:: {         ; decreases Trans value, makes the window more transparent
 Trans := GetTrans()
-If(Trans > 30)
+If Trans > 30
     Trans := Trans - 20 ; subtract 20, change for slower/faster transition
-If(Trans < 21)
+If Trans < 21
     Trans := 1          ; never set to zero, causes ERROR
 SetTrans(Trans)
 }
@@ -316,7 +339,7 @@ F8::SetTransMenuFunc
 ;------------------------------------------------------------------------------
 ;  = Recycle Bin shortcut
 
-^del:: {
+^Del:: {
 If WinActive("Recycle Bin ahk_class CabinetWClass")         ; If windows file explorer is active and recycle bin is in the foreground, empty Bin
     FileRecycleEmpty
 Else If WinExist("Recycle Bin ahk_class CabinetWClass")     ; If explorer is showing recycle bin but is in the background, activate it
@@ -324,16 +347,16 @@ Else If WinExist("Recycle Bin ahk_class CabinetWClass")     ; If explorer is sho
 /* ; If explorer is open but not showing recycle bin, change to Bin (disabled, uncomment if desired)
 Else If WinExist("ahk_class CabinetWClass") {
     WinActivate
-    If WinWaitActive(, , 2) { ; = Sleep 1000, but sends next command as soon as activated, instead of waiting for the full 1000ms period
+    If WinWaitActive(,, 2) { ; = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
         Send "{F4}"
-        While (ControlGetClassNN(ControlGetFocus("A")) != "Microsoft.UI.Content.DesktopChildSiteBridge1") { ; = Sleep 500 ; sleep until focus is on address bar, max 500ms
+        While (ControlGetClassNN(ControlGetFocus("A")) != "Microsoft.UI.Content.DesktopChildSiteBridge1") { ; = Sleep 500 ; wait until focus is on address bar, max 500ms
             Sleep 100
             If (A_Index > 5) {
                 Tool_TipFunc(A_ThisHotkey ":: Failed to focus address bar", -1000) ; 1s
-                exit
+                Exit
                 }
             }
-        Send "{raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
+        Send "{Raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
         }
     }
 */
@@ -346,7 +369,7 @@ Else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"         ; If explorer is not
 
 ^Esc:: {
 ; Sleep 1000  ; Give user a chance to release keys (in case their release would wake up the monitor again)
-KeyWait "Esc", "T1"     ; use KeyWait instead of sleep for faster execution
+KeyWait "Esc", "T1"     ; use KeyWait instead of Sleep for faster execution
 KeyWait "Control", "T1"
 Sleep 100
 SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
@@ -360,16 +383,16 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 ;--------
 ;  = Change Text Case
 
-!c::ChangeCaseMenuFunc      ; ALT + C
+!c::ChangeCaseMenuFunc      ; Alt + C
 
 ;--------
 ;  = Wrap Text In Quotes or Symbols keys
 
 #HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below in apps that don't use it or have conflicts - example: Media Player Classic - Home Cinema
 
-!q::WrapTextMenuFunc ; ALT + Q
+!q::WrapTextMenuFunc ; Alt + Q
 
-; WrapText Keys - ALT + number row
+; WrapText Keys - Alt + number row
 !1::EncText("`'","`'")      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
 !2::EncText('`"','`"')      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
 !3::EncText("(",")")        ; enclose in round breackets ()
@@ -388,7 +411,7 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 ; place cursor between 2 letters. The letters reverse positions - `ab|c` becomes `ac|b`.
 ; Modified from http://www.computoredge.com/AutoHotkey/Downloads/LetterSwap.ahk
 
-$!l:: { ; ALT + L
+$!l:: { ; Alt + L
 Send "{Left}+{Right 2}"
 CallClipboard(2) ; 2s
 SwappedLetters := SubStr(A_Clipboard,2) SubStr(A_Clipboard,1,1)
@@ -400,13 +423,13 @@ A_Clipboard := clipSave ; restore Clipboard contents
 ;  = Toggle Window On Top
 ; Modified from https://www.autohotkey.com/board/topic/94627-button-for-always-on-top/?p=596509
 
-!t:: {                          ; ALT + t
+!t:: {                          ; Alt + t
 Title_When_On_Top := "! "       ; change title "! " as required
 t := WinGetTitle("A")
 ExStyle := WinGetExStyle(t)
 If (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
     WinSetAlwaysOnTop 0, t      ; Turn OFF and remove Title_When_On_Top
-    WinSetTitle (RegexReplace(t, Title_When_On_Top)), "A"
+    WinSetTitle (RegExReplace(t, Title_When_On_Top)), "A"
     }
 Else {
     WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
@@ -454,12 +477,12 @@ SetPriority(*) {
 
 #HotIf WinActive("ahk_class MozillaWindowClass") ; main window ; excludes other dialogue boxes like "Save As" from ahk_exe firefox.exe
 
-^+o:: {      ; CTRL + Shift + O to open library / bookmark manager
+^+o:: {      ; Ctrl + Shift + O to open library / bookmark manager
 If WinActive(" — Mozilla Firefox") ; If not new tab, then open new one
     Send "^t"
 Else Send "^l"  ; If new tab, focus address bar
 Sleep 500       ; wait for focus - change as per your system performance
-Send "{raw}chrome://browser/content/places/places.xhtml`n" ; `n = {enter}
+Send "{Raw} chrome://browser/content/places/places.xhtml`n" ; `n = {Enter}
 }
 
 ^+q::Return     ; disable Exit shortcut
@@ -503,7 +526,7 @@ Loop 3
 ;    + Copy full path
 ; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=61084#p61084
 
-^+c:: { ; CTRL + Shift + C
+^+c:: { ; Ctrl + Shift + C
 CallClipboard(2) ; Timeout 2s
 A_Clipboard := A_Clipboard ; change to plain text
 }
@@ -512,7 +535,7 @@ A_Clipboard := A_Clipboard ; change to plain text
 ;--------
 ;    + Copy file names without path
 
-!n:: { ; ALT + N
+!n:: { ; Alt + N
 CallClipboard(2) ; Timeout 2s
 A_Clipboard := RegExReplace(A_Clipboard, "\w:\\|.+\\") ; remove path
 }
@@ -522,7 +545,7 @@ A_Clipboard := RegExReplace(A_Clipboard, "\w:\\|.+\\") ; remove path
 ;--------
 ;    + Copy file names without extension and path
 
-^!n:: { ; CTRL + ALT + N
+^!n:: { ; Ctrl + Alt + N
 CallClipboard(2) ; Timeout 2s
 files := RegExReplace(A_Clipboard, "\w:\\|.+\\")        ; remove path
 files := RegExReplace(files, "\.[\w]+(`r`n|`n)","`n")   ; remove ext, CR
@@ -548,25 +571,25 @@ A_Clipboard := RegExReplace(files, "\.[\w]+$")          ; remove last ext
 ~.::
 ~!::
 ~?:: {
-cfc1 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
+cfc1 := InputHook("L1 V C","{Space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
 cfc1.Start
 cfc1.Wait
 If (cfc1.EndReason = "Match") {
     If (A_ThisHotkey = "~!" || A_ThisHotkey = "~?") ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
-        Send "{Backspace} +" cfc1.Input
+        Send "{BS} +" cfc1.Input
     Else {
-        Send "{Backspace}+" cfc1.Input ; If dot or numdot is the trigger, don't add space, coz typing website address is problematic
+        Send "{BS}+" cfc1.Input ; If dot or numdot is the trigger, don't add space, coz typing website address is problematic
         ; Soundbeep, 1500, 50
         ; SoundPlay % "C:\Windows\Media\Windows Information Bar.wav"
         }
-    exit
+    Exit
     }
 If cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
-    cfc2 := InputHook("L1 V C","{space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
+    cfc2 := InputHook("L1 V C","{Space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
     cfc2.Start
     cfc2.Wait
     If (cfc2.EndReason = "Match")
-        Send "{Backspace}+" cfc2.Input
+        Send "{BS}+" cfc2.Input
     }
 }
 
@@ -582,7 +605,7 @@ If cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Ex
 #HotIf WinActive("ahk_group CloseWithQW")
 
 Esc::WinClose("A")                     ; sends a WM_CLOSE message to the target window
-^q::!F4                                ; sends ALT + F4
+^q::!F4                                ; sends Alt + F4
 ; ^w::PostMessage 0x0112, 0xF060,,, "A"  ; same as Alt + F4 or clicking a window's close button in its title bar
 
 #HotIf
@@ -597,7 +620,7 @@ Esc::WinClose("A")                     ; sends a WM_CLOSE message to the target 
 ; default method
 
 +WheelUp::SendMessage 0x0114, 0, 0, ControlGetFocus("A")        ; scroll left - 0x114 is WM_HSCROLL, 0 is SB_LINELEFT
-+WheelDown::SendMessage 0x0114, 1, 0, ControlGetFocus("A")      ; scroll right - 1 is SB_LINERIGHT ; same as loop 1
++WheelDown::SendMessage 0x0114, 1, 0, ControlGetFocus("A")      ; scroll right - 1 is SB_LINERIGHT ; same as Loop 1
 
 /* (disabled - uncomment if needed)
 
@@ -680,7 +703,7 @@ see the section under " + Horizontal Scrolling"
 ; :?*:\::{U+FF3C}                     ; \ → ＼ | replace U+005C REVERSE SOLIDUS : backslash            → U+FF3C FULLWIDTH REVERSE SOLIDUS   ; disabled
 
 :?*:/::{U+29F8}                     ; / → ⧸  | replace U+002F SOLIDUS : slash, forward slash, virgule → U+29F8 BIG SOLIDUS
-:?*b0::+::{bs}{U+FF1A}              ; : → ：  | replace U+003A COLON                                  → U+FF1A FULLWIDTH COLON
+:?*b0::+::{BS}{U+FF1A}              ; : → ：  | replace U+003A COLON                                  → U+FF1A FULLWIDTH COLON
 :?*:*::{U+2732}                     ; * → ✲ | replace U+002A ASTERISK : star                         → U+2732 OPEN CENTRE ASTERISK
 :?*:?::{U+FF1F}                     ; ? → ？ | replace U+003F QUESTION MARK                          → U+FF1F FULLWIDTH QUESTION MARK
 :?*:"::{U+FF02}                     ; " → ＂ | replace U+0022 QUOTATION MARK : double quote          → U+FF02 FULLWIDTH QUOTATION MARK
@@ -800,7 +823,7 @@ Line2 "dvvbvvoe df"
 ;  = Notification Function
 
 MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFunc` for alternative
-Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
+Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
 MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
 MyNotification.AddText("cBlack w230 Left", mytext)  ; black text
@@ -840,9 +863,9 @@ Else { ; disable if enabled
 
 CheckRegWrite(key) { ; check if RegWrite was success
 If key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
-    MsgBox "ToggleOS Failed", , "262144" ; 262144 = Always-on-top
+    MsgBox "ToggleOS Failed",, "262144" ; 262144 = Always-on-top
     ; Tool_TipFunc("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
-    ; exit
+    ; Exit
 }
 
 ToggleOSCheck() { ; tray tick mark
@@ -881,7 +904,7 @@ MouseGetPos ,, &WinID
 Trans := WinGetTransparent("ahk_id " WinID)
 If(!Trans)
     Trans := 255
-return Trans
+Return Trans
 }
 
 SetTrans(Transparency) {
@@ -981,7 +1004,7 @@ If !ClipWait(secs) {
 }
 
 CallClipboard(secs) {
-Global clipSave := ClipboardAll() ; Global = return clipSave
+Global clipSave := ClipboardAll() ; Global = Return clipSave
 A_Clipboard := ""
 Send "^c"
 If !ClipWait(secs) {
@@ -1055,7 +1078,7 @@ TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remov
 TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`  ; customise as your needs in WrapTextMenuFunc and WrapText Keys
 TextString := q TextString p
 TextString := StrReplace(TextString, "`n" p, p)
-Len1 := Strlen(TextString)
+Len1 := StrLen(TextString)
 
 ; If you regularly include leading/trailing spaces within quotes, comment out above RegEx and below If statements
 If (RegExMatch(TextStringInitial, "^\s+")) {   ; If initial string has Leading space
@@ -1068,7 +1091,7 @@ If (RegExMatch(TextStringInitial, "\s+$")) {   ; If initial string has Trailing 
     }
 
 Len2 := "+{left " Len1 "}"
-; Send "{raw}" TextString    ; send string with quotes
+; Send "{Raw}" TextString    ; send string with quotes
 A_Clipboard := TextString    ; pasting from clipboard is faster than send raw, especially for long strings
 Send "^v"
 Send Len2          ; and select textstring ; sometimes it doesn't work properly for unknown reasons :shrug:
@@ -1088,7 +1111,7 @@ Loop {
     code := code[0]
     var := Buffer(StrLen(code) // 3, 0)
     code := SubStr(code, 2)
-    loop Parse code, "`%"
+    Loop Parse code, "`%"
         NumPut("UChar", Integer("0x" A_LoopField), var, A_Index - 1)
     Url := StrReplace(Url, "`%" code, StrGet(var, Enc))
     }
@@ -1101,20 +1124,20 @@ buff := Buffer(StrPut(str, enc)), StrPut(str, buff, enc)
 encoded := ""
 Loop {
     If (!b := NumGet(buff, A_Index - 1, "UChar"))
-        break
+        Break
     ch := Chr(b)
     ; "is alnum" is not used because it is locale dependent.
     If (b >= 0x41 && b <= 0x5A      ; A-Z
         || b >= 0x61 && b <= 0x7A   ; a-z
         || b >= 0x30 && b <= 0x39   ; 0-9
-        || InStr(sExcepts, Chr(b), true))
+        || InStr(sExcepts, Chr(b), True))
         encoded .= Chr(b)
     Else {
         DllCall(func, "Str", hex, "Str", "%%%02X", "UChar", b, "Cdecl")
         encoded .= hex
         }
     }
-return encoded
+Return encoded
 }
 
 ;------------------------------------------------------------------------------
@@ -1140,7 +1163,7 @@ ControlPanelFunc(item, position, ControlPanelMenu) {
 If position = 1
     ComObject("shell.application").ControlPanelItem("control")      ; Control Panel
 If position = 2
-    run 'explorer.exe "ms-settings:appsfeatures"'                   ; Installed Apps ; Modern Add/Remove Programs
+    Run 'explorer.exe "ms-settings:appsfeatures"'                   ; Installed Apps ; Modern Add/Remove Programs
 If position = 3
     ComObject("shell.application").ControlPanelItem("appwiz.cpl")   ; Add/Remove Programs ; Legacy Control Panel
 If position = 4
@@ -1154,7 +1177,7 @@ If position = 7
 If position = 8
     ComObject("shell.application").ControlPanelItem("resmon.exe")   ; Resource Monitor
 If position = 9
-    run 'explorer.exe "ms-settings:windowsupdate"'                  ; Windows Update
+    Run 'explorer.exe "ms-settings:windowsupdate"'                  ; Windows Update
 If position = 10
     ComObject("shell.application").ControlPanelItem("winver")       ; Windows version
 }
@@ -1166,20 +1189,20 @@ Modified from https://www.autohotkey.com/boards/viewtopic.php?p=24584#p24584
 ; Already in Win + X menu
 ComObject("shell.application").ControlPanelItem("compmgmt.msc")    ; #x   | Computer Management
 ComObject("shell.application").ControlPanelItem("devmgmt.msc")     ; #x   | Device Manager
-ComObject("shell.application").ControlPanelItem("hdwwiz.cpl")      ; #x   | Device Manager ; alt
+ComObject("shell.application").ControlPanelItem("hdwwiz.cpl")      ; #x   | Device Manager ; alternative
 ComObject("shell.application").ControlPanelItem("diskmgmt.msc")    ; #x   | Disk Management
 ComObject("shell.application").ControlPanelItem("eventvwr.msc")    ; #x   | Event Viewer
 
 ; Added to Control Panel Tools function
 ComObject("shell.application").ControlPanelItem("control")         ; Control Panel
-run 'explorer.exe "ms-settings:appsfeatures"'                      ; Installed Apps ; Modern Add/Remove Programs
+Run 'explorer.exe "ms-settings:appsfeatures"'                      ; Installed Apps ; Modern Add/Remove Programs
 ComObject("shell.application").ControlPanelItem("appwiz.cpl")      ; Add/Remove Programs ; Legacy Control Panel
 ComObject("shell.application").ControlPanelItem("dfrgui")          ; Defragment Interface
 ComObject("shell.application").ControlPanelItem("services.msc")    ; Services
 ComObject("shell.application").ControlPanelItem("sndvol")          ; Sound Mixer (Legacy)
 ComObject("shell.application").ControlPanelItem("regedit")         ; Registry Editor
 ComObject("shell.application").ControlPanelItem("resmon.exe")      ; Resource Monitor
-run 'explorer.exe "ms-settings:windowsupdate"'                     ; Windows Update
+Run 'explorer.exe "ms-settings:windowsupdate"'                     ; Windows Update
 ComObject("shell.application").ControlPanelItem("winver")          ; Windows version
 
 Run '"::{21EC2020-3AEA-1069-A2DD-08002B30309D}"',,"Max"            ; Control Panel (view: small icons) ; alternate
