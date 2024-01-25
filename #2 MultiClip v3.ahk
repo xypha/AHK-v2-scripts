@@ -58,7 +58,7 @@ PasteCStrings(20)
 
 I_Icon := A_ScriptDir "\icons\2-512.ico"
 ; Icon source: https://www.iconsdb.com/caribbean-blue-icons/2-icon.html     ; CC License
-; I like to number scripts 1, 2, 3... and link the scripts to numpad shortcuts for easy editing
+; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing
 If FileExist(I_Icon)
     TraySetIcon I_Icon
 
@@ -72,13 +72,13 @@ Return
 
 ;  = Check & Reload AHK
 
-!Numpad2:: { ; CTRL & Numpad2 keys pressed together
+!Numpad2:: { ; Ctrl + Numpad2 keys pressed together
 ListLines
-If WinWait(".ahk - AutoHotkey v", , 3) ; wait for listlines window to open, timeout 3s
+If WinWait(".ahk - AutoHotkey v",, 3) ; wait for ListLines window to open, timeout 3s
     WinMaximize
 }
 
-^!Numpad2:: { ; CTRL & ALT & Numpad2 keys pressed together
+^!Numpad2:: { ; Ctrl + Alt + Numpad2 keys pressed together
 MyNotificationFunc("Updating AHK v2 #2 MultiClip v3", "500", "1550", "945", "0") ; use sleep coz reload cancels timers
 Reload
 }
@@ -90,7 +90,7 @@ Reload
 
 :?*x:v0+::PasteV(10) ; same as v10+ = j10
 
-:?*x:c++::Send "{raw}" ClipArr.Get(1) ; Send first entry in raw mode, useful when CTRL + V is disabled such as on banking sites
+:?*x:c++::Send "{Raw}" ClipArr.Get(1) ; Send first entry in raw mode, useful when Ctrl + V is disabled such as on banking sites
 
 :?*x:c0+::PasteC(10) ; same as c10+
 
@@ -102,7 +102,7 @@ Reload
 ;  = Notification Function
 
 MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFunc` for alternative
-Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
+Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
 MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
 MyNotification.AddText("cBlack w230 Left", mytext)  ; black text
@@ -160,9 +160,10 @@ ClipArr.InsertAt(1, Cliptemp)
 ; not for associative arrays
 
 HasVal(haystack, needle) {
-; If !(IsObject(haystack)) || (haystack.Length() = 0)
-;   return -1
-; optimise above code to your needs after reading lexikos' comment - https://www.autohotkey.com/boards/viewtopic.php?p=110388#p110388
+/* ; optimise this code to your needs after reading lexikos' comment - https://www.autohotkey.com/boards/viewtopic.php?p=110388#p110388
+If !(IsObject(haystack)) || (haystack.Length() = 0)
+  Return -1
+*/
 For index, value in haystack
     If (value == needle) ; case-sensitive
         Return index
@@ -180,41 +181,43 @@ Loop number {
     }
 }
 
-; use loop to replace similar hotstrings
-; :?*:v1+::
-; .
-; .
-; .
-; :?*:v20+:: {
-; PasteV(ThisHotkey)
-; }
+/* use loop to replace similar hotstrings
+:?*:v1+::
+.
+.
+.
+:?*:v20+:: {
+PasteV(ThisHotkey)
+}
+*/
 
 PasteV(hk) {
 RegExMatch(hk, "\d+", &SubPat)
 hkey := SubPat[]
 Try PasteThis(ClipArr.Get(hkey))
-; Try send ClipArr.Get(hkey) ; alternative
+; Try Send ClipArr.Get(hkey) ; alternative
 }
 
 ;    + PasteCStrings
 
 PasteCStrings(number) {
 Loop number {
-    If A_Index = 1  ; do not create c1+ hotstring, already assigned to "{raw}" ClipArr.Get(1) 
+    If A_Index = 1  ; do not create c1+ hotstring, already assigned to "{Raw}" ClipArr.Get(1) 
         Continue
     Hotstring(":?*x:c" A_Index "+", PasteC)
     }
 }
 
-; :?*:c0+:: ; same as c10
-; :?*:c2+::
-; .
-; .
-; .
-; :?*:c20+:: {
-; PasteC(ThisHotkey)
-; }
-
+/* use loop to replace similar hotstrings
+:?*:c0+:: ; same as c10
+:?*:c2+::
+.
+.
+.
+:?*:c20+:: {
+PasteC(ThisHotkey)
+}
+*/
 
 PasteC(hk) {
 RegExMatch(hk, "\d+", &SubPat)
@@ -280,6 +283,7 @@ PasteThis(ClipArr.Get(position))
 ;------------------------------------------------------------------------------
 ;  = Paste instead of Send - PasteThis Function
 ; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=483549#p483549 and https://www.autohotkey.com/boards/viewtopic.php?p=483588#p483588
+; alternative to inbuilt command - EditPaste String, Control [, WinTitle, WinText, ExcludeTitle, ExcludeText]
 
 PasteThis(pasteText) {
 If (A_Clipboard !== pasteText) {
