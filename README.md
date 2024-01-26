@@ -1,14 +1,14 @@
 # AHK v2 scripts  
 
-[AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts with examples of commonly used commands, shortcut keys and several small functions for various uses, written in AHK v2. 
+  [AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts with examples of useful applications, commonly used commands, shortcut keys and several small functions, written in AHK v2. 
 
-I'm not a programmer, but I am learning to script in AHK v2... slowly :)  
-Any help would be appreciated. Suggestions for improving the script code are welcome.  
+  I'm not a programmer, but I am learning to script in AHK v2... slowly :)  
+  Any help would be appreciated. Suggestions for improving the script code are welcome.  
 
 -----------------
 ### Script No. 0 Template
   [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Template.ahk) to template script.  
-  <sub>Last updated (yyyy.mm.dd) - 2024.01.19</sub>
+  <sub>Last updated (yyyy.mm.dd) - 2024.01.26</sub>
 
 #### **Notification Function**
   Create a personalised alert that replaces the depreciated `Progress` command from AHK v1. The alert is written in AHK v2 and uses the `GUI()` function. It allows you to customise the notification's `text, duration and position`. 
@@ -16,15 +16,15 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 -----------------
 ### Script No. 1 Showcase
 
-  All in one script - [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk)  
-  <sub>Last updated - 2024.01.23</sub>
+  [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk) to all-in-one script.  
+  <sub>Last updated - 2024.01.26</sub>
 
 #### CONTENTS
 
   | Title                          | Standalone | Last Updated |
   | :---                           |    :---:   |     ---:     |
-  | Set default state of Lock keys | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Set%20default%20state%20of%20lock%20keys.ahk) | 2024.01.22 |
-  | Show/Hide OS files             | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Show%E2%A7%B8Hide%20OS%20files) | 2024.01.22 |
+  | Set default state of Lock keys | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Set%20default%20state%20of%20lock%20keys.ahk) | 2024.01.26 |
+  | Show/Hide OS files             | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Show%E2%A7%B8Hide%20OS%20files) | 2024.01.26 |
 
   Standalone scripts for each remaining function will be created soon.
 
@@ -207,11 +207,13 @@ Any help would be appreciated. Suggestions for improving the script code are wel
 
 -----------------
 ### Script No. 2 MultiClip
-[Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%232%20MultiClip%20v3.ahk) to script.
+  
+  [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%232%20MultiClip%20v3.ahk) to script.  
+  <sub>Last updated - 2024.01.25</sub>
 
-This script was created as a rudimentary alternative to PhraseExpress's [clipboard management](https://www.phraseexpress.com/doc/features/clipboard-manager/) function with inspiration from several v1 scripts, including [ClipStep](https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/) and GeekDrop's [Convert Case Cycle](https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes).  
+  This script was created as a rudimentary alternative to PhraseExpress's [clipboard management](https://www.phraseexpress.com/doc/features/clipboard-manager/) function with inspiration from several v1 scripts, including [ClipStep](https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/) and GeekDrop's [Convert Case Cycle](https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes).  
 
-The script does the following -  
+  The script does the following -  
  * `ClipArr` contains 20 slots by default, but can be customised to any number - from 1 to infinity.
  * Hitting `^c` (Copy / `CTRL + C`) or `^x` (Cut / `CTRL + X`) triggers `OnClipboardChange` and saves text[^1] to a slot in clipboard array (`ClipArr`).
  * Hitting `^c` or `^x` a second time moves previously saved text to the next slot and copies the newly selected text to the first slot in `ClipArr`.
@@ -226,4 +228,4 @@ The script does the following -
 
 ![MultiClip pop-up menu `p++` with test array](https://github.com/xypha/AHK-v2-scripts/assets/12472214/32329607-bf4e-436b-b115-ce1919ab6bc1)
 
-An earlier version of MultiClip (AHK v1 script) can be found [here](https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658).
+  An earlier version of MultiClip (AHK v1 script) can be found [here](https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658).
