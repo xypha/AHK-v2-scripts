@@ -35,7 +35,7 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #2 MultiClip v4.00"
+AHKname := "AHK v2 #2 MultiClip v4.01"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationFunc("Loading " AHKname, "10000", "1550", "945", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -208,7 +208,8 @@ SaveClipArr(*) {
 Result := ""
 Loop ClipArr.Length
     Result .= ClipArr.Get(A_Index) delim
-FileRecycle ClipArrFile         ; send old file to recycle bin
+If FileExist(ClipArrFile)       ; check if file exists
+    FileRecycle ClipArrFile     ; send old file to recycle bin
 FileAppend Result, ClipArrFile  ; create new file and save current cliparr contents
 }
 
@@ -284,6 +285,8 @@ PasteThis(Result)
 ClipMenuFunc(FuncName) {
 Global ClipMenu := Menu()
 ClipMenu.Delete
+
+; populate slots
 ClipMenu.Add("&1  = "   ClipTrimFunc(1)   ,FuncName) ; Customise the shortcuts by altering the character after `&` in lines containing `ClipMenu.Add`
 ClipMenu.Add("&2  = "   ClipTrimFunc(2)   ,FuncName) ; Explantation: 
 ClipMenu.Add("&3  = "   ClipTrimFunc(3)   ,FuncName) ; When the menu is displayed, a character preceded by an ampersand (&) can be selected by pressing the corresponding key on the keyboard.
@@ -304,6 +307,13 @@ ClipMenu.Add("&m = "    ClipTrimFunc(17)  ,FuncName) ; number of spaces between 
 ClipMenu.Add("&,    = " ClipTrimFunc(18)  ,FuncName) ; and can be changed to reflect your system font and display settings
 ClipMenu.Add("&.    = " ClipTrimFunc(19)  ,FuncName)
 ClipMenu.Add("&/   = "  ClipTrimFunc(20)  ,FuncName)
+/* ; alternative method to populate slots without shortcuts and messing around with spaces
+Loop 20 {
+    ClipMenu.Add(A_Index " = " ClipTrimFunc(A_Index), FuncName)
+    }
+*/
+
+; show pop-up menu
 ClipMenu.Show
 }
 
@@ -312,9 +322,8 @@ Try ClipArr.Get(number)
 Catch IndexError {
     ClipArr.InsertAt(number, "")
     Return ""
-    }
-Else ClipTrim := SubStr(ClipArr.Get(number), 1, 60)
-Return ClipTrim
+    } 
+Return SubStr(ClipArr.Get(number), 1, 60)
 }
 
 ;--------
@@ -405,6 +414,12 @@ ClipMenuFunc(SendClipFunc)  ; show menu - ClipMenu
 ; ChangeLog
 
 /*
+
+v4.01 - 2024.01.27
+ * remove version from file name
+ * add alternative method to populate slots in ClipMenu
+ * remove unnecessary variable `ClipTrim` from `ClipTrimFunc`
+ * add `FileExist` command to `SaveClipArr` to prevent error on first exit
 
 v4.00 - 2024.01.27
  * add variable `AHKname` for versioning and updation of name in template and standalone scripts
