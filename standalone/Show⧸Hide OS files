@@ -15,38 +15,41 @@
 #SingleInstance force
 #WinActivateForce
 KeyHistory 500
-Persistent                                    ; uncomment for standalone AHK to prevent auto exit
+Persistent                 ; added for standalone AHKs to prevent auto-exit
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
+; This section should always be at the top of your script
 
-MyNotificationFunc("Loading - Show/Hide OS files", "10000", "1650", "985", "1") ; 10s
+; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
+MyNotificationFunc("Loading AHK v2 Show/Hide OS files", "10000", "1650", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Show/Hide OS files
 
-A_TrayMenu.Delete                             ; delete standard menu
+A_TrayMenu.Delete                             ; Delete standard menu
 A_TrayMenu.Add "&Toggle OS files", ToggleOS   ; User-defined Function
-A_TrayMenu.Add                                ; add a separator
-A_TrayMenu.AddStandard                        ; restore standard menu
-ToggleOSCheck                                 ; check value of ShowSuperHidden_Status
+A_TrayMenu.Add                                ; Add a separator
+A_TrayMenu.AddStandard                        ; Restore standard menu
+ToggleOSCheck                                 ; Check registry value of ShowSuperHidden_Status
 
 ;  = End auto-execute
 
-SetTimer EndMyNotif, -1000 ; reset timer to 1s
-Return
+SetTimer EndMyNotif, -1000 ; Reset notification timer to 1s after code in auto-execute section has finished running
+Return ; Ends auto-execute
+
+; Below code can be placed anywhere in your script
 
 ;------------------------------------------------------------------------------
 ; User-defined Functions
 
 ;  = Notification Function
 
-MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {
-Global MyNotification := Gui()
-MyNotification.Opt("+AlwaysOnTop -Caption +ToolWindow")  ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
-MyNotification.BackColor := "EEEEEE"  ; White background, can be any RGB color (it will be made transparent below)
-MyNotification.SetFont("s9 w1000", "Arial")  ; font size 9, bold
-MyNotification.Add("Text", "cBlack w181 Left", mytext)  ; black text
-MyNotification.Show("x1650 y985 NoActivate")  ; NoActivate avoids deactivating the currently active window
+MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFunc` for alternative
+Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
+MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
+MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
+MyNotification.AddText("cBlack w230 Left", mytext)  ; black text
+MyNotification.Show("x1650 y985 NoActivate")        ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
 If timer = 1
     SetTimer EndMyNotif, myduration * -1
@@ -60,6 +63,7 @@ EndMyNotif() {
 MyNotification.Destroy
 }
 
+;--------
 ;  = Toggle protected operating system (OS) files Function
 ; inspiration from https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
 
@@ -80,8 +84,10 @@ Else { ; disable if enabled
 }
 
 CheckRegWrite(key) { ; check if RegWrite was success
-if key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
-    MsgBox "ToggleOS Failed", , "262144" ; 262144 = Always-on-top
+If key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+    MsgBox "ToggleOS Failed",, "262144" ; 262144 = Always-on-top
+    ; Tool_TipFunc("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
+    ; Exit
 }
 
 ToggleOSCheck() { ; tray tick mark
@@ -99,16 +105,16 @@ Else {
 ;  = Windows Refresh Or Run
 
 WindowsRefreshOrRun() {
-if WinExist("ahk_class CabinetWClass") {
-; if Windows File Explorer window exists
+If WinExist("ahk_class CabinetWClass") { ; If Windows File Explorer window exists
     WinActivate
-    Sleep 500       ; change as per your system performance
-    Send "{F5}"     ; refresh
+    If WinWaitActive( ,, 2)     ; wait for explorer to become active window ; 2s timeout
+        Send "{F5}"             ; refresh
+        ; a second refresh might be needed after a few seconds to see the effects of change in settings
+        ; add a Sleep command or use SetTimer prior to refresh to account for the delay
     }
-else {
-; open new Windows File Explorer window if one doesn't already exist ; remove this section if not desired
+Else { ; open new explorer window if one doesn't already exist ; comment out this section if not desired
     Run 'explorer.exe',,"Max"
-    WinWait("ahk_class CabinetWClass",, 10) ; timeout 10 secs
+    WinWait("ahk_class CabinetWClass",, 10) ; timeout 10s
     WinActivate
     }
 }
