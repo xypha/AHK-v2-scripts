@@ -63,6 +63,7 @@
 ;  = Wrap Text In Quotes or Symbols Function
 ;  = URL Encode/Decode Function
 ;  = Control Panel Tools Function
+; ChangeLog
 
 ;------------------------------------------------------------------------------
 ; Settings
@@ -78,8 +79,10 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
+AHKname := "AHK v2 #1 Showcase v2.00"
+
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationFunc("Loading AHK v2 #1 Showcase", "10000", "1550", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationFunc("Loading " AHKname, "10000", "1550", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Set default state of Lock keys
 ; Turn on/off upon startup (one-time)
@@ -151,7 +154,7 @@ If WinWait(".ahk - AutoHotkey v",, 3) ; wait for ListLines window to open, timeo
 }
 
 ^!Numpad1:: { ; Ctrl + Alt + Numpad1 keys pressed together
-MyNotificationFunc("Updating AHK v2 #1 Showcase", "500", "1550", "985", "0") ; use Sleep coz reload cancels timers
+MyNotificationFunc("Updating " AHKname, "500", "1550", "985", "0") ; use Sleep coz reload cancels timers
 Reload
 }
 
@@ -271,13 +274,13 @@ If (winClass != "Shell_TrayWnd")   ; exclude windows taskbar
     ; PostMessage 0x0112, 0xF060,,, "ahk_id " id ; alternative - same as pressing Alt+F4 or clicking a window's close button in its title bar
 }
 
-; Kill window with Ctrl + Alt + F4, usually unresponsive ones if WinClose fails
+; Ctrl + Alt + F4 = Kill window, usually unresponsive ones if WinClose fails
 ^!F4:: {
 MouseGetPos ,, &id
 WinKill ("ahk_id " id)
 }
 
-; Kill All Instances Of An App with Ctrl + Alt + Shift + F4
+; Ctrl + Alt + Shift + F4 = Kill All Instances Of An App
 ^!+F4:: {
 Process_Name := WinGetProcessName("A")
 Display := "Kill all instances of this app?`n`n"    ; `n = new line
@@ -1266,3 +1269,15 @@ PostMessage 0x0111, 65303,,, "ScriptFileName.ahk - AutoHotkey"  ; Reload.
 */
 
 ; End of script code
+
+;------------------------------------------------------------------------------
+; ChangeLog
+
+/*
+
+v2.00 - 2024.01.27
+ * add changelog
+ * add variable `AHKname` for versioning and updation of name in template and standalone scripts
+ * improve comments
+ 
+*/
