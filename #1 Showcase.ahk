@@ -72,7 +72,7 @@
 #SingleInstance force
 #WinActivateForce
 KeyHistory 500
-; Persistent                                    ; uncomment for standalone AHK to prevent auto-exit
+; Persistent                 ; uncomment for standalone AHKs to prevent auto-exit
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
@@ -84,7 +84,7 @@ MyNotificationFunc("Loading AHK v2 #1 Showcase", "10000", "1550", "985", "1") ; 
 ;  = Set default state of Lock keys
 ; Turn on/off upon startup (one-time)
 
-SetCapsLockState "Off"   ; CapsLock   is off - Use SetCapsLockState "AlwaysOff" to force the key to stay off permanently
+SetCapsLockState "Off"   ; CapsLock   is off - Use SetCapsLockState "AlwaysOff" to force the key to stay off permanently, and uncomment `Persistent`
 SetNumLockState "On"     ; NumLock    is ON
 SetScrollLockState "Off" ; ScrollLock is off
 
@@ -885,12 +885,14 @@ Else {
 WindowsRefreshOrRun() {
 If WinExist("ahk_class CabinetWClass") { ; If Windows File Explorer window exists
     WinActivate
-    Sleep 500       ; change as per your system performance
-    Send "{F5}"     ; refresh
+    If WinWaitActive( ,, 2)     ; wait for explorer to become active window ; 2s timeout
+        Send "{F5}"             ; refresh
+        ; a second refresh might be needed after a few seconds to see the effects of change in settings
+        ; add a Sleep command or use SetTimer prior to refresh to account for the delay
     }
-Else { ; open new Windows File Explorer window if one doesn't already exist ; remove this section if not desired
+Else { ; open new explorer window if one doesn't already exist ; comment out this section if not desired
     Run 'explorer.exe',,"Max"
-    WinWait("ahk_class CabinetWClass",, 10) ; timeout 10 secs
+    WinWait("ahk_class CabinetWClass",, 10) ; timeout 10s
     WinActivate
     }
 }
