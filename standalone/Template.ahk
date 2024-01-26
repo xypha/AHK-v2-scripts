@@ -12,14 +12,14 @@
 #SingleInstance force
 #WinActivateForce
 KeyHistory 500
-Persistent                                    ; added for standalone AHKs to prevent auto exit
+; Persistent                 ; uncomment for standalone AHKs to prevent auto-exit
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
 ; This section should always be at the top of your script
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationFunc("Loading AHK v2 #1 Showcase", "10000", "1550", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationFunc("Loading AHK v2 Template", "10000", "1550", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = End auto-execute
 
