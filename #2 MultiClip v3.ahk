@@ -1,4 +1,4 @@
-; /* AHK v2 #2 MultiClip v3 - CONTENTS */
+; /* AHK v2 #2 MultiClip - CONTENTS */
 ; Settings
 ; Auto-execute
 ;  = Intialise ClipArr
@@ -22,6 +22,7 @@
 ;  = Paste instead of Send - PasteThis Function
 ;  = ToolTip Function
 ; Test
+; ChangeLog
 
 ;------------------------------------------------------------------------------
 ; Settings
@@ -34,8 +35,10 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
+AHKname := "AHK v2 #2 MultiClip v4.00"
+
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationFunc("Loading AHK v2 #2 MultiClip v3", "10000", "1550", "945", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationFunc("Loading " AHKname, "10000", "1550", "945", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Intialise ClipArr
 
@@ -72,7 +75,7 @@ OnExit SaveClipArr
 
 ;  = Intialise ClipArr hotstrings
 
-PasteVStrings(20)   ; see ClipArr Hotstrings Functions
+PasteVStrings(20)   ; see ClipArr Hotstrings functions
 PasteCStrings(20)
 
 ;  = Customise Tray Icon
@@ -107,7 +110,7 @@ If WinWait(".ahk - AutoHotkey v",, 3) ; wait for ListLines window to open, timeo
 }
 
 ^!Numpad2:: { ; Ctrl + Alt + Numpad2 keys pressed together
-MyNotificationFunc("Updating AHK v2 #2 MultiClip v3", "500", "1550", "945", "0") ; use Sleep coz reload cancels timers
+MyNotificationFunc("Updating " AHKname, "500", "1550", "945", "0") ; use Sleep coz reload cancels timers
 Reload
 }
 
@@ -210,7 +213,7 @@ FileAppend Result, ClipArrFile  ; create new file and save current cliparr conte
 }
 
 ;------------------------------------------------------------------------------
-;  = ClipArr Hotstrings Functions
+;  = ClipArr Hotstrings functions
 
 ;    + PasteVStrings
 
@@ -220,7 +223,7 @@ Loop number {
     }
 }
 
-/* use loop to replace similar hotstrings
+/* use Loop to replace similar hotstrings
 :?*:v1+::
 .
 .
@@ -237,6 +240,7 @@ Try PasteThis(ClipArr.Get(hkey))
 ; Try Send ClipArr.Get(hkey) ; alternative
 }
 
+;--------
 ;    + PasteCStrings
 
 PasteCStrings(number) {
@@ -247,7 +251,7 @@ Loop number {
     }
 }
 
-/* use loop to replace similar hotstrings
+/* use Loop to replace similar hotstrings
 :?*:c0+:: ; same as c10
 :?*:c2+::
 .
@@ -275,7 +279,7 @@ PasteThis(Result)
 }
 
 ;------------------------------------------------------------------------------
-;  = ClipArr ClipMenu Function
+;  = ClipArr ClipMenu function
 
 ClipMenuFunc(FuncName) {
 Global ClipMenu := Menu()
@@ -313,6 +317,7 @@ Else ClipTrim := SubStr(ClipArr.Get(number), 1, 60)
 Return ClipTrim
 }
 
+;--------
 ;    + SendClipFunc
 
 SendClipFunc(item, position, ClipMenu) {
@@ -395,3 +400,15 @@ A_Clipboard := "a1"
 Global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
 ClipMenuFunc(SendClipFunc)  ; show menu - ClipMenu
 }
+
+;------------------------------------------------------------------------------
+; ChangeLog
+
+/*
+
+v4.00 - 2024.01.27
+ * add variable `AHKname` for versioning and updation of name in template and standalone scripts
+ * add changelog
+ * improve comments
+
+*/
