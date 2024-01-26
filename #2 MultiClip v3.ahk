@@ -11,12 +11,13 @@
 ;  = ClipArr keys
 ; User-defined Functions
 ;  = Notification Function
-;  = ClipArr ClipChanged Function
-;  = ClipArr HasVal Function
-;  = ClipArr Hotstrings Functions
+;  = ClipArr ClipChanged function
+;  = ClipArr InsertInClipArr function
+;  = ClipArr SaveClipArr function
+;  = ClipArr Hotstrings functions
 ;    + PasteVStrings
 ;    + PasteCStrings
-;  = ClipArr ClipMenu Function
+;  = ClipArr ClipMenu function
 ;    + SendClipFunc
 ;  = Paste instead of Send - PasteThis Function
 ;  = ToolTip Function
@@ -31,23 +32,43 @@ KeyHistory 500
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
+; This section should always be at the top of your script
 
-MyNotificationFunc("Loading AHK v2 #2 MultiClip v3", "10000", "1550", "945", "1") ; 10s
+; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
+MyNotificationFunc("Loading AHK v2 #2 MultiClip v3", "10000", "1550", "945", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Intialise ClipArr
 
-; Start clipboard array with 20 slots containing alphanumerical text
-Global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
+Global LimitClipArr := 20
+; Limit the number of slots to 20 ; customise limit to your needs
+; Note:     Higher the number, higher the resource usage and slower the performance/response
+; WARNING:  Removing the variable may cause infinite loop / app hang
 
-; Limit the number of slots to 20 ; change number to your needs or comment out for infinite slots
-ClipArr.Capacity := 20
+Global ClipArrFile := A_MyDocuments "\ClipArrFile.txt"
+; ClipArrFile.txt is saved in default path of AHK's built-in variable: A_MyDocuments
+; A_MyDocuments is the full path and name of the current user's "My Documents" folder. Usually corresponds to "C:\Users\<UserName>\Documents" (the final backslash is not included in the variable)
+ 
+Global delim := "~•~"
+; use a unique string because if an array-slot contains this delimiter by accident, saving and loading array from file will cause errors
+
+Global ClipArr := [] ; set Global variable and load empty array
+
+; Load array from file - inspired by https://www.autohotkey.com/boards/viewtopic.php?p=341809#p341809
+If FileExist(ClipArrFile) ; check if file exists
+    ClipArr := StrSplit(FileRead(ClipArrFile), delim)
+Else ; load default values on start - 20 slots containing alphanumerical text
+    ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"] 
 
 ; run function whenever clipboard is changed
+; such as Ctrl + x (Cut), Ctrl + c (Copy) or by other apps/programs
 OnClipboardChange ClipChanged
 
 ; add current clipboard contents to first clipboard slot in ClipArr on start
-startClip := StrReplace(A_Clipboard,"`r`n","`n")            ; Fix for SendInput sending Windows linebreaks
-ClipArr.InsertAt(1, RegExReplace(startClip,"^\s+|\s+$"))    ; Remove leading/trailing spaces
+InsertInClipArr(A_Clipboard)
+
+OnExit SaveClipArr
+; save `ClipArr` contents to `ClipArrFile.txt` when the script exits by any means,
+; except when it is killed by something like "End Task" via Taskbar, Task Manager or similar
 
 ;  = Intialise ClipArr hotstrings
 
@@ -64,11 +85,18 @@ If FileExist(I_Icon)
 
 ;  = End auto-execute
 
-SetTimer EndMyNotif, -1000 ; reset timer to 1s
-Return
+SetTimer EndMyNotif, -1000 ; Reset notification timer to 1s after code in auto-execute section has finished running
+Return ; Ends auto-execute
+
+; Below code can be placed anywhere in your script
 
 ;------------------------------------------------------------------------------
 ; Hotkeys
+
+; ^ is Control / Ctrl key
+; ! is Alt key
+; # is Windows / Win key
+; + is Shift key
 
 ;  = Check & Reload AHK
 
@@ -79,7 +107,7 @@ If WinWait(".ahk - AutoHotkey v",, 3) ; wait for ListLines window to open, timeo
 }
 
 ^!Numpad2:: { ; Ctrl + Alt + Numpad2 keys pressed together
-MyNotificationFunc("Updating AHK v2 #2 MultiClip v3", "500", "1550", "945", "0") ; use sleep coz reload cancels timers
+MyNotificationFunc("Updating AHK v2 #2 MultiClip v3", "500", "1550", "945", "0") ; use Sleep coz reload cancels timers
 Reload
 }
 
@@ -121,7 +149,7 @@ MyNotification.Destroy
 }
 
 ;------------------------------------------------------------------------------
-;  = ClipArr ClipChanged Function
+;  = ClipArr ClipChanged function
 ; Modified from MultiClip v1 https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658
 ; and https://www.autohotkey.com/boards/viewtopic.php?p=326827#p326827
 
@@ -137,37 +165,48 @@ If DataType = 2 { ; Clipboard contains something entirely non-text such as a pic
     Exit
     }
 
-; DataType = 1 ; Clipboard contains text (including files copied from an Explorer)
+; Else DataType = 1 ; Clipboard contains text (including files copied from Windows File Explorer)
 
-; Cliptemp cleanup
-Cliptemp := StrReplace(A_Clipboard,"`r`n","`n") ; Fix for SendInput sending Windows linebreaks
-Cliptemp := RegExReplace(Cliptemp,"^\s+|\s+$")  ; remove leading/trailing spaces
 
 ; clipboard change alert tooltip
-Tool_TipFunc(SubStr(Cliptemp, 1, 600), -500)
+Tool_TipFunc(SubStr(A_Clipboard, 1, 600), -500)
 
-; Check if Cliptemp is already in an array and retrieve its `Index` if present
-InArr := HasVal(ClipArr, Cliptemp)
-
-If InArr !== 0
-    ClipArr.RemoveAt(InArr)
-ClipArr.InsertAt(1, Cliptemp)
+InsertInClipArr(A_Clipboard)
 }
 
-;------------------------------------------------------------------------------
-;  = ClipArr HasVal Function
-; Modifed from https://www.autohotkey.com/boards/viewtopic.php?p=109173#p109173
-; not for associative arrays
+;--------
+;  = ClipArr InsertInClipArr function
 
-HasVal(haystack, needle) {
-/* ; optimise this code to your needs after reading lexikos' comment - https://www.autohotkey.com/boards/viewtopic.php?p=110388#p110388
-If !(IsObject(haystack)) || (haystack.Length() = 0)
-  Return -1
-*/
-For index, value in haystack
-    If (value == needle) ; case-sensitive
-        Return index
-Return 0
+InsertInClipArr(text) {
+
+If text == ClipArr.Get(1)
+    Return
+
+; Cliptemp cleanup
+Cliptemp := StrReplace(text,"`r`n","`n")        ; fix for SendInput sending Windows linebreaks
+Cliptemp := RegExReplace(Cliptemp,"^\s+|\s+$")  ; remove leading/trailing \s \t \r \n
+
+
+; Check if Cliptemp is already in an array and retrieve its `Index` if present
+Loop LimitClipArr {
+    If Cliptemp == ClipArr.Get(A_Index) {
+        ClipArr.RemoveAt(A_Index)
+        Break
+        }
+    }
+ClipArr.InsertAt(1, Cliptemp)   ; insert current clipboard contents in first slot
+ClipArr.Length := LimitClipArr  ; reset number of slots to previously defined limit
+}
+
+;--------
+;  = ClipArr SaveClipArr function
+
+SaveClipArr(*) {
+Result := ""
+Loop ClipArr.Length
+    Result .= ClipArr.Get(A_Index) delim
+FileRecycle ClipArrFile         ; send old file to recycle bin
+FileAppend Result, ClipArrFile  ; create new file and save current cliparr contents
 }
 
 ;------------------------------------------------------------------------------
@@ -350,6 +389,8 @@ SetTimer () => ToolTip(), ToolDuration
 ; Test
 
 :*:test++:: {
+SaveClipArr
+; save current array contents to file ; If script is reloaded after test, restore array contents by restoring file from recycle bin
 A_Clipboard := "a1"
 Global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
 ClipMenuFunc(SendClipFunc)  ; show menu - ClipMenu
