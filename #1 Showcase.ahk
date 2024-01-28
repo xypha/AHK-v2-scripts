@@ -181,7 +181,7 @@ Return ; Ends auto-execute
 
 !Numpad1:: { ; Ctrl + Numpad1 keys pressed together
 ListLines
-If WinWait(".ahk - AutoHotkey v",, 3) ; wait for ListLines window to open, timeout 3s
+If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; wait for ListLines window to open, timeout 3s
     WinMaximize
 }
 
@@ -1410,6 +1410,8 @@ PostMessage 0x0111, 65303,,, "ScriptFileName.ahk - AutoHotkey"  ; Reload.
 ; ChangeLog
 
 /*
+v2.02 - 2024.01.29
+ * improve ListLines WinWait command by using variables
 
 v2.01 - 2024.01.28
  * rename MyNotificationFunc to MyNotificationGui
