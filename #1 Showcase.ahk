@@ -67,10 +67,10 @@
 ;  = Adjust Window Transparency
 ;    + GetTrans
 ;    + SetTransByWheel
-;    + SetTransMenuFunc
+;    + SetTransMenuFn
 ;    + SetTransByMenu
 ;  = Change Text Case
-;    + ChangeCaseMenuFunc
+;    + ChangeCaseMenuFn
 ;    + ConvertLower
 ;    + ConvertSentence
 ;    + ConvertTitle
@@ -81,9 +81,9 @@
 ;    + CallClipWait
 ;    + CallClipboard
 ;  = ToolTip SetTimer
-;    + ToolTipFunc
+;    + ToolTipFn
 ;  = Wrap Text In Quotes or Symbols
-;    + WrapTextMenuFunc
+;    + WrapTextMenuFn
 ;    + WrapTextFromMenu
 ;    + EncText
 ;  = URL Encode/Decode
@@ -92,7 +92,7 @@
 ;  = Kill All Instances Of An App
 ;    + GetKillTitles
 ;  = Control Panel Tools
-;    + ControlPanelMenuFunc
+;    + ControlPanelMenuFn
 ;    + ControlPanelSelect
 ;    + List of commands
 ; ChangeLog
@@ -111,7 +111,7 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #1 Showcase v2.01"
+AHKname := "AHK v2 #1 Showcase v2.02"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, "10000", "1550", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -226,6 +226,8 @@ RCtrl & Down::Send "{PgDn}"     ; Page down
 RCtrl & Left::Send "{Home}"     ; Home
 RCtrl & Right::Send "{End}"     ; End
 
+!m::WinMinimize "A"         ; Alt+ M = Minimize active window
+
 /* ; remap media keys to navigation keys - disabled, uncomment to use
 Media_Play_Pause::PgUp
 Media_Stop::PgDn
@@ -247,8 +249,6 @@ Media_Next::End
 ^+Media_Prev::^+Home
 ^+Media_Next::^+End
 */
-
-!m::WinMinimize "A"         ; Alt+ M = Minimize active window
 
 ;------------------------------------------------------------------------------
 ;  = Customise CapsLock
@@ -380,7 +380,7 @@ If Trans < 21
 SetTransByWheel(Trans)
 }
 
-F8::SetTransMenuFunc
+F8::SetTransMenuFn
 
 ;------------------------------------------------------------------------------
 ;  = Recycle Bin shortcut
@@ -398,7 +398,7 @@ Else If WinExist("ahk_class CabinetWClass") {
         While ControlGetClassNN(ControlGetFocus("A")) != "Microsoft.UI.Content.DesktopChildSiteBridge1" {
             Sleep 100
             If A_Index > 5 { ; = Sleep 500 ; wait until focus is on address bar, max 500ms
-                ToolTipFunc(A_ThisHotkey ":: Failed to focus address bar", -1000) ; 1s
+                ToolTipFn(A_ThisHotkey ":: Failed to focus address bar", -1000) ; 1s
                 Exit
                 }
             }
@@ -424,19 +424,19 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 ;--------
 ;  = Add Control Panel Tools to a Menu
 
-#+x::ControlPanelMenuFunc   ; Win + Shift + x
+#+x::ControlPanelMenuFn   ; Win + Shift + x
 
 ;--------
 ;  = Change Text Case
 
-!c::ChangeCaseMenuFunc      ; Alt + C
+!c::ChangeCaseMenuFn      ; Alt + C
 
 ;--------
 ;  = Wrap Text In Quotes or Symbols keys
 
 #HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below hotkeys in apps that don't use it or have conflicts - Example: Media Player Classic - Home Cinema
 
-!q::WrapTextMenuFunc ; Alt + Q
+!q::WrapTextMenuFn ; Alt + Q
 
 ; WrapText Keys - Alt + number row
 !1::EncText("`'","`'")      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
@@ -475,7 +475,7 @@ t := WinGetTitle("A")
 ExStyle := WinGetExStyle(t)
 If (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
     WinSetAlwaysOnTop 0, t      ; Turn OFF and remove Title_When_On_Top
-    WinSetTitle (RegExReplace(t, Title_When_On_Top)), "A"
+    WinSetTitle (RegExReplace(t, Title_When_On_Top)), t
     }
 Else {
     WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
@@ -874,7 +874,7 @@ Explanation: blank lines are deleted and spaces are trimmed, but non-blank lines
 
 ;    + MyNotificationGui
 
-MyNotificationGui(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFunc` for alternative
+MyNotificationGui(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFn` for alternative
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
 MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
@@ -924,7 +924,7 @@ Else { ; disable if enabled
 CheckRegWrite(key) { ; check if RegWrite was success
 If key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
     MsgBox "ToggleOS Failed",, "262144" ; 262144 = Always-on-top
-    ; ToolTipFunc("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
+    ; ToolTipFn("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
     ; Exit
 }
 
@@ -985,9 +985,9 @@ WinSetTransparent Transparency, "ahk_id " WinID
 }
 
 ;--------
-;    + SetTransMenuFunc
+;    + SetTransMenuFn
 
-SetTransMenuFunc() {
+SetTransMenuFn() {
 SetTransMenu := Menu()
 SetTransMenu.Delete
 SetTransMenu.Add("&1 255 Opaque"            ,SetTransByMenu)
@@ -1011,9 +1011,9 @@ WinSetTransparent Transparency, "ahk_id " WinID
 ;  = Change Text Case
 ; inspired from https://geekdrop.com/content/super-handy-AutoHotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 
-;    + ChangeCaseMenuFunc
+;    + ChangeCaseMenuFn
 
-ChangeCaseMenuFunc() {
+ChangeCaseMenuFn() {
 ChangeCaseMenu := Menu()
 ChangeCaseMenu.Delete
 ChangeCaseMenu.Add("&1 lower case"      ,ConvertLower)
@@ -1095,7 +1095,7 @@ Send "^v" Len ; Paste new text and select it
 CallClipWait(secs) {
 If not ClipWait(secs) {
     MyNotificationGui(A_ThisHotkey ":: Clip Failed", "2000", "1550", "985", "1") ; personal preferrence coz tooltip conflict
-    ; ToolTipFunc(A_ThisHotkey ":: Clip Failed", -2000) ; Alternative to MyNotification
+    ; ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; Alternative to MyNotification
     Exit
     }
 }
@@ -1117,9 +1117,9 @@ If not ClipWait(secs) {
 ;------------------------------------------------------------------------------
 ;  = ToolTip SetTimer
 
-;    + ToolTipFunc
+;    + ToolTipFn
 
-ToolTipFunc(mytext, myduration) {
+ToolTipFn(mytext, myduration) {
 ToolTip ; turn off any previous tooltip
 ToolTip mytext
 SetTimer () => ToolTip(), myduration
@@ -1130,9 +1130,9 @@ SetTimer () => ToolTip(), myduration
 ; Inspired by https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 ; and https://www.autohotkey.com/board/topic/9805-easy-encloseenquote/?p=61995
 
-;    + WrapTextMenuFunc
+;    + WrapTextMenuFn
 
-WrapTextMenuFunc() {
+WrapTextMenuFn() {
 WrapTextMenu := Menu()
 WrapTextMenu.Delete
 WrapTextMenu.Add("&1   `'  Single Quotation `'"     ,WrapTextFromMenu) ; single quotation '' ; ordered in decreasing frequency of use; reorder as needed
@@ -1183,8 +1183,8 @@ TextStringInitial := A_Clipboard
 TextString := A_Clipboard
 TextString := StrReplace(TextString, "`r`n", "`n")      ; fix carriage return + line feed for Strlen
 TextString := RegExReplace(TextString,'^\s+|\s+$')      ; RegEx remove leading/trailing space
-TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading  ['({%"“‘`  ; customise as your needs in WrapTextMenuFunc and WrapText Keys
-TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`  ; customise as your needs in WrapTextMenuFunc and WrapText Keys
+TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading  ['({%"“‘`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
+TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
 TextString := q TextString p
 TextString := StrReplace(TextString, "`n" p, p)
 Len1 := StrLen(TextString)
@@ -1279,9 +1279,9 @@ Return temp
 ;------------------------------------------------------------------------------
 ;  = Control Panel Tools
 
-;    + ControlPanelMenuFunc
+;    + ControlPanelMenuFn
 
-ControlPanelMenuFunc() {
+ControlPanelMenuFn() {
 ControlPanelMenu := Menu() ; starts building a pop-up menu
 ControlPanelMenu.Delete    ; deletes previously built pop-up menu, if any, and then starts adding items
 ControlPanelMenu.Add("&1 Control Panel"                 ,ControlPanelSelect)
@@ -1410,6 +1410,11 @@ PostMessage 0x0111, 65303,,, "ScriptFileName.ahk - AutoHotkey"  ; Reload.
 ; ChangeLog
 
 /*
+v2.03 - 2024.01.30
+ * rename function names with `Func` in the name to `Fn` because `Func` is a class
+ * improve Toggle Window On Top - change WinSetTitle command to apply to known variable `t` instead of "A"
+ * other minor changes
+
 v2.02 - 2024.01.29
  * improve ListLines WinWait command by using variables
 
