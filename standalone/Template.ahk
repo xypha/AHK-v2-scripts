@@ -2,8 +2,12 @@
 ; Settings
 ; Auto-execute
 ;  = End auto-execute
-; User-defined Functions
-;  = Notification Function
+; Your Code
+; User-defined functions
+;  = Notification
+;    + MyNotificationGui
+;    + EndMyNotif
+; ChangeLog
 
 ;------------------------------------------------------------------------------
 ; Settings
@@ -18,8 +22,10 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
+AHKname := "AHK v2 Template v1.01"
+
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationFunc("Loading AHK v2 Template", "10000", "1550", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationGui("Loading " AHKname, "10000", "1550", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = End auto-execute
 
@@ -29,11 +35,17 @@ Return ; Ends auto-execute
 ; Below code can be placed anywhere in your script
 
 ;------------------------------------------------------------------------------
-; User-defined Functions
+; Your Code
 
-;  = Notification Function
 
-MyNotificationFunc(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFunc` for alternative
+;------------------------------------------------------------------------------
+; User-defined functions
+
+;  = Notification
+
+;    + MyNotificationGui
+
+MyNotificationGui(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFn` for alternative
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
 MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
@@ -48,6 +60,20 @@ If timer = 0 {
     }
 }
 
+;--------
+;    + EndMyNotif
+
 EndMyNotif() {
 MyNotification.Destroy
 }
+
+;------------------------------------------------------------------------------
+; ChangeLog
+
+/*
+v1.01 - 2024.01.30
+ * rename MyNotificationFunc to MyNotificationGui
+ * add changelog
+ * add variable `AHKname` for versioning and updation of name in template and standalone scripts
+ * improve comments and update headings
+*/
