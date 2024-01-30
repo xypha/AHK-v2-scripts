@@ -20,16 +20,16 @@
 ;    + PasteVStrings
 ;    + PasteCStrings
 ;  = MultiClip ClipMenu
-;    + ClipMenuFunc
+;    + ClipMenuFn
 ;    + ClipTrim
-;    + SendClipFunc
+;    + SendClipFn
 ;  = Paste instead of Send
 ;    + PasteThis
 ;    + RestoreClip
 ;    + PasteAndSend
 ;    + SendAndPaste
 ;  = ToolTip SetTimer
-;    + ToolTipFunc
+;    + ToolTipFn
 ; Test
 ; ChangeLog
 
@@ -44,7 +44,7 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #2 MultiClip v4.02"
+AHKname := "AHK v2 #2 MultiClip v4.03"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, "10000", "1550", "945", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -134,7 +134,7 @@ Reload
 
 :?*x:c0+::PasteC(10) ; same as c10+
 
-:?*x:p++::ClipMenuFunc(SendClipFunc) ; show ClipMenu
+:?*x:p++::ClipMenuFn(SendClipFn) ; show ClipMenu
 
 ;------------------------------------------------------------------------------
 ; User-defined functions
@@ -143,7 +143,7 @@ Reload
 
 ;    + MyNotificationGui
 
-MyNotificationGui(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFunc` for alternative
+MyNotificationGui(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFn` for alternative
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
 MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
@@ -175,12 +175,12 @@ MyNotification.Destroy
 ClipChanged(DataType) {
 
 If DataType = 0 { ; Clipboard is now empty
-    ; ToolTipFunc("DataType: 0 - Clipboard is now empty", -1000)
+    ; ToolTipFn("DataType: 0 - Clipboard is now empty", -1000)
     Exit
     }
 
 If DataType = 2 { ; Clipboard contains something entirely non-text such as a picture
-    ToolTipFunc("DataType: 2 - Non-text copied", -1000)
+    ToolTipFn("DataType: 2 - Non-text copied", -1000)
     Exit
     }
 
@@ -188,7 +188,7 @@ If DataType = 2 { ; Clipboard contains something entirely non-text such as a pic
 
 
 ; clipboard change alert tooltip
-ToolTipFunc(SubStr(A_Clipboard, 1, 600), -500)
+ToolTipFn(SubStr(A_Clipboard, 1, 600), -500)
 
 InsertInClipArr(A_Clipboard)
 }
@@ -294,36 +294,36 @@ PasteThis(RegExReplace(Result,"^\n+|\n+$")) ; remove leading/trailing LF
 ;------------------------------------------------------------------------------
 ;  = MultiClip ClipMenu
 
-;    + ClipMenuFunc
+;    + ClipMenuFn
 
-ClipMenuFunc(FuncName) {
+ClipMenuFn(FnName) {
 Global ClipMenu := Menu()
 ClipMenu.Delete
 
 ; populate slots
-ClipMenu.Add("&1  = "   ClipTrim(1)   ,FuncName) ; Customise the shortcuts by altering the character after `&` in lines containing `ClipMenu.Add`
-ClipMenu.Add("&2  = "   ClipTrim(2)   ,FuncName) ; Explantation: 
-ClipMenu.Add("&3  = "   ClipTrim(3)   ,FuncName) ; When the menu is displayed, a character preceded by an ampersand (&) can be selected by pressing the corresponding key on the keyboard.
-ClipMenu.Add("&4  = "   ClipTrim(4)   ,FuncName) ; To display a literal ampersand, specify two consecutive ampersands as in this example: "Save && Exit"
-ClipMenu.Add("&5  = "   ClipTrim(5)   ,FuncName)
-ClipMenu.Add("&6  = "   ClipTrim(6)   ,FuncName) ; Shortcuts correspond to the number/alpabet/symbol prior to `=`
-ClipMenu.Add("&7  = "   ClipTrim(7)   ,FuncName) ; Shortcuts are usually underlined, and consist of
-ClipMenu.Add("&8  = "   ClipTrim(8)   ,FuncName) ; numbers from NumPad or number row, and keys from the bottom row of QUERTY keyboard
-ClipMenu.Add("&9  = "   ClipTrim(9)   ,FuncName)
-ClipMenu.Add("&0  = "   ClipTrim(10)  ,FuncName)
-ClipMenu.Add("&z  = "   ClipTrim(11)  ,FuncName)
-ClipMenu.Add("&x  = "   ClipTrim(12)  ,FuncName)
-ClipMenu.Add("&c  = "   ClipTrim(13)  ,FuncName)
-ClipMenu.Add("&v  = "   ClipTrim(14)  ,FuncName)
-ClipMenu.Add("&b  = "   ClipTrim(15)  ,FuncName)
-ClipMenu.Add("&n  = "   ClipTrim(16)  ,FuncName)
-ClipMenu.Add("&m = "    ClipTrim(17)  ,FuncName) ; number of spaces between characters vary in order to improve readability in pop-up menu
-ClipMenu.Add("&,    = " ClipTrim(18)  ,FuncName) ; and can be changed to reflect your system font and display settings
-ClipMenu.Add("&.    = " ClipTrim(19)  ,FuncName)
-ClipMenu.Add("&/   = "  ClipTrim(20)  ,FuncName)
+ClipMenu.Add("&1  = "   ClipTrim(1)   ,FnName) ; Customise the shortcuts by altering the character after `&` in lines containing `ClipMenu.Add`
+ClipMenu.Add("&2  = "   ClipTrim(2)   ,FnName) ; Explantation: 
+ClipMenu.Add("&3  = "   ClipTrim(3)   ,FnName) ; When the menu is displayed, a character preceded by an ampersand (&) can be selected by pressing the corresponding key on the keyboard.
+ClipMenu.Add("&4  = "   ClipTrim(4)   ,FnName) ; To display a literal ampersand, specify two consecutive ampersands as in this example: "Save && Exit"
+ClipMenu.Add("&5  = "   ClipTrim(5)   ,FnName)
+ClipMenu.Add("&6  = "   ClipTrim(6)   ,FnName) ; Shortcuts correspond to the number/alpabet/symbol prior to `=`
+ClipMenu.Add("&7  = "   ClipTrim(7)   ,FnName) ; Shortcuts are usually underlined, and consist of
+ClipMenu.Add("&8  = "   ClipTrim(8)   ,FnName) ; numbers from NumPad or number row, and keys from the bottom row of QUERTY keyboard
+ClipMenu.Add("&9  = "   ClipTrim(9)   ,FnName)
+ClipMenu.Add("&0  = "   ClipTrim(10)  ,FnName)
+ClipMenu.Add("&z  = "   ClipTrim(11)  ,FnName)
+ClipMenu.Add("&x  = "   ClipTrim(12)  ,FnName)
+ClipMenu.Add("&c  = "   ClipTrim(13)  ,FnName)
+ClipMenu.Add("&v  = "   ClipTrim(14)  ,FnName)
+ClipMenu.Add("&b  = "   ClipTrim(15)  ,FnName)
+ClipMenu.Add("&n  = "   ClipTrim(16)  ,FnName)
+ClipMenu.Add("&m = "    ClipTrim(17)  ,FnName) ; number of spaces between characters vary in order to improve readability in pop-up menu
+ClipMenu.Add("&,    = " ClipTrim(18)  ,FnName) ; and can be changed to reflect your system font and display settings
+ClipMenu.Add("&.    = " ClipTrim(19)  ,FnName)
+ClipMenu.Add("&/   = "  ClipTrim(20)  ,FnName)
 /* ; alternative method to populate slots without shortcuts and messing around with spaces
 Loop 20 {
-    ClipMenu.Add(A_Index " = " ClipTrim(A_Index), FuncName)
+    ClipMenu.Add(A_Index " = " ClipTrim(A_Index), FnName)
     }
 */
 
@@ -344,9 +344,9 @@ Return SubStr(ClipArr.Get(number), 1, 60)
 }
 
 ;--------
-;    + SendClipFunc
+;    + SendClipFn
 
-SendClipFunc(item, position, ClipMenu) {
+SendClipFn(item, position, ClipMenu) {
 PasteThis(ClipArr.Get(position))
 }
 
@@ -366,7 +366,7 @@ If A_Clipboard !== pasteText {
     While tmp_clip2 != pasteText {    ; validate clipboard
         Sleep 50
         If A_Index > 5 {
-            ToolTipFunc(A_ThisHotkey ":: PasteThis Copying Failed?", -500)
+            ToolTipFn(A_ThisHotkey ":: PasteThis Copying Failed?", -500)
             OnClipboardChange ClipChanged,1
             Exit
             }
@@ -386,7 +386,7 @@ A_Clipboard := ClipboardAll(tmp_clip)   ; restore clipboard
 While tmp_clip2 == A_Clipboard {        ; validate clipboard
     Sleep 50
     If A_Index > 5 {
-        ToolTipFunc(A_ThisHotkey ":: PasteThis Restoration Failed", -5000)
+        ToolTipFn(A_ThisHotkey ":: PasteThis Restoration Failed", -5000)
         OnClipboardChange ClipChanged,1
         Exit
         }
@@ -431,9 +431,9 @@ PasteThis(pasteTxt)
 ;------------------------------------------------------------------------------
 ;  = ToolTip SetTimer
 
-;    + ToolTipFunc
+;    + ToolTipFn
 
-ToolTipFunc(ToolText, ToolDuration) {
+ToolTipFn(ToolText, ToolDuration) {
 ToolTip ; turn off any previous tooltip
 ToolTip ToolText
 SetTimer () => ToolTip(), ToolDuration
@@ -447,13 +447,15 @@ SaveClipArr
 ; save current array contents to file ; If script is reloaded after test, restore array contents by restoring file from recycle bin
 A_Clipboard := "a1"
 Global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
-ClipMenuFunc(SendClipFunc)  ; show menu - ClipMenu
+ClipMenuFn(SendClipFn)  ; show menu - ClipMenu
 }
 
 ;------------------------------------------------------------------------------
 ; ChangeLog
 
 /*
+v4.03 - 2024.01.30
+ * rename function names with `Func` in the name to `Fn` because `Func` is a class
 
 v4.02 - 2024.01.29
  * rename MyNotificationFunc to MyNotificationGui
@@ -478,5 +480,4 @@ v4.00 - 2024.01.27
  * add variable `AHKname` for versioning and updation of name in template and standalone scripts
  * add changelog
  * improve comments
-
 */
