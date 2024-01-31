@@ -56,7 +56,7 @@
 ;    + Format Date / Time
 ;  = URL Encode/Decode
 ; User-defined functions
-;  = Notification
+;  = MyNotification
 ;    + MyNotificationGui
 ;    + EndMyNotif
 ;  = Toggle protected operating system (OS) files
@@ -111,10 +111,10 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #1 Showcase v2.02"
+AHKname := "AHK v2 #1 Showcase v2.04"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationGui("Loading " AHKname, "10000", "1550", "985", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationGui("Loading " AHKname, "10000", "1550", "985", "1") ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Set default state of Lock keys
 ; Turn on/off upon startup (one-time)
@@ -129,13 +129,13 @@ A_TrayMenu.Delete                             ; Delete standard menu
 A_TrayMenu.Add "&Toggle OS files", ToggleOS   ; User-defined function
 A_TrayMenu.Add                                ; Add a separator
 A_TrayMenu.AddStandard                        ; Restore standard menu
-ToggleOSCheck                                 ; Check registry value of ShowSuperHidden_Status
+ToggleOSCheck                                 ; Query registry and check/uncheck
 
 ;  = Customise Tray Icon
 
 I_Icon := A_ScriptDir "\icons\1-512.ico"
 ; Icon source: https://www.iconsdb.com/caribbean-blue-icons/1-icon.html     ; CC License
-; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing
+; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing -- see section on "Check & Reload AHK"
 If FileExist(I_Icon)
     TraySetIcon I_Icon
 
@@ -193,9 +193,9 @@ Reload
 ;------------------------------------------------------------------------------
 ;  = Remap Keys
 
-; Disable keys that I don't use or trigger accidentally too often or become annoying
-; many such keys are hardware specific - desktop vs. laptop, and regional differences
-; comment out the ones that don't apply to you
+; Disable keys that you don't use or trigger accidentally too often or become annoying
+; such keys are hardware specific - desktop vs. laptop, and may vary according to region
+; comment out the ones that don't work for you or don't apply to you
 $ScrollLock::               ; disable Scroll Lock ; $ prefix forces keyboard hook
 $NumLock::                  ; disable Num Lock
 
@@ -210,21 +210,21 @@ NumpadIns::
 { ; do nothing
 }
 
-; Use Alt + Insert to toggle the 'Insert mode'
+; Use Alt + Insert to toggle the 'Insert mode' and retain the key's function
 !Insert::Insert     ; Source: https://gist.github.com/endolith/823381
 
 ; Note: ^Insert = Copy(^c) as Windows default - this behaviour is not changed by the above
 
 LWin & Tab::AltTab ; Left Win key works as left Alt key - disables taskview
 
-RAlt::!Space       ; Alt + space brings up window menu
+RAlt::!Space       ; Alt + Space brings up a window's title bar menu
 
 ^RCtrl::MButton    ; press Left & Right Ctrl button to simulate mouse Middle Click
 
-RCtrl & Up::Send "{PgUp}"       ; Page up"
-RCtrl & Down::Send "{PgDn}"     ; Page down
-RCtrl & Left::Send "{Home}"     ; Home
-RCtrl & Right::Send "{End}"     ; End
+RCtrl & Up::     Send "{PgUp}"  ; Page up   - use "&" to create 2-key combo shortcut
+RCtrl & Down::   Send "{PgDn}"  ; Page down - use variable number of spaces before Send command without affecting the command itself
+RControl & Left::Send "{Home}"  ; Home      - use alternate key name for RCtrl
+>^Right::        Send "{End}"   ; End       - use >^ instead of Right Ctrl button and skip using "&"
 
 !m::WinMinimize "A"         ; Alt+ M = Minimize active window
 
@@ -349,7 +349,7 @@ Display .= ( ; continuation
     GetKillTitles(WinGetList("ahk_exe " Process_Name)))
 DetectHiddenWindows False ; default
 Result := MsgBox(Display, A_ScriptName " - WARNING", "Icon! YesNo Default2 262144")
-; Options: add Exclamation icon; Yes or No buttons; make No the default button to ensure explicit consent for TaskKill; 262144 = Always on top
+; Options: add Exclamation icon; Yes or No buttons; make No the default button to prevent accidental process kill; 262144 = Always on top
 If Result = "Yes"
     While ProcessExist(Process_Name)
         ProcessClose Process_Name
@@ -870,7 +870,7 @@ Explanation: blank lines are deleted and spaces are trimmed, but non-blank lines
 ;------------------------------------------------------------------------------
 ; User-defined functions
 
-;  = Notification
+;  = MyNotification
 
 ;    + MyNotificationGui
 
@@ -904,15 +904,15 @@ MyNotification.Destroy
 
 ToggleOS(*) {
 ToggleOSCheck
-If ShowSuperHidden_Status = 0 { ; enable if disabled
-    RegWrite "1", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
-    CheckRegWrite(ShowSuperHidden_Status)
+If Status = 0 { ; enable if disabled
+    RegWrite "1", "REG_DWORD", "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
+    CheckRegWrite(Status)
     ToggleOSCheck
     WindowsRefreshOrRun
     }
 Else { ; disable if enabled
-    RegWrite "0", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
-    CheckRegWrite(ShowSuperHidden_Status)
+    RegWrite "0", "REG_DWORD", "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
+    CheckRegWrite(Status)
     ToggleOSCheck
     WindowsRefreshOrRun
     }
@@ -922,7 +922,7 @@ Else { ; disable if enabled
 ;    + CheckRegWrite
 
 CheckRegWrite(key) { ; check if RegWrite was success
-If key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+If key = RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
     MsgBox "ToggleOS Failed",, "262144" ; 262144 = Always-on-top
     ; ToolTipFn("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
     ; Exit
@@ -932,14 +932,10 @@ If key = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Ex
 ;    + ToggleOSCheck
 
 ToggleOSCheck() { ; tray tick mark
-Global ShowSuperHidden_Status
-ShowSuperHidden_Status := RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
-If ShowSuperHidden_Status = 0
+Global Status := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+If Status = 0
     A_TrayMenu.UnCheck "&Toggle OS files"
-Else {
-    ShowSuperHidden_Status := 1
-    A_TrayMenu.Check "&Toggle OS files"
-    }
+Else A_TrayMenu.Check "&Toggle OS files"
 }
 
 ;--------
@@ -1410,6 +1406,13 @@ PostMessage 0x0111, 65303,,, "ScriptFileName.ahk - AutoHotkey"  ; Reload.
 ; ChangeLog
 
 /*
+v2.04 - 2024.01.31
+ * improve remap keys section to show more variations of key names, symbols and formatting
+ * replace `HKEY_CURRENT_USER` with `HKCU` in regkeys
+ * rename ShowSuperHidden_Status to Status for future expansion of function
+ * condense ToggleOSCheck function
+ * improve comments and update headings
+
 v2.03 - 2024.01.30
  * rename function names with `Func` in the name to `Fn` because `Func` is a class
  * improve Toggle Window On Top - change WinSetTitle command to apply to known variable `t` instead of "A"
