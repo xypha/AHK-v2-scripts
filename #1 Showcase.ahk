@@ -629,6 +629,7 @@ If cfc1.EndReason = "Match" {
         Send "{BS}+" cfc1.Input ; If dot or numdot is the trigger, don't add space, coz typing website address is problematic
         ; SoundBeep 1500, 50 ; play a sound when successful - Frequency(a number between 37 and 32767), Duration in milliseconds
         ; SoundPlay "C:\Windows\Media\Windows Information Bar.wav" ; alternative to SoundBeep
+        ; SoundPlay A_WinDir "\Media\Windows Balloon.wav"          ; alternative to SoundBeep
         }
     Exit
     }
