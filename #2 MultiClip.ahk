@@ -10,7 +10,7 @@
 ; Hotstrings
 ;  = ClipArr keys
 ; User-defined functions
-;  = Notification
+;  = MyNotification
 ;    + MyNotificationGui
 ;    + EndMyNotif
 ;  = MultiClip ClipArr
@@ -44,10 +44,10 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #2 MultiClip v4.03"
+AHKname := "AHK v2 #2 MultiClip v4.04"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationGui("Loading " AHKname, "10000", "1550", "945", "1") ; 10000 milliseconds = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationGui("Loading " AHKname, "10000", "1550", "945", "1") ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Intialise ClipArr
 
@@ -91,7 +91,7 @@ PasteCStrings(20)
 
 I_Icon := A_ScriptDir "\icons\2-512.ico"
 ; Icon source: https://www.iconsdb.com/caribbean-blue-icons/2-icon.html     ; CC License
-; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing
+; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing -- see section on "Check & Reload AHK"
 If FileExist(I_Icon)
     TraySetIcon I_Icon
 
@@ -139,7 +139,7 @@ Reload
 ;------------------------------------------------------------------------------
 ; User-defined functions
 
-;  = Notification
+;  = MyNotification
 
 ;    + MyNotificationGui
 
@@ -167,8 +167,10 @@ MyNotification.Destroy
 
 ;------------------------------------------------------------------------------
 ;  = MultiClip ClipArr
-; Modified from MultiClip v1 https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658
-; and https://www.autohotkey.com/boards/viewtopic.php?p=326827#p326827
+; MultiClip v1 - https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658
+; Other sources - https://www.autohotkey.com/boards/viewtopic.php?p=326827#p326827
+; MultiClip v1 used or adapted AHK v1 code from https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/
+; and https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 
 ;    + ClipChanged
 
@@ -206,7 +208,7 @@ Cliptemp := StrReplace(text,"`r`n","`n")        ; fix for SendInput sending Wind
 Cliptemp := RegExReplace(Cliptemp,"^\s+|\s+$")  ; remove leading/trailing \s \t \r \n
 
 
-; Check if Cliptemp is already in an array and retrieve its `Index` if present
+; if Cliptemp is already in a slot ≠ 1, then remove it
 Loop LimitClipArr {
     If Cliptemp == ClipArr.Get(A_Index) {
         ClipArr.RemoveAt(A_Index)
@@ -226,6 +228,7 @@ Loop ClipArr.Length
     Result .= ClipArr.Get(A_Index) delim
 If FileExist(ClipArrFile)       ; check if file exists
     FileRecycle ClipArrFile     ; send old file to recycle bin
+    ; old script contents can be retrieved by restoring ClipArrFile from recycle bin
 FileAppend Result, ClipArrFile  ; create new file and save current cliparr contents
 }
 
@@ -308,7 +311,7 @@ ClipMenu.Add("&4  = "   ClipTrim(4)   ,FnName) ; To display a literal ampersand,
 ClipMenu.Add("&5  = "   ClipTrim(5)   ,FnName)
 ClipMenu.Add("&6  = "   ClipTrim(6)   ,FnName) ; Shortcuts correspond to the number/alpabet/symbol prior to `=`
 ClipMenu.Add("&7  = "   ClipTrim(7)   ,FnName) ; Shortcuts are usually underlined, and consist of
-ClipMenu.Add("&8  = "   ClipTrim(8)   ,FnName) ; numbers from NumPad or number row, and keys from the bottom row of QUERTY keyboard
+ClipMenu.Add("&8  = "   ClipTrim(8)   ,FnName) ; numbers from Numpad or number row, and keys from the bottom row of QUERTY keyboard
 ClipMenu.Add("&9  = "   ClipTrim(9)   ,FnName)
 ClipMenu.Add("&0  = "   ClipTrim(10)  ,FnName)
 ClipMenu.Add("&z  = "   ClipTrim(11)  ,FnName)
@@ -454,6 +457,9 @@ ClipMenuFn(SendClipFn)  ; show menu - ClipMenu
 ; ChangeLog
 
 /*
+v4.04 - 2024.02.01
+ * improve comments
+
 v4.03 - 2024.01.30
  * rename function names with `Func` in the name to `Fn` because `Func` is a class
 
