@@ -4,7 +4,6 @@
 
   Any help would be appreciated. Suggestions for improving the script code are welcome.  
 
------------------
 ## Script No. 0 Template
 
   [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Template.ahk) to template script.  
@@ -15,7 +14,6 @@
   
   `MyNotification` is coded in AHK v2 and utilises the built-in `Gui()` function to display the alert. It is intended to replace the depreciated `Progress` command from AHK v1.  
 
------------------
 ## Script No. 1 Showcase
 
   [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk) to all-in-one script.  
@@ -237,8 +235,7 @@
 
 </details>
 
------------------
-### Script No. 2 MultiClip
+## Script No. 2 MultiClip
   
   [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%232%20MultiClip.ahk) to script.  
   <sub>Last updated - 2024.02.01</sub>
