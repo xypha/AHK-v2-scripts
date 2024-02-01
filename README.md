@@ -6,6 +6,7 @@
 
 -----------------
 ## Script No. 0 Template
+
   [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Template.ahk) to template script.  
   <sub>Last updated (yyyy.mm.dd) - 2024.01.30</sub>
 
@@ -18,21 +19,20 @@
 ## Script No. 1 Showcase
 
   [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%231%20Showcase.ahk) to all-in-one script.  
-  <sub>Last updated - 2024.01.31</sub>
+  <sub>Last updated - 2024.02.01</sub>
 
-### CONTENTS
+### Contents
 
   | Title                          | Standalone | Last Updated |
   | :---                           |    :---:   |     ---:     |
   | Set default state of Lock keys | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Set%20default%20state%20of%20lock%20keys.ahk) | 2024.01.30 |
   | Show/Hide OS files             | [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Show%E2%A7%B8Hide%20OS%20files) | 2024.01.30 |
 
-  Standalone scripts for each remaining function will be created soon.
+  Standalone scripts for each of the below is in the works.  
 
   * Customise Tray Icon
 
-Hotkeys (keyboard shortcuts) -  
-
+  Hotkeys (keyboard shortcuts) -  
   * Check & Reload AHK
   * Remap Keys
   * Customise CapsLock
@@ -48,8 +48,7 @@ Hotkeys (keyboard shortcuts) -
   * Toggle Window On Top
   * Process Priority
 
-Use cases for -  
-
+  Use cases for -  
   * #HotIf
     * Firefox
     * Windows Explorer
@@ -59,7 +58,7 @@ Use cases for -
     * Horizontal Scrolling
     * Symbols In File Names
 
-Use cases for Hotstrings (text replacement) -  
+  Use cases for Hotstrings (text replacement) -  
   * Find & Replace
   * Trim Clipboard
   * Date & Time
@@ -71,7 +70,7 @@ Use cases for Hotstrings (text replacement) -
 <summary>Show/Hide</summary>
 
 #### **Set default state of Lock keys**
-  Set the default state of `CapsLock`, `NumLock` and `ScrollLock` to On or Off when script runs.  
+  Set the default state of `CapsLock`, `NumLock` and `ScrollLock` to On or Off when the script runs.  
   
   Add this script to your system [startup](https://www.howtogeek.com/208224/how-to-add-a-program-to-startup-in-windows/#step-two-create-a-shortcut-in-the-quot-startup-quot-folder-to-add-a-program-to-startup) and set the lock-state automatically after login.  
 
@@ -81,7 +80,7 @@ Use cases for Hotstrings (text replacement) -
 
   ![Show/Hide OS files](https://github.com/xypha/AHK-v2-scripts/assets/12472214/5d409108-ab10-4877-8be5-4c158da140b8)
 
-  The script checks the current state of the setting on start using Windows Registry, and shows a handy check mark in the tray menu when the option to display protected OS files is enabled.  
+  The script checks the current state of the setting on start using Windows Registry and shows a handy check mark in the tray menu when the option to display protected OS files is enabled.  
 
 -----------------
 #### **Customise Tray Icon**
@@ -99,7 +98,7 @@ Use cases for Hotstrings (text replacement) -
   * Disable the `Insert` key from accidentally triggering when you are trying to press adjacent keys like `Delete` or `Pause/Break`.  
   * Prefer `Alt + Tab` over **Task view**? Remap `Win + Tab` shortcut to always invoke the legacy `Alt + Tab` menu.  
   * Are you using a laptop and miss the `Page Up/Page Down/Home/End` buttons? Remap the `RCtrl + Up/Down/Left/Right` button combos to regain the function of the missing keys.  
-  * Minimise a window instantly by pressing `ALT + M`, instead of having to move your mouse cursor to the title bar to click on the "Minimise" button.  
+  * Minimise a window instantly by pressing `ALT + M`, instead of moving your mouse cursor to the title bar to click on the "Minimise" button.  
 
 -----------------
 #### **Customise CapsLock**
@@ -109,23 +108,23 @@ Use cases for Hotstrings (text replacement) -
   This script can help you do the following -  
   * Disable the `CapsLock` key to prevent it from accidentally turning ON.
   * Hit the `Shift + CapsLock` keys to turn ON CapsLock-state for a customisable duration (10 seconds by default, but can range from 250 milliseconds to 49 days).  
-  * Add a quiet notification in the corner when CapsLock is turned ON and turn it off automatically once CapsLock is off.
-  * If CapsLock is ON, turn it off instantly by hitting the `Esc` key or the `CapsLock` key (even if this key was disabled earlier).  
+  * Add a quiet notification in the corner when CapsLock is ON and dismiss it automatically once CapsLock is off.
+  * If CapsLock is ON, turn it off instantly by hitting the `Esc` key or the `CapsLock` key (even if CapsLock is remapped to never turn ON).  
 
 -----------------
 #### **Move Mouse Pointer by pixel**
-  Use `Win + Numpad` keys to move your mouse pointer with precision, pixel by pixel.  
+  Use `Win + Numpad 1-9` keys to move your mouse pointer with precision, pixel by pixel, using AHK's built-in `MouseMove` command.  
   
-  Customise the shortcut commands to your needs by altering one or more of the following -
+  Customise the `MouseMove` command to your needs by altering one or more of the following -
   * Starting coordinates (absolute or relative position on screen, app window or client)  
   * Speed of mouse cursor [range of 0 (fastest, instant), 2 (default) or 100 (slowest)]  
-  * Degree of mouse movement (relation position by specifying number of pixels)  
+  * Degree of mouse movement (change in absolute/relation position by a precise number of pixels)  
 
 -----------------
 #### **Close or Kill an app window with shortcuts**
   View three methods to close or kill an app or window -
   
-  * Send `WinClose` command with `Alt + Right Click` - closes any app or window instantly without having to navigate to the 'Close' button in the title bar. This simulates the default `Alt + F4` behaviour (in most apps) or `CTRL + W / Q` action (available in some apps).  
+  * Send `WinClose` command with `Alt + Right Click` - closes any app or window instantly without having to navigate to the 'Close' button in the title bar. This simulates the default `Alt + F4` behaviour (in most apps) or the `CTRL + W / Q` action (available in some apps).  
 
   Annoyed by an unresponsive window? Instead of opening Task Manager, try this first -  
   * Send `WinKill` command with `Ctrl + Alt + F4` - kill the unresponsive window forcefully by terminating its process.  
@@ -133,7 +132,7 @@ Use cases for Hotstrings (text replacement) -
   Didn't work? Kill all instances of an app - 
   * Send `ProcessClose` command with `Ctrl + Alt + Shift + F4` - The script shows a warning, with window titles of visible and hidden windows of the unresponsive process and asks for confirmation before terminating the process.  
 
-![Kill All Instances Of An App](https://github.com/xypha/AHK-v2-scripts/assets/12472214/f2ecd9b9-74dc-4e4c-b422-440ad3567d65)
+  ![Kill All Instances Of An App](https://github.com/xypha/AHK-v2-scripts/assets/12472214/f2ecd9b9-74dc-4e4c-b422-440ad3567d65)
 
 
 -----------------
@@ -155,7 +154,7 @@ Use cases for Hotstrings (text replacement) -
   * Bring the Recycle Bin Explorer window in the background to the foreground, or  
   * Empty the bin when the Recycle Bin Explorer window is in the foreground.  
 
-  Alternatively, one or more of these actions can be assigned to work with different keyboard shortcuts. Autothotkey is awesome like that :)
+  Alternatively, assign one or more of these actions to various keyboard shortcuts. AutoHotkey is awesome like that :)
 
 -----------------
 #### **Display Off shortcut**
@@ -190,31 +189,29 @@ Use cases for Hotstrings (text replacement) -
 
 -----------------
 #### **Process Priority**
-  Hit `Win + Z` to select and change the prioty level of a process.
+  Hit `Win + Z` to select and change the priority level of a process.
 
   ![Set Priority](https://github.com/xypha/AHK-v2-scripts/assets/12472214/2d0fd2cc-8c5a-4c43-9afc-599ac5aebd56)
 
 -----------------
 #### **Use cases for Hotstrings**
  Here are some examples of the wide breadth of uses for the AutoHotkey hotstrings feature.  
- * Find & replace text in Clipboard with and without regular expressions(RegEx).
- * Trim clipboard text - remove tabs (`\t`), newline markers (`\r \n`) and double spaces (`\s+` or "`  `") with or without RegEx.
- * Type the current date and/or time in your preferred regional format, or any customisable format.
+ * Find & replace text in Clipboard with and without regular expressions(RegEx).  
+ * Trim clipboard text - remove tabs (`\t`), newline markers (`\r \n`) and double spaces (`\s+` or "`  `") with or without RegEx.  
+ * Type the current date and/or time in your preferred format, regional or otherwise.  
 
 -----------------
 #### **Use cases for #HotIf**
-  Create keyboard shortcuts and text replacement commands tailored to specific windows or apps using the `#HotIf` command. This section of the script includes useful examples of shortcuts for [Firefox](https://www.mozilla.org/en-US/firefox/new/), [Telegram](https://desktop.telegram.org/) and Windows Explorer.
+  Create keyboard shortcuts and text replacement commands tailored to specific windows or apps using the `#HotIf` command. This section of the script includes useful examples of shortcuts for [Firefox](https://www.mozilla.org/en-US/firefox/new/), [Telegram](https://desktop.telegram.org/) and Windows Explorer.  
   * Firefox
-    * Hit `CTRL + Shift + O` to open library / bookmark manager.
-    * Disable the `CTRL + Shift + Q` shortcut, to prevent accidentally exiting the browser.
-  * Telegram
-    * Hit `CTRL + Q` to minimise Telegram Desktop to the tray, instead of quitting.
+    * Hit `CTRL + Shift + O` to open library / bookmark manager.  
+    * Don't want to accidentally exit the browser with the `CTRL + Shift + Q` shortcut? Disable it.  
   * Windows Explorer
-    * Change function of `F1` (opens [Help](https://go.microsoft.com/fwlink/?LinkId=2171119) in Edge Browser) to `F2` (rename command).
-    * Hit `CTRL + Shift + A` to unselect file(s)/folder(s). Conveniently map the opposite of the default behaviour of `CTRL + A` (select all) to a similar shortcut.
-    * Copy full path of folder/file(s) to clipboard using shortcut `CTRL + Shift + C`
-    * Copy file name(s) without path to clipboard using shortcut `ALT + N`
-    * Copy file name(s) without extension and path to clipboard using shortcut `CTRL + ALT + N`
+    * Change function of `F1` (opens [Help](https://go.microsoft.com/fwlink/?LinkId=2171119) in Edge Browser) to `F2` (rename command).  
+    * Hit `CTRL + Shift + A` to unselect file(s)/folder(s). Conveniently map the opposite of the default behaviour of `CTRL + A` (select all) to a similar shortcut.  
+    * Copy the full path of one or more folder/file(s) to the clipboard using the shortcut `CTRL + Shift + C`.  
+    * Copy folder/file name(s) without their path to the clipboard using the shortcut `ALT + N`.  
+    * Copy file name(s) without their extension and path to the clipboard using the shortcut `CTRL + ALT + N`.  
 
 -----------------
 #### **Capitalise the first letter of a sentence**
@@ -232,7 +229,7 @@ Use cases for Hotstrings (text replacement) -
   
   This script allows you to insert similar Unicode symbols as replacements, organically and automatically as you type.  
 
-    ![Symbols In File Names](https://github.com/xypha/AHK-v2-scripts/assets/12472214/c500bf4c-e16d-4c76-b2d4-384a5d54b83c)
+  ![Symbols In File Names](https://github.com/xypha/AHK-v2-scripts/assets/12472214/c500bf4c-e16d-4c76-b2d4-384a5d54b83c)
 
 -----------------
 #### **Notification Function**
@@ -244,7 +241,7 @@ Use cases for Hotstrings (text replacement) -
 ### Script No. 2 MultiClip
   
   [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/%232%20MultiClip.ahk) to script.  
-  <sub>Last updated - 2024.01.30</sub>
+  <sub>Last updated - 2024.02.01</sub>
 
   This script was created as a rudimentary alternative to PhraseExpress's [clipboard management](https://www.phraseexpress.com/doc/features/clipboard-manager/) feature with inspiration from several v1 scripts.  
 
@@ -261,10 +258,9 @@ Use cases for Hotstrings (text replacement) -
 
   MultiClip pop-up menu `p++` with test array -  
   
-![MultiClip pop-up menu `p++` with test array](https://github.com/xypha/AHK-v2-scripts/assets/12472214/32329607-bf4e-436b-b115-ce1919ab6bc1)
+  ![MultiClip pop-up menu `p++` with test array](https://github.com/xypha/AHK-v2-scripts/assets/12472214/32329607-bf4e-436b-b115-ce1919ab6bc1)
+ 
 
-  An earlier version of MultiClip (AHK v1 script) can be found [here](https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658).  
-
-[^1]: Saves **_only_** text - this includes anything from the clipboard that can be expressed as text, such as filenames (with full path) when files/folders are copied from a Windows File Explorer window via `CTRL + C` or `CTRL + X`. See Script #1 Showcase for examples that show you how to copy the full path with or without file extension and path.  
-[^2]: Shortcuts correspond to the number/alphabet/symbol before `=`. Shortcuts are usually underlined and consist of numbers from Numpad or number row and keys from the bottom row of the QWERTY keyboard. Customise the shortcuts by altering the character _after_ `&` in lines containing `ClipMenu.Add`.  
-[^3]: Test array with 20 slots containing alphanumerical text `ClipArr := ["a1", "b2", "c3", "d4", "e5", "f6", "g7", "h8", "i9", "j10", "k11", "l12", "m13", "n14", "o15", "p16", "q17", "r18", "s19", "t20"]`.  
+  [^1]: Saves **_only_** text - this includes anything from the clipboard that can be expressed as text, such as filenames (with full path) when files/folders are copied from a Windows File Explorer window via `CTRL + C` or `CTRL + X`. See Script #1 Showcase for examples that show you how to copy the full path with or without file extension and path.  
+  [^2]: Shortcuts correspond to the number/alphabet/symbol before `=`. Shortcuts are usually underlined and consist of numbers from Numpad or number row and keys from the bottom row of the QWERTY keyboard. Customise the shortcuts by altering the character _after_ `&` in lines containing `ClipMenu.Add`.  
+  [^3]: Test array with 20 slots containing alphanumerical text `ClipArr := ["a1", "b2", "c3", "d4", "e5", "f6", "g7", "h8", "i9", "j10", "k11", "l12", "m13", "n14", "o15", "p16", "q17", "r18", "s19", "t20"]`.  
