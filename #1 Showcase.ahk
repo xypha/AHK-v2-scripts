@@ -34,6 +34,7 @@
 ;  = Exchange adjacent letters
 ;  = Toggle Window On Top
 ;  = Process Priority
+;  = Print Screen keys
 ; #HotIf Apps
 ;  = Firefox
 ;  = Windows File Explorer
@@ -91,6 +92,11 @@
 ;    + UrlEncode
 ;  = Kill All Instances Of An App
 ;    + GetKillTitles
+;  = Print Screen
+;    + SnipMenuFn
+;    + SnipFromMenu
+;    + PrintScreenFn
+;    + PrintScreenExec
 ;  = Control Panel Tools
 ;    + ControlPanelMenuFn
 ;    + ControlPanelSelect
@@ -111,7 +117,7 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #1 Showcase v2.04"
+AHKname := "AHK v2 #1 Showcase v2.05"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, "10000", "1550", "985", "1") ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -147,8 +153,8 @@ GroupAdd "CapitaliseFirstLetter", "ahk_class #32770"                            
 
 ; GroupAdd "CloseWithQW"          , "ahk_exe Taskmgr.exe"                             ; Windows Task Manager ; requires UIAccess
 GroupAdd "CloseWithQW"          , "Window Spy for AHKv2 ahk_class AutoHotkeyGUI"    ; AHK window spy
-GroupAdd "CloseWithQW"          , "Telegram ahk_class Qt51512QWindowIcon"           ; Telegram.exe window
 GroupAdd "CloseWithQW"          , "ahk_class CalcFrame"                             ; classic calculator
+GroupAdd "CloseWithQW"          , "Properties ahk_class #32770 ahk_exe mpc-hc.exe"  ; MediaInfo in mpc
 
 ;  = Horizontal Scrolling Group
 
@@ -172,8 +178,13 @@ Return ; Ends auto-execute
 ;------------------------------------------------------------------------------
 ; Hotkeys
 
-; ^ is Control / Ctrl key
+; ^ is Ctrl / Control key
+;   >^    is RCtrl / right control key
+;   <^    is LCtrl / left control key
 ; ! is Alt key
+;   >!    is RAlt / right ALT
+;   <!    is LAlt / left ALT
+;   <^>!  is ALTGr (LControl & RAlt)
 ; # is Windows / Win key
 ; + is Shift key
 
@@ -181,7 +192,7 @@ Return ; Ends auto-execute
 
 !Numpad1:: { ; Ctrl + Numpad1 keys pressed together
 ListLines
-If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; wait for ListLines window to open, timeout 3s
+If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; 3s timeout - wait for ListLines window to open
     WinMaximize
 }
 
@@ -227,6 +238,7 @@ RControl & Left::Send "{Home}"  ; Home      - use alternate key name for RCtrl
 >^Right::        Send "{End}"   ; End       - use >^ instead of Right Ctrl button and skip using "&"
 
 !m::WinMinimize "A"         ; Alt+ M = Minimize active window
+; PostMessage 0x0112, 0xF020,,, "A" ; alternative, 0x0112 = WM_SYSCOMMAND, 0xF020 = SC_MINIMIZE
 
 /* ; remap media keys to navigation keys - disabled, uncomment to use
 Media_Play_Pause::PgUp
@@ -304,14 +316,15 @@ Alt & RButton:: {
 
 MouseGetPos ,, &id
 ; detect the unique ID number of the window under the mouse cursor
-; MouseGetPos is used instead of acitve window "A" because mouse button is used in shortcut
 ; The window does not have to be active to be detected. Hidden windows cannot be detected
+; WinID := WinExist("A")  ; alternative - but 'Active' window might not always be the intended target
 
 winClass := WinGetClass("ahk_id " id) ; Retrieves the specified window's class name
 If (winClass != "Shell_TrayWnd"                         ; exclude windows taskbar
  || winClass != "TopLevelWindowForOverflowXamlIsland"   ; System tray overflow window
- || winClass != "Windows.UI.Core.CoreWindow")           ; Notification Center
-;|| winClass != "insert yourapp's classname")           ; uncomment to add more apps
+ || winClass != "Windows.UI.Core.CoreWindow"            ; Notification Center
+;|| winClass != "insert yourapp's classname"            ; uncomment to add more apps
+    )
     WinClose("ahk_id " id)  ; sends a WM_CLOSE message to the target window
     ; PostMessage 0x0112, 0xF060,,, "ahk_id " id ; alternative - same as pressing Alt+F4 or clicking a window's close button in its title bar
 }
@@ -322,10 +335,11 @@ If (winClass != "Shell_TrayWnd"                         ; exclude windows taskba
 ; briefly tries to close the window normally and if that fails, attempts to terminate the window's process
 
 ^!F4::WinKill "A"
+
 /* ; alternative
 ^!F4:: {
-Process_Name := WinGetProcessName("ahk_id " id)
-ProcessClose Process_Name
+MouseGetPos ,, &id
+ProcessClose WinGetProcessName("ahk_id " id)
 }
 */
 
@@ -353,7 +367,7 @@ Result := MsgBox(Display, A_ScriptName " - WARNING", "Icon! YesNo Default2 26214
 If Result = "Yes"
     While ProcessExist(Process_Name)
         ProcessClose Process_Name
-    ; Run A_ComSpec ' /C Taskkill /IM "' Process_Name '" /F' ; alternative - you might see a flash of command promt/terminal window. Brief explanation of flags -
+    ; Run A_ComSpec ' /C Taskkill /IM /F "' Process_Name '"' ; alternative - you might see a flash of command promt/terminal window. Brief explanation of flags -
     ; /C Carries out the command and then terminates - open dialogue (Win + R), paste & run "cmd.exe /?" to see other flags
     ; /IM imagename ; /F forcefully terminate - open dialogue (Win + R), paste & run "cmd.exe", paste "Taskkill /?" (without the quotation marks) and press enter to see other flags, filters and examples
 }
@@ -363,21 +377,24 @@ If Result = "Yes"
 ; Modified from https://www.autohotkey.com/board/topic/667-transparent-windows/?p=148102
 
 ^+WheelUp:: {           ; increases Trans value, makes the window more opaque
-Trans := GetTrans()
+MouseGetPos ,, &WinID
+; WinID := WinExist("A")  ; alternative - but 'Active' window might not always be the intended target
+Trans := GetTrans(WinID)
 If Trans < 255
     Trans := Trans + 20 ; add 20, change for slower/faster transition
 If Trans >= 255
     Trans := "Off"
-SetTransByWheel(Trans)
+SetTransByWheel(Trans, WinID)
 }
 
 ^+WheelDown:: {         ; decreases Trans value, makes the window more transparent
-Trans := GetTrans()
-If Trans > 30
+MouseGetPos ,, &WinID
+Trans := GetTrans(WinID)
+If Trans > 20
     Trans := Trans - 20 ; subtract 20, change for slower/faster transition
-If Trans < 21
+Else If Trans <= 20
     Trans := 1          ; never set to zero, causes ERROR
-SetTransByWheel(Trans)
+SetTransByWheel(Trans, WinID)
 }
 
 F8::SetTransMenuFn
@@ -393,16 +410,19 @@ Else If WinExist("Recycle Bin ahk_class CabinetWClass")     ; If explorer is sho
 /* ; If explorer is open but not showing recycle bin, change to Bin (disabled, uncomment if desired)
 Else If WinExist("ahk_class CabinetWClass") {
     WinActivate
-    If WinWaitActive( ,, 2) { ; = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
+    If WinWaitActive( ,, 2) { ; 2s = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
         Send "{F4}"
         While ControlGetClassNN(ControlGetFocus("A")) != "Microsoft.UI.Content.DesktopChildSiteBridge1" {
             Sleep 100
             If A_Index > 5 { ; = Sleep 500 ; wait until focus is on address bar, max 500ms
-                ToolTipFn(A_ThisHotkey ":: Failed to focus address bar", -1000) ; 1s
+                ToolTipFn(ThisHotkey ":: Failed to focus address bar", -1000) ; 1s
                 Exit
                 }
             }
-        Send "{Raw}::{645ff040-5081-101b-9f08-00aa002f954e}`n"
+        WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge",, 2) ; 2s - wait for dropdown
+        Send "{Raw}::{645ff040-5081-101b-9f08-00aa002f954e}"
+        WinWaitClose("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge",, 2) ; 2s - wait for dropdown to disappear, then Send Enter ; WinWait commands used to prevent dropdown display appearing after Enter - explorer bug
+        Send "{Enter}"
         }
     }
 */
@@ -460,8 +480,7 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 $!l:: { ; Alt + L
 Send "{Left}+{Right 2}"
 CallClipboard(2) ; 2s
-SwappedLetters := SubStr(A_Clipboard,2) SubStr(A_Clipboard,1,1)
-Send SwappedLetters "{Left}"
+Send SubStr(A_Clipboard,2) SubStr(A_Clipboard,1,1) "{Left}"
 A_Clipboard := clipSave ; restore Clipboard contents
 }
 
@@ -512,6 +531,20 @@ SetPriority(*) {
         MyNotificationGui("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, "5000", "1550", "945", "1")
     Finally PPGui.Destroy
     }
+}
+
+;------------------------------------------------------------------------------
+;  = Print Screen keys
+
+; $PrintScreen::      ; keyboard hook $ ; commented out to preserve default function
+#PrintScreen:: {    ; Win + PrintScreen
+PrintScreenFn       ; take screenshot, save and rename
+}
+
+; #+r::         ; video snip shortcut, uncomment if desired
+^PrintScreen::  ; Ctrl + Print Screen (keyname = PrtSc, PrtScn or PrntScrn)
+#+s:: {         ; Win + Shift + s
+SnipMenuFn
 }
 
 ;------------------------------------------------------------------------------
@@ -623,7 +656,7 @@ cfc1 := InputHook("L1 V C","{Space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h
 cfc1.Start
 cfc1.Wait
 If cfc1.EndReason = "Match" {
-    If A_ThisHotkey = "~!" or A_ThisHotkey = "~?" ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
+    If ThisHotkey = "~!" or ThisHotkey = "~?" ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
         Send "{BS} +" cfc1.Input
     Else {
         Send "{BS}+" cfc1.Input ; If dot or numdot is the trigger, don't add space, coz typing website address is problematic
@@ -714,6 +747,7 @@ Loop 3
 ; Method #3 - turn on scroll lock and send arrow keys to scroll horizontally
 
 #HotIf WinActive("ahk_group HorizontalScroll2")                ; group 2 - not yet defined in auto-execute
+; ahk_class XLMAIN  ; may apply to MS Excel - modified from https://superuser.com/a/825291/391770
 
 +WheelUp::SendKey("{Left}")
 +WheelDown::SendKey("{Right}")
@@ -740,6 +774,7 @@ SetScrollLockState "Off"
 ; Method #5 - horizontal scrolling for windows file explorer
 see the section under " + Horizontal Scrolling"
 
+Still not working? Try other niche solutions mentioned here - https://superuser.com/questions/13763/horizontal-scrolling-shortcut-in-windows
 */
 
 ;------------------------------------------------------------------------------
@@ -752,7 +787,7 @@ see the section under " + Horizontal Scrolling"
 ; :?*:\::{U+FF3C}                     ; \ → ＼ | replace U+005C REVERSE SOLIDUS : backslash            → U+FF3C FULLWIDTH REVERSE SOLIDUS   ; disabled
 
 :?*:/::{U+29F8}                     ; / → ⧸  | replace U+002F SOLIDUS : slash, forward slash, virgule → U+29F8 BIG SOLIDUS
-:?*b0::+::{BS}{U+FF1A}              ; : → ：  | replace U+003A COLON                                  → U+FF1A FULLWIDTH COLON
+:?*:`:::{U+FF1A}                    ; : → ：  | replace U+003A COLON                                  → U+FF1A FULLWIDTH COLON
 :?*:*::{U+2732}                     ; * → ✲ | replace U+002A ASTERISK : star                         → U+2732 OPEN CENTRE ASTERISK
 :?*:?::{U+FF1F}                     ; ? → ？ | replace U+003F QUESTION MARK                          → U+FF1F FULLWIDTH QUESTION MARK
 :?*:"::{U+FF02}                     ; " → ＂ | replace U+0022 QUOTATION MARK : double quote          → U+FF02 FULLWIDTH QUOTATION MARK
@@ -905,6 +940,7 @@ MyNotification.Destroy
 
 ToggleOS(*) {
 ToggleOSCheck
+; alternative - Run ToggleSystemFiles.bat as administrator to toggle settings - https://superuser.com/a/1151851/391770
 If Status = 0 { ; enable if disabled
     RegWrite "1", "REG_DWORD", "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     CheckRegWrite(Status)
@@ -922,11 +958,12 @@ Else { ; disable if enabled
 ;--------
 ;    + CheckRegWrite
 
-CheckRegWrite(key) { ; check if RegWrite was success
-If key = RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+CheckRegWrite(value) { ; check if RegWrite was success
+If value = RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden") {
     MsgBox "ToggleOS Failed",, "262144" ; 262144 = Always-on-top
     ; ToolTipFn("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
-    ; Exit
+    Exit
+    }
 }
 
 ;--------
@@ -945,14 +982,14 @@ Else A_TrayMenu.Check "&Toggle OS files"
 WindowsRefreshOrRun() {
 If WinExist("ahk_class CabinetWClass") { ; If Windows File Explorer window exists
     WinActivate
-    If WinWaitActive( ,, 2)     ; wait for explorer to become active window ; 2s timeout
+    If WinWaitActive( ,, 2)     ; 2s timeout ; wait for explorer to become active window 
         Send "{F5}"             ; refresh
         ; a second refresh might be needed after a few seconds to see the effects of change in settings
         ; add a Sleep command or use SetTimer prior to refresh to account for the delay
     }
 Else { ; open new explorer window if one doesn't already exist ; comment out this section if not desired
     Run 'explorer.exe',,"Max"
-    WinWait("ahk_class CabinetWClass",, 10) ; timeout 10s
+    WinWait("ahk_class CabinetWClass",, 10) ; 10s timeout
     WinActivate
     }
 }
@@ -962,10 +999,8 @@ Else { ; open new explorer window if one doesn't already exist ; comment out thi
 
 ;    + GetTrans
 
-GetTrans() {
-ToolTip ; disable previous tooltip if any
-MouseGetPos ,, &WinID
-Trans := WinGetTransparent("ahk_id " WinID)
+GetTrans(id) {
+Trans := WinGetTransparent("ahk_id " id)
 If not Trans
     Trans := 255
 Return Trans
@@ -974,17 +1009,22 @@ Return Trans
 ;--------
 ;    + SetTransByWheel
 
-SetTransByWheel(Transparency) {
-ToolTip "Transparency: " Transparency
-SetTimer () => ToolTip(), -500
-MouseGetPos ,, &WinID
-WinSetTransparent Transparency, "ahk_id " WinID
+SetTransByWheel(Transparency, id) {
+If Transparency = "Off"
+    WinSetTransparent 255, "ahk_id " id
+    ; Set transparency to 255 before using Off - might avoid window redrawing problems such as a black background. If the window still fails to be redrawn correctly, try WinRedraw, WinMove or WinHide + WinShow for a possible workaround.
+WinSetTransparent Transparency, "ahk_id " id
+ToolTipFn("Transparency: " Transparency, -500) ; 500ms
 }
 
 ;--------
 ;    + SetTransMenuFn
+; modified from http://www.computoredge.com/AutoHotkey/Downloads/Always_on_Top.ahk
 
 SetTransMenuFn() {
+MouseGetPos ,, &WinID   ; identify window id
+; WinID := WinExist("A")  ; alternative - but 'Active' window might not always be the intended target
+Global WinID            ; so that SetTransByMenu can use it to set transparency
 SetTransMenu := Menu()
 SetTransMenu.Delete
 SetTransMenu.Add("&1 255 Opaque"            ,SetTransByMenu)
@@ -999,9 +1039,12 @@ SetTransMenu.Show
 ;    + SetTransByMenu
 
 SetTransByMenu(item, position, SetTransMenu) {
-MouseGetPos ,, &WinID
 Transparency := Trim(SubStr(item, 4, 3))
 WinSetTransparent Transparency, "ahk_id " WinID
+If Transparency = 255 {
+    WinSetTransparent "Off", "ahk_id " WinID ; Specifying Off - may improve performance and reduce usage of system resources
+    }
+ToolTipFn("Transparency: " Trim(SubStr(item, 4)), -2000) ; 2s
 }
 
 ;------------------------------------------------------------------------------
@@ -1025,7 +1068,7 @@ ChangeCaseMenu.Show
 ;    + ConvertLower
 
 ConvertLower(*) {
-CallClipboard(2)
+CallClipboard(2) ; 2s
 CaseConvert(StrLower(A_Clipboard))
 }
 
@@ -1033,7 +1076,7 @@ CaseConvert(StrLower(A_Clipboard))
 ;    + ConvertSentence
 
 ConvertSentence(*) {
-CallClipboard(2)
+CallClipboard(2) ; 2s
 transformed := RegExReplace(StrLower(A_Clipboard), "(((^\s*|([.!?]+\s*))[a-z])|\Wi\W)", "$U1") ; Code Credit #1
 CaseConvert(transformed)
 }
@@ -1042,7 +1085,7 @@ CaseConvert(transformed)
 ;    + ConvertTitle
 
 ConvertTitle(*) {
-CallClipboard(2)
+CallClipboard(2) ; 2s
 CaseConvert(StrTitle(A_Clipboard))
 }
 
@@ -1050,7 +1093,7 @@ CaseConvert(StrTitle(A_Clipboard))
 ;    + ConvertUpper
 
 ConvertUpper(*) {
-CallClipboard(2)
+CallClipboard(2) ; 2s
 CaseConvert(StrUpper(A_Clipboard))
 }
 
@@ -1058,7 +1101,7 @@ CaseConvert(StrUpper(A_Clipboard))
 ;    + ConvertInvert
 
 ConvertInvert(*) {
-CallClipboard(2)
+CallClipboard(2) ; 2s
 inverted := ""
 Loop Parse A_Clipboard {     ; Code Credit #2
     If StrLower(A_LoopField) == A_LoopField    ; * Code Credit #3
@@ -1092,7 +1135,7 @@ Send "^v" Len ; Paste new text and select it
 CallClipWait(secs) {
 If not ClipWait(secs) {
     MyNotificationGui(A_ThisHotkey ":: Clip Failed", "2000", "1550", "985", "1") ; personal preferrence coz tooltip conflict
-    ; ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; Alternative to MyNotification
+    ; ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; 2s - Alternative to MyNotification
     Exit
     }
 }
@@ -1274,6 +1317,121 @@ Return temp
 }
 
 ;------------------------------------------------------------------------------
+;  = Print Screen
+
+;    + SnipMenuFn
+
+SnipMenuFn() {
+SnipMenu := Menu()
+SnipMenu.Delete
+SnipMenu.Add("&1 Rectangular Snip"          ,SnipFromMenu)
+SnipMenu.Add("&2 Freeform Snip"             ,SnipFromMenu)
+SnipMenu.Add("&3 Window Snip"               ,SnipFromMenu)
+SnipMenu.Add("&4 Screenshot - Save && Exec" ,PrintScreenFn)
+SnipMenu.Show
+}
+
+;--------
+;    + SnipFromMenu
+
+SnipFromMenu(ItemName, ItemPos, MyMenu) {
+Send "{PrintScreen}"
+
+; wait for screnshot tool to activate
+If WinWaitActive("Screen Snipping ahk_class Windows.UI.Core.CoreWindow",, 3) { ; 3s timeout
+    Sleep 500
+    Send "{Tab " ItemPos "}{Enter}"
+    }
+Else {
+    ToolTipFn(A_ThisHotkey ":: Screen Snipping timed out", -2000) ; 2s
+    Exit
+    }
+
+; wait for screenshot to be taken ; abort further action if timeout or Esc key is pressed
+If WinWaitClose(,, 15) and (A_PriorKey != "Escape") { ; 15s
+    If WinExist("ahk_class MSPaintApp")
+        WinActivate
+    Else Run "mspaint.exe",,"Max"
+
+    If WinWait("ahk_class MSPaintApp",, 3) ; 3s
+        ; modified from https://www.autohotkey.com/boards/viewtopic.php?p=360163#p360163
+        PostMessage 0x111, 57637,,, "ahk_class MSPaintApp" ; 0x111 = Paste
+        ; Send "^v"                                 ; alternative to PostMessage
+        ; ControlSend "^v",, "ahk_class MSPaintApp" ; alternative to Send / PostMessage
+    }
+Else ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - 15s timeout / Esc", -2000) ; 2s
+}
+
+/* ; use PostMessage to select tool -
+Free-Form       621
+Select          620
+Eraser          637
+Fill            623
+Pick            639
+Magnifier       638
+Pencil          636
+Brush           640
+AirBrush        627
+Text            622
+Line            624
+Curve           628
+Rectangle       641
+Polygon         632
+Ellipse         643
+Rounded_Rect    634
+
+PostMessage 0x111, 620,,, "ahk_pid " PID ; alternative to "ahk_class MSPaintApp"
+paint settings in registry = HKCU\Software\Microsoft\Windows\CurrentVersion\Applets\Paint\
+*/
+
+;--------
+;    + PrintScreenFn
+
+PrintScreenFn(*) {
+; save screenshot number in variable 'serial'
+serial := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer", "ScreenshotIndex", "1")
+
+; send Windows + Print Screen
+Send "#{PrintScreen}"
+
+; use SetTimer to wait for file creation 100ms and execute action in another thread
+; pass serial as number for further action
+SetTimer(() => PrintScreenExec(serial), -100) ; 100ms
+}
+
+;--------
+;    + PrintScreenExec
+
+PrintScreenExec(number) {
+
+; store path of screenshot file in variable 'MyPath'
+MyPath := "C:\Users\" A_UserName "\Pictures\Screenshots\Screenshot (" number ").png"
+
+; if file does not exist, wait using Sleep and repeat check
+While FileExist(MyPath) = "" {
+    Sleep 500        ; wait for 500ms - modify as per system performance
+    If A_Index > 6 { ; max 6 attempts, total wait 3000ms = 3s
+        ; If failed ×6, open screenshot folder in explorer
+        Run 'explore "C:\Users\' A_UserName '\Pictures\Screenshots\"',,"Max"
+        Exit         ; give up on rename
+        }
+    }
+
+; prepare to rename file
+String := FormatTime(FileGetTime(MyPath, "C"), "yyyy-MM-dd @ HH：mm：ss") ; 2016-07-21 @ 13：28：05
+; FileGetTime - obtain creation time as a string in YYYYMMDDHH24MISS format
+; FormatTime - transform Timestamp YYYYMMDDHH24MISS into desired date/time format.
+MyPathNew := "C:\Users\" A_UserName "\Pictures\Screenshots\" String ".png"
+
+; rename
+FileMove MyPath, MyPathNew
+
+; Further actions -
+; Run 'mspaint.exe "' MyPathNew '"',,"Max"                              ; open in paint
+; Run 'explore "C:\Users\' A_UserName '\Pictures\Screenshots\"',,"Max"  ; open screenshot folder in explorer
+}
+
+;------------------------------------------------------------------------------
 ;  = Control Panel Tools
 
 ;    + ControlPanelMenuFn
@@ -1343,7 +1501,7 @@ ComObject("shell.application").ControlPanelItem("resmon.exe")      ; Resource Mo
 Run 'explorer.exe "ms-settings:windowsupdate"'                     ; Windows Update
 ComObject("shell.application").ControlPanelItem("winver")          ; Windows version
 
-Run '"::{21EC2020-3AEA-1069-A2DD-08002B30309D}"',,"Max"            ; Control Panel (view: small icons) ; alternate
+Run "::{21EC2020-3AEA-1069-A2DD-08002B30309D}",,"Max"              ; Control Panel (view: small icons) ; alternate
 ::{26EE0668-A00A-44D7-9371-BEB064C98683}                           ; Control Panel (view: category) ; alternate
 ::{20D04FE0-3AEA-1069-A2D8-08002B30309D}                           ; This PC
 Run 'SnippingTool.exe'                                             ; Snipping Tool ; alternate ; Opens modern app
@@ -1381,6 +1539,7 @@ ComObject("shell.application").ControlPanelItem("write")           ; Wordpad ; N
 ComObject("shell.application").ShutdownWindows()                   ; Shutdown Menu
 
 System Configuration Tools (skipped items already in #x or listed above)
+; Replace the Windows directory "C:\Windows" with A_WinDir as required
 
 C:\WINDOWS\System32\UserAccountControlSettings.exe                 ; Change User Account Control Settings
 C:\WINDOWS\System32\control.exe /name Microsoft.Troubleshooting    ; Modern Settings App > System > Troubleshoot
@@ -1393,12 +1552,15 @@ C:\WINDOWS\System32\rstrui.exe                                     ; Restore you
 C:\WINDOWS\System32\regedt32.exe                                   ; Make changes to the Windows registry
 C:\WINDOWS\System32\resmon.exe                                     ; Monitor the performance and resource usage of the local computer
 
-
 Find more shortcuts to various sections within modern Settings app - https://winaero.com/ms-settings-commands-in-windows-10/
 Shell:AppsFolder ; shortcuts to all apps in start menu
 PostMessage 0x0111, 65305,,, "C:\YourScript.ahk ahk_class AutoHotkey" ; Suspend, Toggle
 PostMessage 0x0111, 65306,,, "ScriptFileName.ahk - AutoHotkey" ; Pause, Toggle
 PostMessage 0x0111, 65303,,, "ScriptFileName.ahk - AutoHotkey"  ; Reload.
+
+restart your video drivers by pressing the key combination Win + Ctrl + Shift + B -- https://www.makeuseof.com/tag/hidden-key-combo-frozen-computer/
+
+more? Check jeeswg's Explorer tutorial - https://www.autohotkey.com/boards/viewtopic.php?p=148121#p148121
 */
 
 ; End of script code
@@ -1407,6 +1569,26 @@ PostMessage 0x0111, 65303,,, "ScriptFileName.ahk - AutoHotkey"  ; Reload.
 ; ChangeLog
 
 /*
+v2.05 - 2024.02.04
+ * add 'Print Screen' section
+ * remove Telegram from 'CloseWithQW' group - conflict with default behaviour of 'Esc'
+ * add 'MediaInfo in mpc' to 'CloseWithQW' group
+ * add alternative 'PostMessage' to 'WinMinimize' 
+ * add alternative 'WinExist' to 'MouseGetPos' 
+ * correct position of parentheses in 'WinClose' with '!RButton'
+ * improve alternative `^!F4` hotkey - add missing MouseGetPoI, and remove unnecessary variable Process_Name 
+ * improve 'Adjust Window Transparency keys' - call 'MouseGetPos' once instead of twice for each mouse key and correct 'If Trans' statements in `^+WheelDown` hotkey
+ * change 'A_ThisHotkey' to 'ThisHotkey' when applicable for more reliability
+ * improve 'Recycle Bin shortcut' - add 'WinWait' to prevent dropdown explorer bug
+ * remove unnecessary variable 'SwappedLetters' 
+ * correctly replace U+003A COLON in 'Symbols In File Names keys'
+ * correct 'CheckRegWrite' - uncomment 'Exit' command, to stop further execution on 'RegWrite' failure
+ * improve GetTrans - remove unnecessary 'ToolTip' command
+ * improve SetTransByWheel - remove 'ToolTip'/'SetTimer' combo, add 'WinSetTransparent' 255 before setting "Off", and add 'ToolTipFn' after 'WinSetTransparent' command
+ * improve 'SetTransMenuFn' - get 'WinID' before executing 'SetTransByMenu'
+ * improve 'SetTransByMenu' - add 'WinSetTransparent' "Off" if 255, and add ToolTipFn
+ * improve comments and update headings
+
 v2.04 - 2024.01.31
  * improve remap keys section to show more variations of key names, symbols and formatting
  * replace `HKEY_CURRENT_USER` with `HKCU` in regkeys
