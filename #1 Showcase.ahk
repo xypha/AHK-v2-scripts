@@ -117,10 +117,10 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #1 Showcase v2.05"
+AHKname := "AHK v2 #1 Showcase v2.06"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationGui("Loading " AHKname, "10000", "1550", "985", "1") ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationGui("Loading " AHKname, 10000, 1550, 985, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Set default state of Lock keys
 ; Turn on/off upon startup (one-time)
@@ -197,7 +197,7 @@ If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; 3s timeout - w
 }
 
 ^!Numpad1:: { ; Ctrl + Alt + Numpad1 keys pressed together
-MyNotificationGui("Updating " AHKname, "500", "1550", "985", "0") ; use Sleep coz reload cancels timers
+MyNotificationGui("Updating " AHKname,,, 985, 0) ; 500ms ; use Sleep coz reload cancels timers
 Reload
 }
 
@@ -264,13 +264,14 @@ Media_Next::End
 
 ;------------------------------------------------------------------------------
 ;  = Customise CapsLock
+; for a more comprehensive CapsLock script, visit - https://github.com/nascentt/CapShift
 
 ^CapsLock::^a        ; Select all
 <#CapsLock::AltTab   ; Switch windows with Right Win + CapsLock
 
 +CapsLock:: {
 SetCapsLockState "On"
-MyNotificationGui("CapsLock ON", "10000", "960", "985", "1")   ; 10000ms = 10s, change to match KeyWait timeout if needed
+MyNotificationGui("CapsLock ON", 10000, 960) ; 10000ms = 10s, change to match KeyWait timeout if needed
 SetTimer CapsWait, -100 ; 100ms ; add SetTimer to move KeyWait to new thread and prevent current thread from being paused
 }
 
@@ -410,7 +411,7 @@ Else If WinExist("Recycle Bin ahk_class CabinetWClass")     ; If explorer is sho
 /* ; If explorer is open but not showing recycle bin, change to Bin (disabled, uncomment if desired)
 Else If WinExist("ahk_class CabinetWClass") {
     WinActivate
-    If WinWaitActive( ,, 2) { ; 2s = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
+    If WinWaitActive(,, 2) { ; 2s = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
         Send "{F4}"
         While ControlGetClassNN(ControlGetFocus("A")) != "Microsoft.UI.Content.DesktopChildSiteBridge1" {
             Sleep 100
@@ -419,10 +420,10 @@ Else If WinExist("ahk_class CabinetWClass") {
                 Exit
                 }
             }
-        WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge",, 2) ; 2s - wait for dropdown
+        ; WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge",, 2) ; 2s - wait for dropdown
         Send "{Raw}::{645ff040-5081-101b-9f08-00aa002f954e}"
-        WinWaitClose("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge",, 2) ; 2s - wait for dropdown to disappear, then Send Enter ; WinWait commands used to prevent dropdown display appearing after Enter - explorer bug
-        Send "{Enter}"
+        ; WinWaitClose(,, 2) ; 2s - wait for dropdown to disappear, then Send Enter ; WinWait commands used to prevent dropdown display appearing after Enter - explorer bug
+        Send "{Enter}{F6 2}"
         }
     }
 */
@@ -494,7 +495,7 @@ t := WinGetTitle("A")
 ExStyle := WinGetExStyle(t)
 If (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
     WinSetAlwaysOnTop 0, t      ; Turn OFF and remove Title_When_On_Top
-    WinSetTitle (RegExReplace(t, Title_When_On_Top)), t
+    WinSetTitle StrReplace(t, Title_When_On_Top), t
     }
 Else {
     WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
@@ -526,9 +527,9 @@ SetPriority(*) {
     PPGui.Hide
     Try ProcessSetPriority(LB.Text, active_pid)
     Catch ; if error
-        MyNotificationGui("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, "5000", "1550", "945", "1")
+        MyNotificationGui("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, 5000) ; 5s
     Else ; if successful
-        MyNotificationGui("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, "5000", "1550", "945", "1")
+        MyNotificationGui("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, 5000) ; 5s
     Finally PPGui.Destroy
     }
 }
@@ -835,11 +836,20 @@ Replacement text:   "ABC def GHI"
 
 :?*:v--:: { ; hotstring "v--"
 cliptext := StrReplace(A_Clipboard,"  "," ")        ; trim double spaces
-cliptext := RegExReplace(cliptext,"\s+",A_Space)    ; replace \t(tab) \s(space) \r(carriage return) \n(linefeed) with A_Space = " " (single space)
+cliptext := RegExReplace(cliptext,"\s+",A_Space)    ; replace \s with A_Space = " " (single space)
 A_Clipboard := RegExReplace(cliptext," +$|^ +")     ; trim leading/trailing spaces
 }
 
-/*
+/* Regular Expressions (RegEx) -
+\s = [\r\n\t\f\v ]
+\r = carriage return
+\n = line-feed (newline)
+\t = tab
+\f = form-feed
+\v = vertical whitespace
+" "= white space
+see Regular Expressions (RegEx) - Quick Reference in AHK help file for more information
+
 Example text - Input:
 Line0 ""              (blank line)
 Line1 " FUBFUBFI    " (leading and trailing space)
@@ -848,7 +858,7 @@ Line3 ""              (blank line)
 
 Trimmed text - Output:
 Line1 "FUBFUBFI dvvbvvoe df"
-Explanation: blank lines are deleted, one or more of \t \s \r \n are replaced with space, resulting in Line2 being appended to Line1
+Explanation: blank lines are deleted, one or more \s are replaced with space, resulting in Line2 being appended to Line1
 */
 
 ; Trim but keep non-blank lines
@@ -907,10 +917,11 @@ Explanation: blank lines are deleted and spaces are trimmed, but non-blank lines
 ; User-defined functions
 
 ;  = MyNotification
+; search for `ToolTipFn` for alternative
 
 ;    + MyNotificationGui
 
-MyNotificationGui(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFn` for alternative
+MyNotificationGui(mytext, myduration := 500, xAxis := 1550, yAxis := 985, timer := 1) {
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
 MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
@@ -939,7 +950,6 @@ MyNotification.Destroy
 ;    + ToggleOS
 
 ToggleOS(*) {
-ToggleOSCheck
 ; alternative - Run ToggleSystemFiles.bat as administrator to toggle settings - https://superuser.com/a/1151851/391770
 If Status = 0 { ; enable if disabled
     RegWrite "1", "REG_DWORD", "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
@@ -959,7 +969,8 @@ Else { ; disable if enabled
 ;    + CheckRegWrite
 
 CheckRegWrite(value) { ; check if RegWrite was success
-If value = RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden") {
+Global Status := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+If value = Status {
     MsgBox "ToggleOS Failed",, "262144" ; 262144 = Always-on-top
     ; ToolTipFn("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
     Exit
@@ -970,7 +981,8 @@ If value = RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Adva
 ;    + ToggleOSCheck
 
 ToggleOSCheck() { ; tray tick mark
-Global Status := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+If not IsSet(Status)
+    Global Status := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
 If Status = 0
     A_TrayMenu.UnCheck "&Toggle OS files"
 Else A_TrayMenu.Check "&Toggle OS files"
@@ -982,7 +994,7 @@ Else A_TrayMenu.Check "&Toggle OS files"
 WindowsRefreshOrRun() {
 If WinExist("ahk_class CabinetWClass") { ; If Windows File Explorer window exists
     WinActivate
-    If WinWaitActive( ,, 2)     ; 2s timeout ; wait for explorer to become active window 
+    If WinWaitActive(,, 2)     ; 2s timeout ; wait for explorer to become active window
         Send "{F5}"             ; refresh
         ; a second refresh might be needed after a few seconds to see the effects of change in settings
         ; add a Sleep command or use SetTimer prior to refresh to account for the delay
@@ -1014,7 +1026,7 @@ If Transparency = "Off"
     WinSetTransparent 255, "ahk_id " id
     ; Set transparency to 255 before using Off - might avoid window redrawing problems such as a black background. If the window still fails to be redrawn correctly, try WinRedraw, WinMove or WinHide + WinShow for a possible workaround.
 WinSetTransparent Transparency, "ahk_id " id
-ToolTipFn("Transparency: " Transparency, -500) ; 500ms
+ToolTipFn("Transparency: " Transparency) ; 500ms
 }
 
 ;--------
@@ -1081,6 +1093,11 @@ transformed := RegExReplace(StrLower(A_Clipboard), "(((^\s*|([.!?]+\s*))[a-z])|\
 CaseConvert(transformed)
 }
 
+; RegEx explanation -
+; \s = [\r\n\t\f\v ]
+; $U1 = backreference uppercase 1
+; \W = [^a-zA-Z0-9_] = any character that is NOT alphabet, number, underscore
+
 ;--------
 ;    + ConvertTitle
 
@@ -1110,22 +1127,26 @@ Loop Parse A_Clipboard {     ; Code Credit #2
     }
 CaseConvert(inverted)
 }
-; Unicode TestString      := "abcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñABCDEFGHIJKLMNOPQRSTUVWXYZÉÂÄÀÅÇÊËÈÏÎÌÆÔÖÒÛÙŸÁÍÓÚÑ"
-; Unicode iNVERT cASE     := "ABCDEFGHIJKLMNOPQRSTUVWXYZÉÂÄÀÅÇÊËÈÏÎÌÆÔÖÒÛÙŸÁÍÓÚÑabcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñ"
+; Unicode TestString  :=
+; abcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñABCDEFGHIJKLMNOPQRSTUVWXYZÉÂÄÀÅÇÊËÈÏÎÌÆÔÖÒÛÙŸÁÍÓÚÑ
+; Unicode iNVERT cASE :=
+; ABCDEFGHIJKLMNOPQRSTUVWXYZÉÂÄÀÅÇÊËÈÏÎÌÆÔÖÒÛÙŸÁÍÓÚÑabcdefghijklmnopqrstuvwxyzéâäàåçêëèïîìæôöòûùÿáíóúñ
 
 ;--------
 ;    + CaseConvert
 
 CaseConvert(caseText) {
-A_Clipboard := caseText
-LenTemp := StrReplace(caseText, "`r`n", "`n") ; correct count for len
-Len := "+{left " Strlen(LenTemp) "}"
-Send "^v" Len ; Paste new text and select it
+string := StrReplace(caseText, "`r") ; remove \r
+Len := StrLen(string)
+A_Clipboard := string
+Send "^v"    ; Paste text
+If Len < 21  ; and select text only if text ≤ 20 characters (change limit as needed)
+    Send "+{Left " Len "}"
 }
 
-; Code Credit #1 NeedleRegEx pattern modified from pattern from https://www.autohotkey.com/board/topic/24431-convert-text-uppercase-lowercase-capitalized-or-inverted/?p=158295
-; Code Credit #2 idea for loop from https://www.autohotkey.com/boards/viewtopic.php?p=58417#p58417
-; Code Credit #3 - 3 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a auto-query to DuckDuckGPT by KudoAI via https://greasyfork.org/en/scripts/459849-duckduckgpt
+; Code Credit #1 - NeedleRegEx pattern modified from https://www.autohotkey.com/board/topic/24431-convert-text-uppercase-lowercase-capitalized-or-inverted/?p=158295
+; Code Credit #2 - idea for loop modified from https://www.autohotkey.com/boards/viewtopic.php?p=58417#p58417
+; Code Credit #3 - 3 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a query to KudoAI's DuckDuckGPT userscript - https://greasyfork.org/en/scripts/459849-duckduckgpt
 
 ;------------------------------------------------------------------------------
 ;  = Call ClipWait ± Clipboard
@@ -1134,7 +1155,7 @@ Send "^v" Len ; Paste new text and select it
 
 CallClipWait(secs) {
 If not ClipWait(secs) {
-    MyNotificationGui(A_ThisHotkey ":: Clip Failed", "2000", "1550", "985", "1") ; personal preferrence coz tooltip conflict
+    MyNotificationGui(A_ThisHotkey ":: Clip Failed", 2000) ; 2s ; personal preferrence coz tooltip conflict
     ; ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; 2s - Alternative to MyNotification
     Exit
     }
@@ -1148,7 +1169,7 @@ Global clipSave := ClipboardAll() ; Global = Return clipSave
 A_Clipboard := ""
 Send "^c"
 If not ClipWait(secs) {
-    MyNotificationGui(A_ThisHotkey ":: Clip Failed", "2000", "1550", "985", "1") ; personal preferrence coz tooltip conflict
+    MyNotificationGui(A_ThisHotkey ":: Clip Failed", 2000) ; 2s ; personal preferrence coz tooltip conflict
     A_Clipboard := clipSave
     Exit
     }
@@ -1159,7 +1180,7 @@ If not ClipWait(secs) {
 
 ;    + ToolTipFn
 
-ToolTipFn(mytext, myduration) {
+ToolTipFn(mytext, myduration := -500) { ; 500ms
 ToolTip ; turn off any previous tooltip
 ToolTip mytext
 SetTimer () => ToolTip(), myduration
@@ -1219,30 +1240,30 @@ Else If position = 10
 
 EncText(q,p) {
 CallClipboard(2) ; 2s
-TextStringInitial := A_Clipboard
-TextString := A_Clipboard
-TextString := StrReplace(TextString, "`r`n", "`n")      ; fix carriage return + line feed for Strlen
-TextString := RegExReplace(TextString,'^\s+|\s+$')      ; RegEx remove leading/trailing space
+TextString := StrReplace(A_Clipboard, "`r")             ; remove \r for Strlen
+TextStringInitial := TextString                         ; save initial string for later
+TextString := RegExReplace(TextString,'^\s+|\s+$')      ; RegEx remove leading/trailing ; \s = [\r\n\t\f\v ]
 TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading  ['({%"“‘`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
 TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
 TextString := q TextString p
 TextString := StrReplace(TextString, "`n" p, p)
-Len1 := StrLen(TextString)
+Len := StrLen(TextString)
 
 ; If you regularly include leading/trailing spaces within quotes, comment out above RegEx and below If statements
-If RegExMatch(TextStringInitial, "^\s+") {   ; If initial string has Leading space
-    TextString := " " TextString             ; add Leading space to string
-    Len1++                                   ; add 1 to len
+If RegExMatch(TextStringInitial, "^\s+", &Lead) {   ; If initial string has leading \s
+    TextString := Lead[] TextString  ; add &OutputVar to string
+    Len += Lead.Len                  ; add length of &OutputVar to len
     }
-If RegExMatch(TextStringInitial, "\s+$") {   ; If initial string has Trailing space
-    TextString .= " "                        ; append trailing space to string
-    Len1++                                   ; add 1 to len
+If RegExMatch(TextStringInitial, "\s+$", &Trail) {   ; If initial string has trailing \s
+    TextString .= Trail[]            ; append &OutputVar to string
+    Len += Trail.Len                 ; add length of &OutputVar to len
     }
 
-Len2 := "+{left " Len1 "}"
 ; Send "{Raw}" TextString ; send string with quotes
 A_Clipboard := TextString ; pasting from clipboard is faster than send raw, especially for long strings
-Send "^v" Len2            ; paste and select textstring ; sometimes it doesn't work properly for unknown reasons :shrug:
+Send "^v"                 ; paste
+If Len < 21               ; and select textstring if ≤ 20 characters (change limit as needed)
+    Send "+{left " Len "}"
 ; A_Clipboard := TextStringInitial  ; restore original text string to clipboard if desired
 }
 
@@ -1271,8 +1292,9 @@ Return Url
 ;    + UrlEncode
 
 UrlEncode(str, sExcepts := "-_.", enc := "UTF-8") {
-hex := "00", func := "msvcrt\swprintf"
-buff := Buffer(StrPut(str, enc)), StrPut(str, buff, enc)
+hex := "00"
+buff := Buffer(StrPut(str, enc))
+StrPut(str, buff, enc)
 encoded := ""
 Loop {
     If not b := NumGet(buff, A_Index - 1, "UChar")
@@ -1284,7 +1306,7 @@ Loop {
         || InStr(sExcepts, ch, True))
         encoded .= ch
     Else {
-        DllCall(func, "Str", hex, "Str", "%%%02X", "UChar", b, "Cdecl")
+        DllCall("msvcrt\swprintf", "Str", hex, "Str", "%%%02X", "UChar", b, "Cdecl")
         encoded .= hex
         }
     }
@@ -1299,7 +1321,7 @@ Return encoded
 GetKillTitles(HWNDs) {
 temp := ""
 Loop HWNDs.Length {
-    t := RegExReplace(WinGetTitle(HWNDs[A_Index]), "\s+", A_Space)   ; remove `t `r `n
+    t := RegExReplace(WinGetTitle(HWNDs[A_Index]), "\s+", A_Space)   ; remove \s = [\r\n\t\f\v ]
     If t = "" and A_Index < 10
         tempTitle := "  " A_Index " = #No Title`n    "   ; pad space before 1-9
     Else If t = ""
@@ -1308,7 +1330,7 @@ Loop HWNDs.Length {
         tempTitle := "  " A_Index " = " t "`n    "
     Else tempTitle := A_Index " = " t "`n    "
 
-    ; rudimentary wordwrap ; for more AHK v1 sophisticted solution - https://www.autohotkey.com/boards/viewtopic.php?t=59461
+    ; rudimentary wordwrap ; for more sophisticted solution (AHK v1) - https://www.autohotkey.com/boards/viewtopic.php?t=59461
     If StrLen(tempTitle) > 61
         temp .= SubStr(tempTitle, 1, 50) "-`n            -" SubStr(tempTitle, 51, 50)
     Else temp .= tempTitle
@@ -1569,23 +1591,45 @@ more? Check jeeswg's Explorer tutorial - https://www.autohotkey.com/boards/viewt
 ; ChangeLog
 
 /*
+v2.06 - 2024.02.05
+ + add defaults to 'MyNotificationGui' parameters
+ - remove default values from all 'MyNotificationGui' func calls
+ + add defaults to 'ToolTipFn' parameters
+ - remove default values from all 'ToolTipFn' func calls
+ - remove unnecessary quotation marks "" for 'MyNotificationGui' and 'ToolTipFn' parameters
+ - remove unnecessary Space or title from 'WinWait' commands
+ * replace 'RegExReplace' with 'StrReplace' where possible to improve performance
+ - remove unnecessary 'ToggleOSCheck' from 'ToggleOS(*)'
+ * improve 'CheckRegWrite' and 'ToggleOSCheck' - call 'RegRead' only once per 'RegWrite'
+ ? improve 'Recycle Bin shortcut' - replace 'WinWait' with {F6 2}
+ * fix 'CaseConvert' - remove \r from 'caseText' before assigning to 'A_Clipboard'
+ * fix 'EncText' - remove \r from 'A_Clipboard' before assigning to 'TextString' and 'TextStringInitial'; instead of single Space, use '&OutputVar' to modify 'TextString' and 'Len'
+ * improve 'EncText' - call 'A_Clipboard' only once, rename variable 'Len1' to 'Len'
+ - remove unnecessary variable 'Len2' from 'EncText'
+ * improve 'CaseConvert' and 'EncTxt' - select text only if string is ≤ 20 characters (change limit as needed), this is to prevent sending large number of keystrokes when these functions are used for big chunks of text
+ - remove unnecessary 'func' variable from 'UrlEncode'
+ * improve comments
+ * improve changelog - use "fix" instead of "correct/update", use "+" for new additions and "-" for removals, "★" for new functions/sections instead of "*"
+
 v2.05 - 2024.02.04
- * add 'Print Screen' section
- * remove Telegram from 'CloseWithQW' group - conflict with default behaviour of 'Esc'
- * add 'MediaInfo in mpc' to 'CloseWithQW' group
- * add alternative 'PostMessage' to 'WinMinimize' 
- * add alternative 'WinExist' to 'MouseGetPos' 
- * correct position of parentheses in 'WinClose' with '!RButton'
- * improve alternative `^!F4` hotkey - add missing MouseGetPoI, and remove unnecessary variable Process_Name 
- * improve 'Adjust Window Transparency keys' - call 'MouseGetPos' once instead of twice for each mouse key and correct 'If Trans' statements in `^+WheelDown` hotkey
+ ★ add 'Print Screen' section
+ - remove Telegram from 'CloseWithQW' group - conflict with default behaviour of 'Esc'
+ + add 'MediaInfo in mpc' to 'CloseWithQW' group
+ + add alternative 'PostMessage' to 'WinMinimize'
+ + add alternative 'WinExist' to 'MouseGetPos'
+ * fix position of parentheses in 'WinClose' with '!RButton'
+ * fix alternative `^!F4` hotkey - add missing MouseGetPoI
+ - remove unnecessary variable Process_Name from alternative `^!F4` hotkey
+ * improve 'Adjust Window Transparency keys' - call 'MouseGetPos' once instead of twice for each mouse key
+ * fix 'Adjust Window Transparency keys' - 'If Trans' statements in `^+WheelDown` hotkey
  * change 'A_ThisHotkey' to 'ThisHotkey' when applicable for more reliability
  * improve 'Recycle Bin shortcut' - add 'WinWait' to prevent dropdown explorer bug
- * remove unnecessary variable 'SwappedLetters' 
- * correctly replace U+003A COLON in 'Symbols In File Names keys'
- * correct 'CheckRegWrite' - uncomment 'Exit' command, to stop further execution on 'RegWrite' failure
- * improve GetTrans - remove unnecessary 'ToolTip' command
- * improve SetTransByWheel - remove 'ToolTip'/'SetTimer' combo, add 'WinSetTransparent' 255 before setting "Off", and add 'ToolTipFn' after 'WinSetTransparent' command
- * improve 'SetTransMenuFn' - get 'WinID' before executing 'SetTransByMenu'
+ - remove unnecessary variable 'SwappedLetters'
+ * fix colon replacement with U+003A in 'Symbols In File Names keys'
+ * fix 'CheckRegWrite' - uncomment 'Exit' command, to stop further execution on 'RegWrite' failure
+ - remove unnecessary 'ToolTip' command from 'GetTrans'
+ * improve 'SetTransByWheel' - add 'WinSetTransparent' 255 before setting "Off", and replace 'ToolTip'/'SetTimer' combo with 'ToolTipFn' and place it after 'WinSetTransparent' command
+ * fix 'SetTransMenuFn' - get 'WinID' before executing 'SetTransByMenu'
  * improve 'SetTransByMenu' - add 'WinSetTransparent' "Off" if 255, and add ToolTipFn
  * improve comments and update headings
 
@@ -1598,7 +1642,7 @@ v2.04 - 2024.01.31
 
 v2.03 - 2024.01.30
  * rename function names with `Func` in the name to `Fn` because `Func` is a class
- * improve Toggle Window On Top - change WinSetTitle command to apply to known variable `t` instead of "A"
+ * fix Toggle Window On Top - change WinSetTitle command to apply to known variable `t` instead of "A"
  * other minor changes
 
 v2.02 - 2024.01.29
