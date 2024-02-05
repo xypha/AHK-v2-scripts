@@ -44,10 +44,10 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #2 MultiClip v4.04"
+AHKname := "AHK v2 #2 MultiClip v4.05"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationGui("Loading " AHKname, "10000", "1550", "945", "1") ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationGui("Loading " AHKname, 10000, 1550, 945, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Intialise ClipArr
 
@@ -63,7 +63,7 @@ Global ClipArrFile := A_MyDocuments "\ClipArrFile.txt"
 Global delim := "~•~"
 ; use a unique string because if an array-slot contains this delimiter by accident, saving and loading array from file will cause errors
 
-Global ClipArr := [] ; set Global variable and load empty array
+Global ClipArr := [] ; set Global variable and assign empty array
 
 ; Load array from file - inspired by https://www.autohotkey.com/boards/viewtopic.php?p=341809#p341809
 If FileExist(ClipArrFile) ; check if file exists
@@ -105,8 +105,13 @@ Return ; Ends auto-execute
 ;------------------------------------------------------------------------------
 ; Hotkeys
 
-; ^ is Control / Ctrl key
+; ^ is Ctrl / Control key
+;   >^    is RCtrl / right control key
+;   <^    is LCtrl / left control key
 ; ! is Alt key
+;   >!    is RAlt / right ALT
+;   <!    is LAlt / left ALT
+;   <^>!  is ALTGr (LControl & RAlt)
 ; # is Windows / Win key
 ; + is Shift key
 
@@ -114,12 +119,12 @@ Return ; Ends auto-execute
 
 !Numpad2:: { ; Ctrl + Numpad2 keys pressed together
 ListLines
-If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; wait for ListLines window to open, timeout 3s
+If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; 3s timeout ; wait for ListLines window to open
     WinMaximize
 }
 
 ^!Numpad2:: { ; Ctrl + Alt + Numpad2 keys pressed together
-MyNotificationGui("Updating " AHKname, "500", "1550", "945", "0") ; use Sleep coz reload cancels timers
+MyNotificationGui("Updating " AHKname,,, 945, 0) ; use Sleep coz reload cancels timers
 Reload
 }
 
@@ -140,10 +145,11 @@ Reload
 ; User-defined functions
 
 ;  = MyNotification
+; search for `ToolTipFn` for alternative
 
 ;    + MyNotificationGui
 
-MyNotificationGui(mytext, myduration, xAxis, yAxis, timer) {       ; search for `ToolTipFn` for alternative
+MyNotificationGui(mytext, myduration := 500, xAxis := 1550, yAxis := 985, timer := 1) {
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
 MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
@@ -167,9 +173,9 @@ MyNotification.Destroy
 
 ;------------------------------------------------------------------------------
 ;  = MultiClip ClipArr
-; MultiClip v1 - https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658
-; Other sources - https://www.autohotkey.com/boards/viewtopic.php?p=326827#p326827
-; MultiClip v1 used or adapted AHK v1 code from https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/
+; Code sources - https://www.autohotkey.com/boards/viewtopic.php?p=326827#p326827
+; and MultiClip v1 - https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658
+; MultiClip v1 used or modified AHK v1 code from https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/
 ; and https://geekdrop.com/content/super-handy-autohotkey-ahk-script-to-change-the-case-of-text-in-line-or-wrap-text-in-quotes
 
 ;    + ClipChanged
@@ -177,12 +183,12 @@ MyNotification.Destroy
 ClipChanged(DataType) {
 
 If DataType = 0 { ; Clipboard is now empty
-    ; ToolTipFn("DataType: 0 - Clipboard is now empty", -1000)
+    ; ToolTipFn("DataType: 0 - Clipboard is now empty", -1000) ; 1s
     Exit
     }
 
 If DataType = 2 { ; Clipboard contains something entirely non-text such as a picture
-    ToolTipFn("DataType: 2 - Non-text copied", -1000)
+    ToolTipFn("DataType: 2 - Non-text copied", -1000) ; 1s
     Exit
     }
 
@@ -190,7 +196,7 @@ If DataType = 2 { ; Clipboard contains something entirely non-text such as a pic
 
 
 ; clipboard change alert tooltip
-ToolTipFn(SubStr(A_Clipboard, 1, 600), -500)
+ToolTipFn(SubStr(A_Clipboard, 1, 600)) ; 500ms
 
 InsertInClipArr(A_Clipboard)
 }
@@ -205,7 +211,7 @@ If text == ClipArr.Get(1)
 
 ; Cliptemp cleanup
 Cliptemp := StrReplace(text,"`r`n","`n")        ; fix for SendInput sending Windows linebreaks
-Cliptemp := RegExReplace(Cliptemp,"^\s+|\s+$")  ; remove leading/trailing \s \t \r \n
+Cliptemp := RegExReplace(Cliptemp,"^\s+|\s+$")  ; remove leading/trailing \s = [\r\n\t\f\v ]
 
 
 ; if Cliptemp is already in a slot ≠ 1, then remove it
@@ -361,24 +367,28 @@ PasteThis(ClipArr.Get(position))
 ;    + PasteThis
 
 PasteThis(pasteText) {
-If A_Clipboard !== pasteText {
-    OnClipboardChange ClipChanged,0
-    tmp_clip := ClipboardAll()          ; preserve Clipboard
-    A_Clipboard := pasteText            ; copy pastetext to clipboard
-    tmp_clip2 := A_Clipboard
-    While tmp_clip2 != pasteText {    ; validate clipboard
-        Sleep 50
-        If A_Index > 5 {
-            ToolTipFn(A_ThisHotkey ":: PasteThis Copying Failed?", -500)
-            OnClipboardChange ClipChanged,1
-            Exit
+If StrLen(pasteText) < 16 ; If short text, Send keystrokes instead of paste
+    Send pasteText
+Else {
+    If A_Clipboard !== pasteText {
+        OnClipboardChange ClipChanged,0
+        tmp_clip := ClipboardAll()          ; preserve Clipboard
+        A_Clipboard := pasteText            ; copy pastetext to clipboard
+        tmp_clip2 := A_Clipboard
+        While tmp_clip2 != pasteText {      ; validate clipboard
+            Sleep 50 ; 50ms
+            If A_Index > 5 { ; max 250ms
+                ToolTipFn(A_ThisHotkey ":: PasteThis Copying Failed?") ; 500ms
+                OnClipboardChange ClipChanged,1
+                Exit
+                }
             }
         }
+    Else tmp_clip := A_Clipboard
+    Send "^v"  ; paste
+    If tmp_clip !== pasteText
+        SetTimer () => RestoreClip(tmp_clip, tmp_clip2), -100 ; 100ms - don't wait for restoration
     }
-Else tmp_clip := A_Clipboard
-Send "^v"  ; paste
-If tmp_clip !== pasteText
-    SetTimer () => RestoreClip(tmp_clip, tmp_clip2), -100 ; 100ms - don't wait for restoration
 }
 
 ;--------
@@ -387,14 +397,15 @@ If tmp_clip !== pasteText
 RestoreClip(tmp_clip, tmp_clip2) {
 A_Clipboard := ClipboardAll(tmp_clip)   ; restore clipboard
 While tmp_clip2 == A_Clipboard {        ; validate clipboard
-    Sleep 50
-    If A_Index > 5 {
-        ToolTipFn(A_ThisHotkey ":: PasteThis Restoration Failed", -5000)
+    Sleep 50 ; 50ms
+    If A_Index > 5 { ; max 250ms
+        ToolTipFn(A_ThisHotkey ":: PasteThis Restoration Failed", -5000) ; 5s
         OnClipboardChange ClipChanged,1
         Exit
         }
     }
-tmp_clip := "", tmp_clip2 := ""
+tmp_clip := ""
+tmp_clip2 := ""
 OnClipboardChange ClipChanged, 1
 }
 
@@ -436,7 +447,7 @@ PasteThis(pasteTxt)
 
 ;    + ToolTipFn
 
-ToolTipFn(ToolText, ToolDuration) {
+ToolTipFn(mytext, myduration := -500) { ; 500ms
 ToolTip ; turn off any previous tooltip
 ToolTip ToolText
 SetTimer () => ToolTip(), ToolDuration
@@ -457,6 +468,16 @@ ClipMenuFn(SendClipFn)  ; show menu - ClipMenu
 ; ChangeLog
 
 /*
+v4.05 - 2024.02.05
+ + add defaults to 'MyNotificationGui' parameters
+ - remove default values from all 'MyNotificationGui' func calls
+ + add defaults to 'ToolTipFn' parameters
+ - remove default values from all 'ToolTipFn' func calls
+ - remove unnecessary quotation marks "" for 'MyNotificationGui' and 'ToolTipFn' parameters
+ * improve 'PasteThis' - use 'Send' command if 'pasteText' is less than 16 characters
+ * improve comments
+ * improve changelog - use "fix" instead of "correct/update", use "+" for new additions and "-" for removals, "★" for new functions/sections instead of "*"
+
 v4.04 - 2024.02.01
  * improve comments
 
@@ -467,23 +488,23 @@ v4.02 - 2024.01.29
  * rename MyNotificationFunc to MyNotificationGui
  * improve ListLines WinWait command by using variables
  * rename Tool_TipFunc to ToolTipFunc
- * remove unnecessary variable hkey in PasteV function
- * remove unnecessary variable result in PasteAll function
+ - remove unnecessary variable hkey in PasteV function
+ - remove unnecessary variable result in PasteAll function
  * improve RegEx in PasteAll function
  * rename ClipTrimFunc to ClipTrim
- * remove unnecessary parentheses in If commands
- * add PasteAndSend and SendAndPaste functions
+ - remove unnecessary parentheses in If commands
+ + add PasteAndSend and SendAndPaste functions
  * some minor changes
  * improve comments and update headings
 
 v4.01 - 2024.01.27
- * remove version from file name
- * add alternative method to populate slots in ClipMenu
- * remove unnecessary variable `ClipTrim` from `ClipTrimFunc`
- * add `FileExist` command to `SaveClipArr` to prevent error on first exit
+ - remove version from file name
+ + add alternative method to populate slots in ClipMenu
+ - remove unnecessary variable `ClipTrim` from `ClipTrimFunc`
+ + add `FileExist` command to `SaveClipArr` to prevent error on first exit
 
 v4.00 - 2024.01.27
- * add variable `AHKname` for versioning and updation of name in template and standalone scripts
- * add changelog
+ + add variable `AHKname` for versioning and updation of name in template and standalone scripts
+ + add changelog
  * improve comments
 */
