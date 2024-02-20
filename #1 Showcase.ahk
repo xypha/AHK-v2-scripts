@@ -117,7 +117,7 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #1 Showcase v2.06"
+AHKname := "AHK v2 #1 Showcase v2.07"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, 10000, 1550, 985, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -205,7 +205,7 @@ Reload
 ;  = Remap Keys
 
 ; Disable keys that you don't use or trigger accidentally too often or become annoying
-; such keys are hardware specific - desktop vs. laptop, and may vary according to region
+; such keys are hardware specific - desktop vs. laptop, and may vary according to the region
 ; comment out the ones that don't work for you or don't apply to you
 $ScrollLock::               ; disable Scroll Lock ; $ prefix forces keyboard hook
 $NumLock::                  ; disable Num Lock
@@ -233,7 +233,7 @@ RAlt::!Space       ; Alt + Space brings up a window's title bar menu
 ^RCtrl::MButton    ; press Left & Right Ctrl button to simulate mouse Middle Click
 
 RCtrl & Up::     Send "{PgUp}"  ; Page up   - use "&" to create 2-key combo shortcut
-RCtrl & Down::   Send "{PgDn}"  ; Page down - use variable number of spaces before Send command without affecting the command itself
+RCtrl & Down::   Send "{PgDn}"  ; Page down - use a variable number of spaces before Send command without affecting the command itself
 RControl & Left::Send "{Home}"  ; Home      - use alternate key name for RCtrl
 >^Right::        Send "{End}"   ; End       - use >^ instead of Right Ctrl button and skip using "&"
 
@@ -516,7 +516,7 @@ PPGui.AddText(, "Press ESCAPE to cancel.")
 PPGui.AddText(, "Window:`n" WinGetTitle("ahk_pid " active_pid) "`n`nProcess:`n" ProcessGetPath(active_pid))
 PPGui.AddText(, "Double-click to set a new priority level.")
 LB := PPGui.AddListBox("r5 Choose1", ["Normal","High","Low","BelowNormal","AboveNormal"])
-; Realtime omitted because any process not designed to run at Realtime priority might reduce system stability if set to that level ; add Realtime to listbox if necessary
+; Realtime omitted because any process not designed to run at Realtime priority might reduce system stability if set to that level ; add Realtime to ListBox if necessary
 LB.OnEvent("DoubleClick", SetPriority)
 PPGui.AddButton("default", "OK").OnEvent("Click", SetPriority)
 PPGui.OnEvent("Escape", (*) => PPGui.Destroy)
@@ -660,7 +660,7 @@ If cfc1.EndReason = "Match" {
     If ThisHotkey = "~!" or ThisHotkey = "~?" ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
         Send "{BS} +" cfc1.Input
     Else {
-        Send "{BS}+" cfc1.Input ; If dot or numdot is the trigger, don't add space, coz typing website address is problematic
+        Send "{BS}+" cfc1.Input ; If Dot or NumpadDot is the trigger, don't add space, coz typing the website address is problematic
         ; SoundBeep 1500, 50 ; play a sound when successful - Frequency(a number between 37 and 32767), Duration in milliseconds
         ; SoundPlay "C:\Windows\Media\Windows Information Bar.wav" ; alternative to SoundBeep
         ; SoundPlay A_WinDir "\Media\Windows Balloon.wav"          ; alternative to SoundBeep
@@ -923,7 +923,7 @@ Explanation: blank lines are deleted and spaces are trimmed, but non-blank lines
 
 MyNotificationGui(mytext, myduration := 500, xAxis := 1550, yAxis := 985, timer := 1) {
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
-MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
+MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB colour (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
 MyNotification.AddText("cBlack w230 Left", mytext)  ; black text
 MyNotification.Show("x1650 y985 NoActivate")        ; NoActivate avoids deactivating the currently active window
@@ -1250,16 +1250,16 @@ TextString := StrReplace(TextString, "`n" p, p)
 Len := StrLen(TextString)
 
 ; If you regularly include leading/trailing spaces within quotes, comment out above RegEx and below If statements
-If RegExMatch(TextStringInitial, "^\s+", &Lead) {   ; If initial string has leading \s
+If RegExMatch(TextStringInitial, "^\s+", &Lead) {   ; If the initial string has leading \s
     TextString := Lead[] TextString  ; add &OutputVar to string
-    Len += Lead.Len                  ; add length of &OutputVar to len
+    Len += Lead.Len                  ; add the length of &OutputVar to len
     }
-If RegExMatch(TextStringInitial, "\s+$", &Trail) {   ; If initial string has trailing \s
+If RegExMatch(TextStringInitial, "\s+$", &Trail) {   ; If the initial string has trailing \s
     TextString .= Trail[]            ; append &OutputVar to string
-    Len += Trail.Len                 ; add length of &OutputVar to len
+    Len += Trail.Len                 ; add the length of &OutputVar to len
     }
 
-; Send "{Raw}" TextString ; send string with quotes
+; Send "{Raw}" TextString ; send the string with quotes
 A_Clipboard := TextString ; pasting from clipboard is faster than send raw, especially for long strings
 Send "^v"                 ; paste
 If Len < 21               ; and select textstring if ≤ 20 characters (change limit as needed)
@@ -1591,6 +1591,9 @@ more? Check jeeswg's Explorer tutorial - https://www.autohotkey.com/boards/viewt
 ; ChangeLog
 
 /*
+v2.07 - 2024.02.20
+ * improve comments
+ 
 v2.06 - 2024.02.05
  + add defaults to 'MyNotificationGui' parameters
  - remove default values from all 'MyNotificationGui' func calls
@@ -1606,7 +1609,7 @@ v2.06 - 2024.02.05
  * fix 'EncText' - remove \r from 'A_Clipboard' before assigning to 'TextString' and 'TextStringInitial'; instead of single Space, use '&OutputVar' to modify 'TextString' and 'Len'
  * improve 'EncText' - call 'A_Clipboard' only once, rename variable 'Len1' to 'Len'
  - remove unnecessary variable 'Len2' from 'EncText'
- * improve 'CaseConvert' and 'EncTxt' - select text only if string is ≤ 20 characters (change limit as needed), this is to prevent sending large number of keystrokes when these functions are used for big chunks of text
+ * improve 'CaseConvert' and 'EncText' - select text only if string is ≤ 20 characters (change limit as needed), this is to prevent sending large number of keystrokes when these functions are used for big chunks of text
  - remove unnecessary 'func' variable from 'UrlEncode'
  * improve comments
  * improve changelog - use "fix" instead of "correct/update", use "+" for new additions and "-" for removals, "★" for new functions/sections instead of "*"
@@ -1669,7 +1672,7 @@ v2.01 - 2024.01.28
  * rename WrapTextFunc to WrapTextFromMenu for more specificity
  * remove unnecessary code variable from UrlDecode
  * rename ControlPanelFunc to ControlPanelSelect for more specificity
- * utlise ch variable in UrlEncode
+ * utilise ch variable in UrlEncode
  * some minor changes
  * improve comments and update headings
 
