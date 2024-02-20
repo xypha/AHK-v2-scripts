@@ -44,7 +44,7 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #2 MultiClip v4.05"
+AHKname := "AHK v2 #2 MultiClip v4.06"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, 10000, 1550, 945, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -151,7 +151,7 @@ Reload
 
 MyNotificationGui(mytext, myduration := 500, xAxis := 1550, yAxis := 985, timer := 1) {
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
-MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB color (it will be made transparent below)
+MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB colour (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
 MyNotification.AddText("cBlack w230 Left", mytext)  ; black text
 MyNotification.Show("x1650 y985 NoActivate")        ; NoActivate avoids deactivating the currently active window
@@ -221,7 +221,7 @@ Loop LimitClipArr {
         Break
         }
     }
-ClipArr.InsertAt(1, Cliptemp)   ; insert current clipboard contents in first slot
+ClipArr.InsertAt(1, Cliptemp)   ; insert current clipboard contents in the first slot
 ClipArr.Length := LimitClipArr  ; reset number of slots to previously defined limit
 }
 
@@ -315,7 +315,7 @@ ClipMenu.Add("&2  = "   ClipTrim(2)   ,FnName) ; Explantation:
 ClipMenu.Add("&3  = "   ClipTrim(3)   ,FnName) ; When the menu is displayed, a character preceded by an ampersand (&) can be selected by pressing the corresponding key on the keyboard.
 ClipMenu.Add("&4  = "   ClipTrim(4)   ,FnName) ; To display a literal ampersand, specify two consecutive ampersands as in this example: "Save && Exit"
 ClipMenu.Add("&5  = "   ClipTrim(5)   ,FnName)
-ClipMenu.Add("&6  = "   ClipTrim(6)   ,FnName) ; Shortcuts correspond to the number/alpabet/symbol prior to `=`
+ClipMenu.Add("&6  = "   ClipTrim(6)   ,FnName) ; Shortcuts correspond to the number/alphabet/symbol before `=`
 ClipMenu.Add("&7  = "   ClipTrim(7)   ,FnName) ; Shortcuts are usually underlined, and consist of
 ClipMenu.Add("&8  = "   ClipTrim(8)   ,FnName) ; numbers from Numpad or number row, and keys from the bottom row of QUERTY keyboard
 ClipMenu.Add("&9  = "   ClipTrim(9)   ,FnName)
@@ -326,7 +326,7 @@ ClipMenu.Add("&c  = "   ClipTrim(13)  ,FnName)
 ClipMenu.Add("&v  = "   ClipTrim(14)  ,FnName)
 ClipMenu.Add("&b  = "   ClipTrim(15)  ,FnName)
 ClipMenu.Add("&n  = "   ClipTrim(16)  ,FnName)
-ClipMenu.Add("&m = "    ClipTrim(17)  ,FnName) ; number of spaces between characters vary in order to improve readability in pop-up menu
+ClipMenu.Add("&m = "    ClipTrim(17)  ,FnName) ; number of spaces between characters varies to improve readability in pop-up menu
 ClipMenu.Add("&,    = " ClipTrim(18)  ,FnName) ; and can be changed to reflect your system font and display settings
 ClipMenu.Add("&.    = " ClipTrim(19)  ,FnName)
 ClipMenu.Add("&/   = "  ClipTrim(20)  ,FnName)
@@ -468,6 +468,9 @@ ClipMenuFn(SendClipFn)  ; show menu - ClipMenu
 ; ChangeLog
 
 /*
+v4.06 - 2024.02.20
+ * improve comments
+ 
 v4.05 - 2024.02.05
  + add defaults to 'MyNotificationGui' parameters
  - remove default values from all 'MyNotificationGui' func calls
