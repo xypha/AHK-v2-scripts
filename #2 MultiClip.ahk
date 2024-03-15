@@ -1,8 +1,8 @@
 ; /* AHK v2 #2 MultiClip - CONTENTS */
 ; Settings
 ; Auto-execute
-;  = Intialise ClipArr
-;  = Intialise ClipArr hotstrings
+;  = Initialise ClipArr
+;  = Initialise ClipArr hotstrings
 ;  = Customise Tray Icon
 ;  = End auto-execute
 ; Hotkeys
@@ -44,12 +44,12 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #2 MultiClip v4.06"
+AHKname := "AHK v2 #2 MultiClip v4.07"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, 10000, 1550, 945, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
-;  = Intialise ClipArr
+;  = Initialise ClipArr
 
 Global LimitClipArr := 20
 ; Limit the number of slots to 20 ; customise limit to your needs
@@ -59,7 +59,7 @@ Global LimitClipArr := 20
 Global ClipArrFile := A_MyDocuments "\ClipArrFile.txt"
 ; ClipArrFile.txt is saved in default path of AHK's built-in variable: A_MyDocuments
 ; A_MyDocuments is the full path and name of the current user's "My Documents" folder. Usually corresponds to "C:\Users\<UserName>\Documents" (the final backslash is not included in the variable)
- 
+
 Global delim := "~•~"
 ; use a unique string because if an array-slot contains this delimiter by accident, saving and loading array from file will cause errors
 
@@ -69,7 +69,7 @@ Global ClipArr := [] ; set Global variable and assign empty array
 If FileExist(ClipArrFile) ; check if file exists
     ClipArr := StrSplit(FileRead(ClipArrFile), delim)
 Else ; load default values on start - 20 slots containing alphanumerical text
-    ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"] 
+    ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
 
 ; run function whenever clipboard is changed
 ; such as Ctrl + x (Cut), Ctrl + c (Copy) or by other apps/programs
@@ -82,7 +82,7 @@ OnExit SaveClipArr
 ; save `ClipArr` contents to `ClipArrFile.txt` when the script exits by any means,
 ; except when it is killed by something like "End Task" via Taskbar, Task Manager or similar
 
-;  = Intialise ClipArr hotstrings
+;  = Initialise ClipArr hotstrings
 
 PasteVStrings(20)   ; User-defined function
 PasteCStrings(20)
@@ -124,7 +124,7 @@ If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; 3s timeout ; w
 }
 
 ^!Numpad2:: { ; Ctrl + Alt + Numpad2 keys pressed together
-MyNotificationGui("Updating " AHKname,,, 945, 0) ; use Sleep coz reload cancels timers
+MyNotificationGui("Updating " AHKname,,, 945, 0) ; 500ms ; use Sleep coz reload cancels timers
 Reload
 }
 
@@ -151,9 +151,9 @@ Reload
 
 MyNotificationGui(mytext, myduration := 500, xAxis := 1550, yAxis := 985, timer := 1) {
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
-MyNotification.BackColor := "EEEEEE"                ; White background, can be any RGB colour (it will be made transparent below)
+MyNotification.BackColor := "2C2C2E"                ; "2C2C2E" for dark mode ; "EEEEEE" for White background ; can be any RGB colour (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
-MyNotification.AddText("cBlack w230 Left", mytext)  ; black text
+MyNotification.AddText("cWhite w230 Left", mytext)  ; "cWhite" for dark mode ; use "cBlack" for black text on white background
 MyNotification.Show("x1650 y985 NoActivate")        ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
 If timer = 1
@@ -194,11 +194,13 @@ If DataType = 2 { ; Clipboard contains something entirely non-text such as a pic
 
 ; Else DataType = 1 ; Clipboard contains text (including files copied from Windows File Explorer)
 
+; check and add to clipArr
+InsertInClipArr(A_Clipboard)
 
 ; clipboard change alert tooltip
-ToolTipFn(SubStr(A_Clipboard, 1, 600)) ; 500ms
-
-InsertInClipArr(A_Clipboard)
+If StrLen(ClipArr.Get(1)) > 1000 ; trim If more than 1000 characters
+    ToolTipFn(SubStr(ClipArr.Get(1), 1, 1000) "`n... and more") ; 500ms
+Else ToolTipFn(ClipArr.Get(1)) ; 500ms
 }
 
 ;--------
@@ -210,9 +212,8 @@ If text == ClipArr.Get(1)
     Return
 
 ; Cliptemp cleanup
-Cliptemp := StrReplace(text,"`r`n","`n")        ; fix for SendInput sending Windows linebreaks
+Cliptemp := StrReplace(text,"`r`n","`n")        ; fix for SendInput sending Windows line-breaks
 Cliptemp := RegExReplace(Cliptemp,"^\s+|\s+$")  ; remove leading/trailing \s = [\r\n\t\f\v ]
-
 
 ; if Cliptemp is already in a slot ≠ 1, then remove it
 Loop LimitClipArr {
@@ -235,7 +236,7 @@ Loop ClipArr.Length
 If FileExist(ClipArrFile)       ; check if file exists
     FileRecycle ClipArrFile     ; send old file to recycle bin
     ; old script contents can be retrieved by restoring ClipArrFile from recycle bin
-FileAppend Result, ClipArrFile  ; create new file and save current cliparr contents
+FileAppend Result, ClipArrFile  ; create new file and save current clipArr contents
 }
 
 ;--------
@@ -268,7 +269,7 @@ Try PasteThis(ClipArr.Get(SubPat[]))
 
 PasteCStrings(number) {
 Loop number {
-    If A_Index = 1  ; do not create c1+ hotstring, already assigned to "{Raw}" ClipArr.Get(1) 
+    If A_Index = 1  ; do not create c1+ hotstring, already assigned to "{Raw}" ClipArr.Get(1)
         Continue
     Hotstring(":?*x:c" A_Index "+", PasteC)
     }
@@ -311,7 +312,7 @@ ClipMenu.Delete
 
 ; populate slots
 ClipMenu.Add("&1  = "   ClipTrim(1)   ,FnName) ; Customise the shortcuts by altering the character after `&` in lines containing `ClipMenu.Add`
-ClipMenu.Add("&2  = "   ClipTrim(2)   ,FnName) ; Explantation: 
+ClipMenu.Add("&2  = "   ClipTrim(2)   ,FnName) ; Explantation:
 ClipMenu.Add("&3  = "   ClipTrim(3)   ,FnName) ; When the menu is displayed, a character preceded by an ampersand (&) can be selected by pressing the corresponding key on the keyboard.
 ClipMenu.Add("&4  = "   ClipTrim(4)   ,FnName) ; To display a literal ampersand, specify two consecutive ampersands as in this example: "Save && Exit"
 ClipMenu.Add("&5  = "   ClipTrim(5)   ,FnName)
@@ -330,7 +331,7 @@ ClipMenu.Add("&m = "    ClipTrim(17)  ,FnName) ; number of spaces between charac
 ClipMenu.Add("&,    = " ClipTrim(18)  ,FnName) ; and can be changed to reflect your system font and display settings
 ClipMenu.Add("&.    = " ClipTrim(19)  ,FnName)
 ClipMenu.Add("&/   = "  ClipTrim(20)  ,FnName)
-/* ; alternative method to populate slots without shortcuts and messing around with spaces
+/* ; alternative method to populate slots without shortcuts and without messing about with spaces
 Loop 20 {
     ClipMenu.Add(A_Index " = " ClipTrim(A_Index), FnName)
     }
@@ -348,7 +349,7 @@ Try ClipArr.Get(number)
 Catch IndexError {
     ClipArr.InsertAt(number, "")
     Return ""
-    } 
+    }
 Return SubStr(ClipArr.Get(number), 1, 60)
 }
 
@@ -367,15 +368,15 @@ PasteThis(ClipArr.Get(position))
 ;    + PasteThis
 
 PasteThis(pasteText) {
-If StrLen(pasteText) < 16 ; If short text, Send keystrokes instead of paste
+If StrLen(pasteText) <= 15 ; If short text, Send keystrokes instead of paste
     Send pasteText
 Else {
     If A_Clipboard !== pasteText {
-        OnClipboardChange ClipChanged,0
+        OnClipboardChange ClipChanged, 0    ; disable callback
         tmp_clip := ClipboardAll()          ; preserve Clipboard
-        A_Clipboard := pasteText            ; copy pastetext to clipboard
+        A_Clipboard := pasteText            ; copy pasteText to clipboard
         tmp_clip2 := A_Clipboard
-        While tmp_clip2 != pasteText {      ; validate clipboard
+        While tmp_clip2 !== pasteText {     ; validate clipboard
             Sleep 50 ; 50ms
             If A_Index > 5 { ; max 250ms
                 ToolTipFn(A_ThisHotkey ":: PasteThis Copying Failed?") ; 500ms
@@ -400,7 +401,7 @@ While tmp_clip2 == A_Clipboard {        ; validate clipboard
     Sleep 50 ; 50ms
     If A_Index > 5 { ; max 250ms
         ToolTipFn(A_ThisHotkey ":: PasteThis Restoration Failed", -5000) ; 5s
-        OnClipboardChange ClipChanged,1
+        OnClipboardChange ClipChanged, 1
         Exit
         }
     }
@@ -447,10 +448,12 @@ PasteThis(pasteTxt)
 
 ;    + ToolTipFn
 
-ToolTipFn(mytext, myduration := -500) { ; 500ms
+ToolTipFn(mytext, myduration := -500, xAxis?, yAxis?) { ; 500ms
 ToolTip ; turn off any previous tooltip
-ToolTip ToolText
-SetTimer () => ToolTip(), ToolDuration
+Try ToolTip mytext, xAxis, yAxis
+Catch
+    ToolTip mytext
+SetTimer () => ToolTip(), myduration
 }
 
 ;------------------------------------------------------------------------------
@@ -468,24 +471,16 @@ ClipMenuFn(SendClipFn)  ; show menu - ClipMenu
 ; ChangeLog
 
 /*
-v4.06 - 2024.02.20
- * improve comments
- 
-v4.05 - 2024.02.05
- + add defaults to 'MyNotificationGui' parameters
- - remove default values from all 'MyNotificationGui' func calls
- + add defaults to 'ToolTipFn' parameters
- - remove default values from all 'ToolTipFn' func calls
- - remove unnecessary quotation marks "" for 'MyNotificationGui' and 'ToolTipFn' parameters
- * improve 'PasteThis' - use 'Send' command if 'pasteText' is less than 16 characters
- * improve comments
- * improve changelog - use "fix" instead of "correct/update", use "+" for new additions and "-" for removals, "★" for new functions/sections instead of "*"
-
-v4.04 - 2024.02.01
+v4.00 - 2024.01.27
+ + add variable `AHKname` to easily update script name and version in template and standalone scripts
+ + add changelog
  * improve comments
 
-v4.03 - 2024.01.30
- * rename function names with `Func` in the name to `Fn` because `Func` is a class
+v4.01 - 2024.01.27
+ - remove version from file name
+ + add alternative method to populate slots in ClipMenu
+ - remove unnecessary variable `ClipTrim` from `ClipTrimFunc`
+ + add `FileExist` command to `SaveClipArr` to prevent error on first exit
 
 v4.02 - 2024.01.29
  * rename MyNotificationFunc to MyNotificationGui
@@ -500,14 +495,31 @@ v4.02 - 2024.01.29
  * some minor changes
  * improve comments and update headings
 
-v4.01 - 2024.01.27
- - remove version from file name
- + add alternative method to populate slots in ClipMenu
- - remove unnecessary variable `ClipTrim` from `ClipTrimFunc`
- + add `FileExist` command to `SaveClipArr` to prevent error on first exit
+v4.03 - 2024.01.30
+ * rename function names with `Func` in the name to `Fn` because `Func` is a class
 
-v4.00 - 2024.01.27
- + add variable `AHKname` for versioning and updation of name in template and standalone scripts
- + add changelog
+v4.04 - 2024.02.01
  * improve comments
+
+v4.05 - 2024.02.05
+ + add defaults to 'MyNotificationGui' parameters
+ - remove default values from all 'MyNotificationGui' func calls
+ + add defaults to 'ToolTipFn' parameters
+ - remove default values from all 'ToolTipFn' func calls
+ - remove unnecessary quotation marks "" for 'MyNotificationGui' and 'ToolTipFn' parameters
+ * improve 'PasteThis' - use 'Send' command if 'pasteText' is less than 16 characters
+ * improve comments
+ * improve changelog - use "fix" instead of "correct/update", use "+" for new additions and "-" for removals, "★" for new functions/sections instead of "*"
+
+v4.06 - 2024.02.20
+ * improve comments
+
+v4.07 - 2024.03.15
+ * change "!=" to "!==" wherever applicable to enable case sensitivity
+ * change MyNotificationGui colour scheme to white text on dark background (dark mode)
+ * improve clipboard change alert tooltip by removing unnecessary clipboard call and increasing character limit from 600 to 1000
+ * replace < 16 with <= 15 in "PasteThis"
+ * improve "ToolTipFn" by adding 'xAxis?, yAxis?' optional parameters
+ * improve comments, spelling and small changes
+ * change changelog order for easier access
 */
