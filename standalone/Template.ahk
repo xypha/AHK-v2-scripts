@@ -30,7 +30,7 @@ MyNotificationGui("Loading " AHKname, -10000, 1550, 985, 1) ; 10000ms = 10 secon
 
 ;  = End auto-execute
 
-SetTimer EndMyNotif, -1000 ; Reset notification timer to 1s after code in auto-execute section has finished running
+SetTimer () => EndMyNotif(), -1000 ; Reset notification timer to 1s after code in auto-execute section has finished running
 Return ; Ends auto-execute
 
 ;------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ v1.02 - 2024.03.28
  - remove unnecessary quotation marks "" for 'MyNotificationGui'
  * change MyNotificationGui colour scheme to white text on dark background (dark mode)
  * update MyNotificationGui duration to negative number, as convention to match ToolTipFn; consequently switch negative multiplier from SetTimer to Sleep 
- * update MyNotificationGui SetTimer for more versatility
+ * update SetTimer for more versatility
  * improve comments and update headings
  * improve changelog - use "fix" instead of "correct/update", use "+" for new additions and "-" for removals, "★" for new functions/sections instead of "*"
 */
