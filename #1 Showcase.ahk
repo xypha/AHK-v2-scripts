@@ -1,3 +1,6 @@
+; https://github.com/xypha/AHK-v2-scripts/edit/main/%231%20Showcase.ahk
+; Last updated 2024.09.16
+
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
 ; Search for below commands/functions by using control + F to search on the help webpage - https://www.autohotkey.com/docs/v2/lib/
 
@@ -16,6 +19,7 @@
 ;  = Horizontal Scrolling Group
 ;  = Media Keys Group (disabled)
 ;  = Symbols In File Names Group
+;  = NoWrapText Group
 ;  = End auto-execute
 ; Hotkeys
 ;  = Check & Reload AHK
@@ -28,7 +32,7 @@
 ;    + Kill All Instances Of An App with ^!+F4
 ;  = Adjust Window Transparency keys
 ;  = Recycle Bin shortcut
-;  = Display Off shortcut
+;  = Display Off shortcuts
 ;  = Add Control Panel Tools to a Menu
 ;  = Change Text Case
 ;  = Wrap Text In Quotes or Symbols keys
@@ -39,13 +43,15 @@
 ; #HotIf Apps
 ;  = Firefox
 ;  = Windows File Explorer
-;    + General - CabinetWClass
-;    + Invert selection
-;    + Show folder size in ToolTip
-;    + Horizontal Scrolling
-;    + Copy full path
-;    + Copy file names without path
-;    + Copy file names without extension and path
+;    + Explorer main window
+;      * Unselect
+;      * UnGroup
+;      * Invert selection
+;      * Show folder/file size in ToolTip
+;      * Horizontal Scrolling
+;      * Copy full path
+;      * Copy file names without path
+;      * Copy file names without extension and path
 ; #HotIf Groups
 ;  = Capitalise the first letter of a sentence
 ;  = Close With Esc/Q/W keys
@@ -53,13 +59,13 @@
 ;  = Media Keys Restored (disabled)
 ;  = Symbols In File Names keys
 ; Hotstrings
+;  = Date & Time
+;    + Format Date / Time
+;  = URL Encode/Decode
 ;  = Find & Replace in Clipboard
 ;    + Find & Replace dot with space
 ;    + Find & Replace dot with space (RegEx)
 ;  = Trim Clipboard
-;  = Date & Time
-;    + Format Date / Time
-;  = URL Encode/Decode
 ; User-defined functions
 ;  = MyNotification
 ;    + MyNotificationGui
@@ -69,10 +75,10 @@
 ;    + CheckRegWrite
 ;    + ToggleOSCheck
 ;    + WindowsRefreshOrRun
-;  = Launch function in new thread with SetTimer
-;    + NewThread
+;    + RefreshExplorer
 ;  = Launch explorer or reuse to open path
 ;    + OpenFolder
+;    + FocusExplorerAddressBar
 ;  = Adjust Window Transparency
 ;    + GetTrans
 ;    + SetTransByWheel
@@ -90,8 +96,9 @@
 ;    + CallClipWait
 ;    + CallClipboard
 ;    + CallClipboardVar
-;  = ToolTip SetTimer
+;  = ToolTip functions
 ;    + ToolTipFn
+;    + ToolTipOff
 ;  = Wrap Text In Quotes or Symbols
 ;    + WrapTextMenuFn
 ;    + WrapTextFromMenu
@@ -105,10 +112,11 @@
 ;    + SnipMenuFn
 ;    + SnipFromMenu
 ;    + PrintScreenFn
-;    + PrintScreenExec
+;    + ScreenshotFileOp
 ;  = Show folder size Fn
 ;    + GetFolderSize
 ;    + FolderSizeFn
+;    + ValidPath
 ;  = Control Panel Tools
 ;    + ControlPanelMenuFn
 ;    + ControlPanelSelect
@@ -129,10 +137,10 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #1 Showcase v2.08"
+AHKname := "AHK v2 #1 Showcase v2.09"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationGui("Loading " AHKname, 10000, 1550, 985, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationGui("Loading " AHKname, -10000, 1550, 985, 1) ; 10000ms = 10 seconds (negative number so that timer will run only once), position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;  = Set default state of Lock keys
 ; Turn on/off upon startup (one-time)
@@ -147,7 +155,7 @@ A_TrayMenu.Delete                             ; Delete standard menu
 A_TrayMenu.Add "&Toggle OS files", ToggleOS   ; User-defined function
 A_TrayMenu.Add                                ; Add a separator
 A_TrayMenu.AddStandard                        ; Restore standard menu
-ToggleOSCheck                                 ; Query registry and check/uncheck
+ToggleOSCheck()                               ; Query registry and check/uncheck
 
 ;  = Customise Tray Icon
 
@@ -187,13 +195,19 @@ GroupAdd "MediaKeys"            , "ahk_class PotPlayer64"                       
 
 GroupAdd "FileNameSymbols"      , "ahk_class CabinetWClass"                         ; Windows file explorer
 GroupAdd "FileNameSymbols"      , "ahk_class EVERYTHING"                            ; Everything
+GroupAdd "FileNameSymbols"      , "Renaming ahk_exe qbittorrent.exe"                ; qBittorrent
 GroupAdd "FileNameSymbols"      , "Save ahk_class #32770"                           ; Save As / Save File dialogue
 GroupAdd "FileNameSymbols"      , "Export ahk_class #32770"
 GroupAdd "FileNameSymbols"      , "Rename ahk_class #32770"
 
+;  = NoWrapText Group
+
+GroupAdd "NoWrapText"      , "ahk_exe mpc-hc.exe"                                   ; MPC-HC
+GroupAdd "NoWrapText"      , "ahk_class MSPaintApp"                                 ; MS Paint (classic)
+
 ;  = End auto-execute
 
-SetTimer EndMyNotif, -1000 ; Reset notification timer to 1s after code in auto-execute section has finished running
+SetTimer () => EndMyNotif(), -1000 ; 1s ; new thread ; Reset notification timer to 1s after code in auto-execute section has finished running
 Return ; Ends auto-execute
 
 ; Below code can be placed anywhere in your script
@@ -297,8 +311,8 @@ Media_Next::End
 
 +CapsLock:: {
 SetCapsLockState "On"
-MyNotificationGui("CapsLock ON", 10000, 845) ; 10000ms = 10s, change to match KeyWait timeout if needed
-NewThread(CapsWait) ; 100ms
+MyNotificationGui("CapsLock ON", -10000, 845)   ; 10000ms = 10s, change to match KeyWait timeout if needed
+SetTimer () => CapsWait(), -100                 ; 100ms ; new thread
 }
 
 CapsWait() { ; runs in new thread and allows for quick toggling of CapsLock-state with +CapsLock / CapsLock / ESC keys in current thread
@@ -450,13 +464,20 @@ Else OpenFolder("::{645ff040-5081-101b-9f08-00aa002f954e}") ; comment out if not
 }
 
 ;------------------------------------------------------------------------------
-;  = Display Off shortcut
+;  = Display Off shortcuts
 ; modified from https://www.autohotkey.com/docs/v2/lib/SendMessage.htm#ExMonitorPower
 
-^Esc:: {
-KeyWait "Esc"       , "T1"     ; use KeyWait instead of Sleep for faster execution
-KeyWait "Control"   , "T1"
-Sleep 100 ; wait a bit after key release in case key release would wake up the monitor again
+>^NumpadEnter::                         ; with Right hand, press Right Ctrl + NumpadEnter keys
+<^Esc:: {                               ; with Left hand, press Left Ctrl + Esc keys
+If ThisHotkey == "^NumpadEnter" {
+    KeyWait "Control"       , "T1"      ; use KeyWait instead of Sleep for faster execution
+    KeyWait "NumpadEnter"   , "T1"
+    }
+Else {
+    KeyWait "Esc"       , "T1"          ; use KeyWait instead of Sleep for faster execution
+    KeyWait "Control"   , "T1"
+    }
+Sleep 100 ; wait a bit after key release to prevent key release from waking up the monitor again
 ; Sleep 1000  ; alternative to above commands
 SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
 }
@@ -464,17 +485,18 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 ;--------
 ;  = Add Control Panel Tools to a Menu
 
-#+x::ControlPanelMenuFn   ; Win + Shift + x
+#+x::ControlPanelMenuFn()   ; Win + Shift + x
 
 ;--------
 ;  = Change Text Case
 
-!c::ChangeCaseMenuFn      ; Alt + C
+!c::ChangeCaseMenuFn()      ; Alt + C
 
 ;--------
 ;  = Wrap Text In Quotes or Symbols keys
 
-#HotIf not WinActive("ahk_exe mpc-hc.exe") ; disable below hotkeys in apps that don't use it or have conflicts - Example: Media Player Classic - Home Cinema
+#HotIf not WinActive("ahk_group NoWrapText")
+; disables below hotkeys in apps that belonging to this group because they don't use it or have conflicts
 
 !q::WrapTextMenuFn ; Alt + Q
 
@@ -546,9 +568,9 @@ SetPriority(*) {
     PPGui.Hide
     Try ProcessSetPriority(LB.Text, active_pid)
     Catch ; if error
-        MyNotificationGui("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, 5000) ; 5s
+        MyNotificationGui("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, -5000) ; 5s
     Else ; if successful
-        MyNotificationGui("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, 5000) ; 5s
+        MyNotificationGui("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, -5000) ; 5s
     Finally PPGui.Destroy
     }
 }
@@ -579,8 +601,8 @@ SnipMenuFn
 ^+f::Send "^f{Esc}"
 
 ; Ctrl + Shift + H = open Homepage
-^+h::Send "^labout:home{Enter}" ; go backwards/forwards button history is preserved
-; Send "^w^t"     ; alternative - go backwards/forwards button history is lost
+^+h::Send "^labout:home{Enter}" ; Go backwards and Go forwards button history is preserved, but blank grey background may be seen instead of new tab background image
+; Send "^w^t"     ; alternative - Go backwards and Go forwards button history is lost, but wallpaper loads correctly
 
 ; Ctrl + Shift + O = open library / bookmark manager
 ^+o:: {
@@ -589,9 +611,10 @@ If WinActive(" — Mozilla Firefox") ; If not new tab, then open new one
 Else Send "^l"  ; If new tab, focus address bar
 Sleep 500       ; wait for focus - change as per your system performance
 Send "{Raw}chrome://browser/content/places/places.xhtml`n" ; `n = {Enter}
+; PasteAndSend("chrome://browser/content/places/places.xhtml", "{Enter}") ; alternative - use custom function `PasteAndSend` from my other script AHK v2 #2 MultiClip
 }
 
-; Disable Ctrl + Shift + Q = Exit shortcut
+; Disable Ctrl + Shift + Q = Exit (default Firefox shortcut)
 ^+q::Return
 
 #HotIf
@@ -599,19 +622,35 @@ Send "{Raw}chrome://browser/content/places/places.xhtml`n" ; `n = {Enter}
 ;--------
 ;  = Windows File Explorer
 
-;    + General - CabinetWClass
-
 #HotIf WinActive("ahk_class CabinetWClass")
+
+;    + Explorer main window
 
 F1::F2 ; disable opening help in MS edge
 
+;--------
+;      * Unselect
 ; Unselect multiple files/folders
 ; Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
-^+a::F5
+
+^+a::F5 ; Ctrl + Shift + A = unselect by sending {F5} key ; same as Right Click > Refresh
+
 
 ;--------
-;    + Invert selection
+;      * UnGroup
+; Change the annoying `Group by Date modified` default in Downloads folder to `Group by Date (None)` 
 
+^g:: {  ; Ctrl + G
+MouseMove 541, 146
+Send "{Click}"
+If WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge ahk_exe explorer.exe",, 1) ; 1s
+    Send "{Up}{Right}"
+    Sleep 250
+    Send "{Up}{Enter}"
+}
+
+;--------
+;      * Invert selection
 ; For the Windows 11 23H2 Windows File Explorer
 
 ^i:: {                    ; Ctrl + I
@@ -624,41 +663,42 @@ If WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge ahk_e
     }
 }
 
-; Note 1: location of "see more" option on screen
-; MouseMove - move the mouse cursor to x,y coordinates on 'Screen' use Window Spy to determine coordinates for your own screen(s)
-; might want to change "CoordMode" if you have problems, visit help page: https://www.autohotkey.com/docs/v2/lib/CoordMode.htm
+/*
+Note 1: location of "see more" option on screen
+MouseMove - move the mouse cursor to x,y coordinates on 'Screen' use Window Spy to determine coordinates for your own screen(s)
+might want to change "CoordMode" if you have problems, visit help page: https://www.autohotkey.com/docs/v2/lib/CoordMode.htm
 
-; Note 2: wait 500ms for window to respond to keys
-; wait times (in milliseconds) don't work sometimes, try changing them to see what is sufficient for your PC spec/performance.
-; Sometimes it doesn't work at all on the 1st try (ex: when a new explorer instance is first opened after login/restart)
-; but works on subsequent attempts. *shrug* no idea why.
+Note 2: wait 500ms for window to respond to keys
+wait times (in milliseconds) don't work sometimes, try changing them to see what is sufficient for your PC spec/performance.
+Sometimes it doesn't work at all on the 1st try (ex: when a new explorer instance is first opened after login/restart)
+but works on subsequent attempts. *shrug* no idea why.
 
-; Note 3: uncomment this line after test of previous steps
-; or leave it as is if you prefer to do this step manually, especially if you notice inconsistent selection of options.
+Note 3: uncomment this line after test of previous steps
+or leave it as is if you prefer to do this step manually, especially if you notice inconsistent selection of options.
+*/
 
-/* ; Invert selection - alternative
-; For ribbon UI enabled File Explorer (in older Win 11 and 7/8/8.1/10 systems) -
+/* ; Invert selection in older Win 11 and 7/8/8.1/10 systems
+; applicable for ribbon UI enabled File Explorer
 ; Modified from https://www.autohotkey.com/boards/viewtopic.php?f=76&t=27564
 
 ^i::PostMessage 0x111, 28706,, "SHELLDLL_DefView1", "A"
-
 */
 
 ;--------
-;    + Show folder size in ToolTip
+;      * Show folder/file size in ToolTip
 
-^!s:: {
+^+s:: {
 
 ; check keyboard focus
 ClassNN := ControlGetClassNN(ControlGetFocus("A"))
 
 ; If keyboard focus = file list
 If ClassNN == "DirectUIHWND2"
-    WhichFolder := CallClipboardVar(2) ; 2s
+    path := ValidPath()
 
 ; If keyboard focus = address bar
 Else If ClassNN == "Microsoft.UI.Content.DesktopChildSiteBridge1" {
-    WhichFolder := CallClipboardVar(2) ; 2s
+    path := ValidPath()
     Send "{F6 2}{Down}{Home}" ; Return focus to file list
     }
 
@@ -676,11 +716,11 @@ Else {
     }
 
 ; calculate folder size and display
-GetFolderSize(WhichFolder)
+GetFolderSize(path[1], path[2])
 }
 
 ;--------
-;    + Horizontal Scrolling
+;      * Horizontal Scrolling
 ; modified from https://www.autohotkey.com/boards/viewtopic.php?p=466527&sid=6dc4a701e678a7b9ee1241ab0043ebd8#p466527
 
 ; Method #5
@@ -701,26 +741,26 @@ Loop 3
 */
 
 ;--------
-;    + Copy full path
+;      * Copy full path
 ; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=61084#p61084
 
 ^+c:: { ; Ctrl + Shift + C
 CallClipboard(2) ; Timeout 2s
 A_Clipboard := A_Clipboard ; change to plain text
 }
-; Example: C:\Program Files\Mozilla Firefox\firefox.exe
+; Output Example: C:\Program Files\Mozilla Firefox\firefox.exe
 
 ;--------
-;    + Copy file names without path
+;      * Copy file names without path
 
 !n:: { ; Alt + N
 A_Clipboard := RegExReplace(CallClipboardVar(2), "\w:\\|.+\\") ; 2s ; remove path
 }
 
-; Example: firefox.exe
+; Output Example: firefox.exe
 
 ;--------
-;    + Copy file names without extension and path
+;      * Copy file names without extension and path
 
 ^!n:: { ; Ctrl + Alt + N
 files := RegExReplace(CallClipboardVar(2), "\w:\\|.+\\") ; 2s ; remove path
@@ -728,7 +768,7 @@ files := RegExReplace(files, "\.[\w]+(`r`n|`n)","`n")    ; remove ext, CR
 A_Clipboard := RegExReplace(files, "\.[\w]+$")           ; remove last ext
 }
 
-; Example: firefox
+; Output Example: firefox
 
 #HotIf
 
@@ -915,6 +955,37 @@ Media_Play_Pause::Media_Play_Pause
 ;------------------------------------------------------------------------------
 ; Hotstrings
 
+;  = Date & Time
+
+;    + Format Date / Time
+
+:*x:d++::      Send FormatTime(, "yyyy.MM.dd")          ; sends 2021.02.31
+:*x:date+::    Send FormatTime(, "dd.MM.yyyy")          ; sends 28.03.2020
+:*x:time+::    Send FormatTime(, "h:mm tt")             ; sends 6:48 PM
+:*x:datetime+::Send FormatTime(, "dd/MM/yyyy h:mm tt")  ; sends 28/03/2020 6:46 PM
+
+;------------------------------------------------------------------------------
+;  = URL Encode/Decode
+
+:*x:url+::Send UrlEncode(A_Clipboard)
+
+/* Encode URL
+    Example: https://www.google.com/
+    Copy example URL to clipboard
+    Triger `UrlEncode` function by typing `url+`
+    Output: https%3A%2F%2Fwww.google.com%2F
+*/
+
+:*x:url-::Send UrlDecode(A_Clipboard)
+
+/* Decode URL
+    Example: https%3A%2F%2Fwww.google.com%2F
+    Copy example URL to clipboard
+    Triger `UrlDecode` function by typing `url-`
+    Output: https://www.google.com/
+*/
+
+;------------------------------------------------------------------------------
 ;  = Find & Replace in Clipboard
 
 ;    + Find & Replace dot with space
@@ -928,6 +999,7 @@ Find text:          "ABC..def.GHI"
 Replacement text:   "ABC  def GHI"
 */
 
+;--------
 ;    + Find & Replace dot with space (RegEx)
 
 :*:.r++:: { ; hotstring ".r++"
@@ -971,6 +1043,7 @@ Line1 "FUBFUBFI dvvbvvoe df"
 Explanation: blank lines are deleted, one or more \s are replaced with space, resulting in Line2 being appended to Line1
 */
 
+;--------
 ; Trim but keep non-blank lines
 
 :?*:v++:: { ; hotstring "v++"
@@ -993,37 +1066,6 @@ Explanation: blank lines are deleted and spaces are trimmed, but non-blank lines
 */
 
 ;------------------------------------------------------------------------------
-;  = Date & Time
-
-;    + Format Date / Time
-
-:*x:d++::      Send FormatTime(, "yyyy.MM.dd")          ; sends 2021.02.31
-:*x:date+::    Send FormatTime(, "dd.MM.yyyy")          ; sends 28.03.2020
-:*x:time+::    Send FormatTime(, "h:mm tt")             ; sends 6:48 PM
-:*x:datetime+::Send FormatTime(, "dd/MM/yyyy h:mm tt")  ; sends 28/03/2020 6:46 PM
-
-;------------------------------------------------------------------------------
-;  = URL Encode/Decode
-
-:*x:url+::Send UrlEncode(A_Clipboard)
-
-/* Encode URL
-    Example: https://www.google.com/
-    Copy example URL to clipboard
-    Triger `UrlEncode` function by typing `url+`
-    Output: https%3A%2F%2Fwww.google.com%2F
-*/
-
-:*x:url-::Send UrlDecode(A_Clipboard)
-
-/* Decode URL
-    Example: https%3A%2F%2Fwww.google.com%2F
-    Copy example URL to clipboard
-    Triger `UrlDecode` function by typing `url-`
-    Output: https://www.google.com/
-*/
-
-;------------------------------------------------------------------------------
 ; User-defined functions
 
 ;  = MyNotification
@@ -1031,7 +1073,7 @@ Explanation: blank lines are deleted and spaces are trimmed, but non-blank lines
 
 ;    + MyNotificationGui
 
-MyNotificationGui(mytext, myduration := 500, xAxis := 1550, yAxis := 985, timer := 1) {
+MyNotificationGui(mytext, myduration := -500, xAxis := 1550, yAxis := 985, timer := 1) {
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
 MyNotification.BackColor := "2C2C2E"                ; "2C2C2E" for dark mode ; "EEEEEE" for White background ; can be any RGB colour (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
@@ -1039,10 +1081,10 @@ MyNotification.AddText("cWhite w230 Left", mytext)  ; "cWhite" for dark mode ; u
 MyNotification.Show("x1650 y985 NoActivate")        ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
 If timer = 1
-    SetTimer EndMyNotif, myduration * -1
+    SetTimer () => EndMyNotif(), myduration ; 500ms ; new thread
 If timer = 0 {
-    Sleep myduration
-    EndMyNotif
+    Sleep myduration * -1
+    EndMyNotif()
     }
 }
 
@@ -1065,13 +1107,13 @@ If Status = 0 { ; enable if disabled
     RegWrite "1", "REG_DWORD", "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     CheckRegWrite(Status)
     ToggleOSCheck
-    NewThread(WindowsRefreshOrRun)
+    SetTimer () => WindowsRefreshOrRun(), -100       ; 100ms ; new thread
     }
 Else { ; disable if enabled
     RegWrite "0", "REG_DWORD", "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     CheckRegWrite(Status)
     ToggleOSCheck
-    NewThread(WindowsRefreshOrRun)
+    SetTimer () => WindowsRefreshOrRun(), -100       ; 100ms ; new thread
     }
 }
 
@@ -1080,7 +1122,7 @@ Else { ; disable if enabled
 
 CheckRegWrite(value) { ; check if RegWrite was success
 Global Status := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
-If value = Status {
+If value == Status {
     MsgBox "ToggleOS Failed",, "262144" ; 262144 = Always-on-top
     ; ToolTipFn("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
     Exit
@@ -1102,13 +1144,11 @@ Else A_TrayMenu.Check "&Toggle OS files"
 ;    + WindowsRefreshOrRun
 
 WindowsRefreshOrRun() {
-Sleep 2000 ; 2s wait for registry change to be enforced
-If WinExist("ahk_class CabinetWClass") { ; If Windows File Explorer window exists
+Sleep 2000                                  ; 2s wait for registry change to be enforced
+If WinExist("ahk_class CabinetWClass") {    ; If Windows File Explorer window exists
     WinActivate
-    If WinWaitActive(,, 2)      ; 2s timeout ; wait for explorer to become active window
-        Send "{F5}"             ; refresh
-        ; a second refresh might be needed after a few seconds to see the effects of change in settings
-        ; add a Sleep command or use SetTimer prior to refresh to account for the delay
+    If WinWaitActive(,, 2)                  ; 2s timeout ; wait for explorer to become active window
+        RefreshExplorer()
     }
 Else { ; open new explorer window if one doesn't already exist ; comment out this section if not desired
     Run 'explorer.exe',,"Max"
@@ -1117,14 +1157,42 @@ Else { ; open new explorer window if one doesn't already exist ; comment out thi
     }
 }
 
-;------------------------------------------------------------------------------
-;  = Launch function in new thread with SetTimer
+;--------
+;    + RefreshExplorer
+; Source: https://www.autohotkey.com/boards/viewtopic.php?p=482766#p482766
 
-;    + NewThread
-
-NewThread(Fn, timeout := -100) { ; 100ms
-SetTimer Fn, timeout ; use SetTimer to run commands in a new thread and prevent current thread from being paused
+RefreshExplorer() {
+    Local Windows := ComObject("Shell.Application").Windows
+    Windows.Item(ComValue(0x13, 8)).Refresh()
+    For Window in Windows
+        If (Window.Name != "Internet Explorer")
+            Window.Refresh()
 }
+
+/* alternatives - but not tested personally, and likely not as reliable (check source)
+
+N°. 1 -
+Sleep 2000 ; 500 ms
+Send "{F5}"             ; refresh
+; a second refresh might be needed after a few seconds to see the effects of change in settings
+; add a Sleep command or use SetTimer prior to refresh to account for the delay
+
+N°. 2 - source: https://www.autohotkey.com/boards/viewtopic.php?p=543680#p543680
+ExplorerRefresh() => PostMessage(WM_COMMAND := 0x111, Refresh := 41504,, HWND_BROADCAST := 0xFFFF)
+
+N°. 3 - source: https://www.autohotkey.com/boards/viewtopic.php?p=543680#p543680
+UpdateWindows()
+{
+    _ttm := A_TitleMatchMode
+    SetTitleMatchMode 'RegEx'
+    for window in WinGetList("ahk_class ExploreWClass|CabinetWClass|Progman")
+        PostMessage 0x111 , 41504 ,,, window
+    SetTitleMatchMode _ttm
+}
+
+N°. 4 - Source: https://www.autohotkey.com/board/topic/12342-showhide-hidden-files-and-folders/#entry79944
+PostMessage 0x111, 41504
+*/
 
 ;------------------------------------------------------------------------------
 ;  = Launch explorer or reuse to open path
@@ -1132,25 +1200,47 @@ SetTimer Fn, timeout ; use SetTimer to run commands in a new thread and prevent 
 ;    + OpenFolder
 
 OpenFolder(path) {
-If WinExist("ahk_class CabinetWClass") {           ; If any other folder, change to Bin
+If WinExist("ahk_class CabinetWClass") {           ; if explorer is open
     WinActivate
     If WinWaitActive(,, 2) { ; 2s = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
-        Send "{F4}"
-        While ControlGetClassNN(ControlGetFocus("A")) !== "Microsoft.UI.Content.DesktopChildSiteBridge1" {
-            Sleep 100
-            If A_Index > 5 { ; = Sleep 500 ; wait until focus is on address bar, max 500ms
-                ToolTipFn("OpenFolder(" path ") :: Function failed to focus address bar", -1000) ; 1s
-                Run 'explore "' path '"',,"Max"
-                Exit
-                }
+    
+        ; wait for cursor focus
+        If FocusExplorerAddressBar() == "err0r" {
+            Run 'explore "' path '"',,"Max"
+            Exit
             }
-        WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge",, 2) ; 2s - wait for drop down
-        Send "{Raw}" path
-        WinWaitClose(,, 2) ; 2s - wait for drop down to disappear, then Send Enter ; WinWait commands used to prevent drop down display appearing after Enter - explorer bug
-        Send "{Enter}{F6 2}"
+        
+        ; check to see if existing path is not equal to new path
+        Else If path !== CallClipboardVar(2, 1) { ; 2s, Return
+            Send "{Raw}" path
+            WinWaitClose(,, 2) ; 2s - wait for drop down to disappear, then Send Enter ; WinWait commands used to prevent drop down display appearing after Enter - explorer bug
+            Send "{Enter}{F6 2}"
+            }
+            
+        ; if paths are equal, no further change is not necessary, refocus on file list
+        Else Send "{F6 2}"
         }
     }
+; if explorer is not open
 Else Run 'explore "' path '"',,"Max"
+}
+
+;--------
+;    + FocusExplorerAddressBar
+; check focus of cursor in explorer before further action
+
+FocusExplorerAddressBar() {
+Send "{F4}"
+While ControlGetClassNN(ControlGetFocus("A")) !== "Microsoft.UI.Content.DesktopChildSiteBridge1" {
+    Sleep 100
+    If A_Index > 5 { ; = Sleep 500 ; wait until focus is on address bar, max 500ms
+        ToolTipFn("Failed to focus address bar", -1000) ; 1s
+        Return "err0r"
+        }
+    }
+If WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge",, 2) ; 2s - wait for drop down
+    Return "Success"
+Else Return "err0r"
 }
 
 ;--------
@@ -1301,9 +1391,10 @@ If Len <= 20 ; and select text only if text ≤ 20 characters (change limit as n
 ;    + CallClipWait
 
 CallClipWait(secs) {
+ToolTipFn("Waiting for clipboard", secs * -1000) ; 2s
 If not ClipWait(secs) {
-    MyNotificationGui(A_ThisHotkey ":: Clip Failed", 2000) ; 2s ; personal preference coz tooltip conflict
-    ; ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; 2s - Alternative to MyNotification
+    ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; 2s
+    ; MyNotificationGui(A_ThisHotkey ":: Clip Failed", -2000) ; 2s ; alternative to tooltip
     Exit
     }
 }
@@ -1311,38 +1402,64 @@ If not ClipWait(secs) {
 ;--------
 ;    + CallClipboard
 
-CallClipboard(secs) {
+CallClipboard(secs, retrn := 0) {
 Global clipSave := ClipboardAll() ; Global = Return clipSave
 A_Clipboard := ""
 Send "^c"
+ToolTipFn("Waiting for clipboard", secs * -1000) ; 2s
 If not ClipWait(secs) {
-    MyNotificationGui(A_ThisHotkey ":: Clip Failed", 2000) ; 2s ; personal preference coz tooltip conflict
+    ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; 2s
     A_Clipboard := clipSave
-    Exit
+    If retrn = 0
+        Exit
+    Else Return "err0r" ; If retrn = 1
     }
 }
 
 ;--------
 ;    + CallClipboardVar
 
-CallClipboardVar(secs) {        ; copied text is sent to variable, clipboard is restored
-CallClipboard(secs)
-clipped := A_Clipboard
-A_Clipboard := clipSave
-Return clipped
+CallClipboardVar(secs, retrn := 0) {        ; copied text is sent to variable, clipboard is restored
+If CallClipboard(secs, retrn) == "err0r"    ; ClipChanged is turned on
+    Return "err0r"
+Else {
+    clipped := A_Clipboard
+    A_Clipboard := clipSave
+    Return clipped
+    }
 }
 
 ;------------------------------------------------------------------------------
-;  = ToolTip SetTimer
+;  = ToolTip functions
 
 ;    + ToolTipFn
 
 ToolTipFn(mytext, myduration := -500, xAxis?, yAxis?) { ; 500ms
-ToolTip ; turn off any previous tooltip
-Try ToolTip mytext, xAxis, yAxis
+
+; turn off ToolTip
+ToolTip()
+Try ToolTip(,,, ToolTipNo)
+
+; set/increment WhichToolTip parameter
+If not IsSet(ToolTipNo)
+    Global ToolTipNo := 1
+Else If ToolTipNo = 20
+    ToolTipNo := 1
+Else ToolTipNo++
+
+Try ToolTip mytext, xAxis, yAxis, ToolTipNo
 Catch
-    ToolTip mytext
-SetTimer () => ToolTip(), myduration
+    ToolTip mytext,,, ToolTipNo
+SetTimer () => ToolTipOff(ToolTipNo), myduration ; 500ms ; new thread
+}
+
+;--------
+;    + ToolTipOff
+
+ToolTipOff(ToolTipNo) {
+ToolTip(,,, ToolTipNo)
+Sleep 5000 ; 5s ; max ToolTip duration in script, to prevent persistent tooltip that forces script reload
+ToolTip()
 }
 
 ;------------------------------------------------------------------------------
@@ -1427,52 +1544,6 @@ If Len <= 20              ; and select text string if ≤ 20 characters (change 
 }
 
 ;------------------------------------------------------------------------------
-;  = URL Encode/Decode
-; Modified from https://www.autohotkey.com/boards/viewtopic.php?style=7&t=116056#p517193
-
-;    + UrlDecode
-
-UrlDecode(Url, Enc := "UTF-8") {
-Pos := 1
-Loop {
-    Pos := RegExMatch(Url, "i)(?:%[\da-f]{2})+", &code, Pos++)
-    If Pos = 0
-        Break
-    var := Buffer(StrLen(code[0]) // 3, 0)
-    code := SubStr(code[0], 2)
-    Loop Parse code, "`%"
-        NumPut("UChar", Integer("0x" A_LoopField), var, A_Index - 1)
-    Url := StrReplace(Url, "`%" code, StrGet(var, Enc))
-    }
-Return Url
-}
-
-;--------
-;    + UrlEncode
-
-UrlEncode(str, sExcepts := "-_.", enc := "UTF-8") {
-hex := "00"
-buff := Buffer(StrPut(str, enc))
-StrPut(str, buff, enc)
-encoded := ""
-Loop {
-    If not b := NumGet(buff, A_Index - 1, "UChar")
-        Break
-    ch := Chr(b)
-    If (b >= 0x41 && b <= 0x5A      ; A-Z
-        || b >= 0x61 && b <= 0x7A   ; a-z
-        || b >= 0x30 && b <= 0x39   ; 0-9
-        || InStr(sExcepts, ch, True))
-        encoded .= ch
-    Else {
-        DllCall("msvcrt\swprintf", "Str", hex, "Str", "%%%02X", "UChar", b, "Cdecl")
-        encoded .= hex
-        }
-    }
-Return encoded
-}
-
-;------------------------------------------------------------------------------
 ;  = Kill All Instances Of An App
 
 ;    + GetKillTitles
@@ -1498,6 +1569,69 @@ Return temp
 }
 
 ;------------------------------------------------------------------------------
+;  = URL Encode/Decode
+; Modified from https://www.autohotkey.com/boards/viewtopic.php?style=7&t=116056#p517193
+
+;    + UrlDecode
+
+UrlDecode(Url, Enc := "UTF-8") {
+; Validate url
+; If not RegExMatch(Url, "^http(s|)%3A%2F%2F[\w-@%~#&=\.\+\?]{2,256}\.[a-z]{2,6}($|%2F[\w-@%~#&=\.\+\?]*$)")
+;     Return
+Pos := 1
+Loop {
+    Pos := RegExMatch(Url, "i)(?:%[\da-f]{2})+", &code, Pos++)
+    If Pos = 0
+        Break
+    var := Buffer(StrLen(code[0]) // 3, 0)
+    code := SubStr(code[0], 2)
+    Loop Parse code, "`%"
+        NumPut("UChar", Integer("0x" A_LoopField), var, A_Index - 1)
+    Url := StrReplace(Url, "`%" code, StrGet(var, Enc))
+    }
+ToolTipFn("Decoding successful!", -2000) ; 2s
+Return Url
+}
+
+;--------
+;    + UrlEncode
+
+UrlEncode(str, sExcepts := "-_.", enc := "UTF-8") {
+validateURL := "^http(s|)://[\w-@:%~#&=\.\+\?]{2,256}\.[a-z]{2,6}($|/[\w-@:%~#&=/\.\+\?]*$)" ; modified from https://www.makeuseof.com/regular-expressions-validate-url/
+If not RegExMatch(str, validateURL) {
+    Try UrlDecode(str) ; url is already encoded
+    Catch {
+        MsgBox "ERROR!`n`nString: " str "`nRegEx: " validateURL "`n`nNot a valid URL.",, "262144"
+        Exit
+        }
+    Else ToolTipFn("URL already encoded!", -2000) ; 2s
+    Return str
+    }
+Else {
+    hex := "00"
+    buff := Buffer(StrPut(str, enc))
+    StrPut(str, buff, enc)
+    encoded := ""
+    Loop {
+        If not b := NumGet(buff, A_Index - 1, "UChar")
+            Break
+        ch := Chr(b)
+        If (b >= 0x41 && b <= 0x5A      ; A-Z
+            || b >= 0x61 && b <= 0x7A   ; a-z
+            || b >= 0x30 && b <= 0x39   ; 0-9
+            || InStr(sExcepts, ch, True))
+            encoded .= ch
+        Else {
+            DllCall("msvcrt\swprintf", "Str", hex, "Str", "%%%02X", "UChar", b, "Cdecl")
+            encoded .= hex
+            }
+        }
+    ToolTipFn("Valid URL! Encoding successful!", -2000) ; 2s
+    Return encoded
+    }
+}
+
+;------------------------------------------------------------------------------
 ;  = Print Screen
 
 ;    + SnipMenuFn
@@ -1506,14 +1640,64 @@ SnipMenuFn() {
 SnipMenu := Menu()
 SnipMenu.Delete
 SnipMenu.Add("&1 Rectangular Snip"          ,SnipFromMenu)
-SnipMenu.Add("&2 Freeform Snip"             ,SnipFromMenu)
-SnipMenu.Add("&3 Window Snip"               ,SnipFromMenu)
-SnipMenu.Add("&4 Screenshot - Save && Exec" ,PrintScreenFn)
+SnipMenu.Add("&2 Window Snip"               ,SnipFromMenu)
+SnipMenu.Add("&3 Full Screen Snip"          ,SnipFromMenu)
+SnipMenu.Add("&4 Freeform Snip"             ,SnipFromMenu)
 SnipMenu.Show
 }
 
 ;--------
 ;    + SnipFromMenu
+; Applicable to SnippingTool.exe version 11.2407.3.0 and later (Date: 2024.09.16)
+
+SnipFromMenu(ItemName, ItemPos, MyMenu) {
+Send "{PrintScreen}"
+If WinWaitActive("Snipping Tool Overlay ahk_exe SnippingTool.exe",, 3) { ; 3s
+    Sleep 250
+    MouseMove A_ScreenWidth/2, 40 ; client 973, 38
+    MouseClick
+    If WinWait("PopupHost ahk_exe SnippingTool.exe",, 3) { ; 3s
+        Sleep 250
+        Send "{Up 4}"
+        Send "{Down " ItemPos - 1 "}{Enter}"
+        }
+    Else {
+        ToolTipFn(A_ThisHotkey ":: Snipping Tool Pop-up timed out", -2000) ; 2s
+        Exit
+        }
+    }
+Else {
+    ToolTipFn(A_ThisHotkey ":: Screen Snipping Overlay timed out", -2000) ; 2s
+    Exit
+    }
+; wait for screenshot to be taken ; abort further action if timeout or Esc key is pressed
+If WinWaitClose("Snipping Tool Overlay ahk_exe SnippingTool.exe",, 15) and (A_PriorKey != "Escape") { ; 15s
+
+    ; If `Automatically save screenshots` is ENABLED in snippingtool
+    MyPath := "C:\Users\" A_UserName "\Pictures\Screenshots\Screenshot " FormatTime(, "yyyy-MM-dd HHmmss") ".png"
+    SetTimer () => ScreenshotFileOp(MyPath), -100 ; new thread
+    
+/*  ; If `Automatically save screenshots` is disabled in snippingtool, use below code to open paint and edit/save from clipboard
+
+    If WinExist("ahk_class MSPaintApp")
+        WinActivate
+    Else Run "mspaint.exe",,"Max"
+
+    If WinWait("ahk_class MSPaintApp",, 3) { ; 3s
+        Sleep 500 ; 500ms
+        PostMessage 0x111, 57637,,, "ahk_class MSPaintApp"  ; 0x111 = Paste
+        ; Send "^v"                                         ; alternative to PostMessage
+        ; ControlSend "^v",, "ahk_class MSPaintApp"         ; alternative to Send / PostMessage
+        PostMessage 0x111, 620,,, "ahk_class MSPaintApp"    ; activate "Select" tool
+        }
+ */
+    }
+Else If A_PriorKey = "Escape"
+    ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - Esc", -2000) ; 2s
+Else ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - 15s timeout", -2000) ; 2s
+}
+
+/* For older versions of screen snippingtool, below code may work
 
 SnipFromMenu(ItemName, ItemPos, MyMenu) {
 Send "{PrintScreen}"
@@ -1543,7 +1727,8 @@ If WinWaitClose(,, 15) and (A_PriorKey != "Escape") { ; 15s
 Else ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - 15s timeout / Esc", -2000) ; 2s
 }
 
-/* ; use PostMessage to select tool -
+;--------
+; use PostMessage to select tool -
 Free-Form       621
 Select          620
 Eraser          637
@@ -1561,7 +1746,7 @@ Polygon         632
 Ellipse         643
 Rounded_Rect    634
 
-PostMessage 0x111, 620,,, "ahk_pid " PID ; alternative to "ahk_class MSPaintApp"
+PostMessage 0x111, 620,,, "ahk_pid " <Process ID> ; alternative to "ahk_class MSPaintApp"
 paint settings in registry = HKCU\Software\Microsoft\Windows\CurrentVersion\Applets\Paint\
 */
 
@@ -1576,39 +1761,35 @@ serial := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer", "Sc
 Send "#{PrintScreen}"
 
 ; use SetTimer to wait for file creation 100ms and execute action in another thread
-; pass serial as number for further action
-SetTimer(() => PrintScreenExec(serial), -100) ; 100ms
+; pass serial as number for path of screenshot file in `ScreenshotFileOp` function
+SetTimer () => ScreenshotFileOp("C:\Users\" A_UserName "\Pictures\Screenshots\Screenshot (" serial ").png"), -100   ; 100ms ; new thread
 }
 
 ;--------
-;    + PrintScreenExec
+;    + ScreenshotFileOp
 
-PrintScreenExec(number) {
-
-; store path of screenshot file in variable 'MyPath'
-MyPath := "C:\Users\" A_UserName "\Pictures\Screenshots\Screenshot (" number ").png"
-
-; if file does not exist, wait using Sleep and repeat check
-While FileExist(MyPath) = "" {
-    Sleep 500        ; wait for 500ms - modify as per system performance
+ScreenshotFileOp(MyPath) {
+While !FileExist(MyPath) { ; if file does not exist, wait using Sleep and repeat check
+    Sleep 500        ; wait for 500ms
     If A_Index > 6 { ; max 6 attempts, total wait 3000ms = 3s
         ; If failed ×6, open screenshot folder in explorer
         Run 'explore "C:\Users\' A_UserName '\Pictures\Screenshots\"',,"Max"
-        Exit         ; give up on rename
+        MsgBox MyPath,, "262144"    ; show calculated path in pop-up to compare with actual file path
+        Exit                        ; give up on rename
         }
     }
 
 ; prepare to rename file
-String := FormatTime(FileGetTime(MyPath, "C"), "yyyy-MM-dd @ HH：mm：ss") ; 2016-07-21 @ 13：28：05
+fileTime := FormatTime(FileGetTime(MyPath, "C"), "yyyy-MM-dd @ HH：mm：ss") ; 2016-07-21 @ 13：28：05
 ; FileGetTime - obtain creation time as a string in YYYYMMDDHH24MISS format
 ; FormatTime - transform Timestamp YYYYMMDDHH24MISS into desired date/time format.
-MyPathNew := "C:\Users\" A_UserName "\Pictures\Screenshots\" String ".png"
+NewPath := "C:\Users\" A_UserName "\Pictures\Screenshots\" fileTime ".png"
 
 ; rename
-FileMove MyPath, MyPathNew
+FileMove MyPath, NewPath
 
-; Further actions -
-; Run 'mspaint.exe "' MyPathNew '"',,"Max"                              ; open in paint
+; Further actions - (uncomment below lines to execute)
+; Run 'mspaint.exe "' NewPath '"',,"Max"                                ; open in paint
 ; Run 'explore "C:\Users\' A_UserName '\Pictures\Screenshots\"',,"Max"  ; open screenshot folder in explorer
 }
 
@@ -1617,16 +1798,15 @@ FileMove MyPath, MyPathNew
 
 ;    + GetFolderSize
 
-GetFolderSize(WhichFolder) {
+GetFolderSize(pathType, pathContent) {
 ; variables
 FolderSizeB := 0
 errorDetails := ""
 folderName := ""
 fileName := ""
 
-; check If multiple folder/files or single folder or file
-If InStr(WhichFolder, "`n") {               ; multiple lines
-    Loop Parse WhichFolder, "`n", "`r" {
+If pathType = 1 {   ; multiple lines ; InStr(pathContent, "`n")
+    Loop Parse pathContent, "`n", "`r" {
         If DirExist(A_LoopField) {          ; is folder
             Loop Files A_LoopField "\*.*", "R"
                 FolderSizeB += A_LoopFileSize
@@ -1639,33 +1819,31 @@ If InStr(WhichFolder, "`n") {               ; multiple lines
         Else errorDetails .= "#" A_Index ": " A_LoopField " -> Not a folder or file`n"
         }
 
-    ; display folders first in string
-    If fileName = ""
-        WhichFolder := Trim(Sort(folderName), "`n")
+    ; display folders first in pathContent
     If folderName = ""
-        WhichFolder := Trim(Sort(fileName), "`n")
-    Else WhichFolder := Trim(Sort(folderName), "`n") "`n" Trim(Sort(fileName), "`n")
+        pathContent := Trim(Sort(fileName), "`n")
+    Else If fileName = ""
+        pathContent := Trim(Sort(folderName), "`n")
+    Else pathContent := Trim(Sort(folderName), "`n") "`n" Trim(Sort(fileName), "`n")
 
     ; limit string to 1000 characters
-    If StrLen(WhichFolder) > 1500 {
-        RegExMatch(WhichFolder, "[\s\S]{1,1500}`n", &output)
-        WhichFolder := output.0 "... and more"
+    If StrLen(pathContent) > 1500 {
+        RegExMatch(pathContent, "[\s\S]{1,1500}`n", &output)
+        pathContent := output.0 "... and more"
         }
     }
-Else If DirExist(WhichFolder) {         ; single line - folder
-    Loop Files WhichFolder "\*.*", "R"
+Else If pathType = 2 { ;          ; single line - folder ; DirExist(pathContent)
+    Loop Files pathContent "\*.*", "R"
         FolderSizeB += A_LoopFileSize
     }
-Else If FileExist(WhichFolder)          ; single line - file
-    FolderSizeB += FileGetSize(WhichFolder, "B")
-Else errorDetails := WhichFolder " -> Not a folder or file`n"
+Else FolderSizeB += FileGetSize(pathContent, "B")    ; single line - file ; FileExist(pathContent)
 
 ; check size and display tooltip
-If FolderSizeB = 0 and errorDetails != ""   ; size zero and error
+If FolderSizeB = 0 and errorDetails != ""   ; size zero and error present
     ToolTipFn(errorDetails, -5000) ; 5s     ; show error
-Else If FolderSizeB = 0
-    ToolTipFn(WhichFolder "`nEmpty Folder/File", -5000) ; 5s
-Else ToolTipFn(WhichFolder . FolderSizeFn(FolderSizeB) "`n`n" errorDetails, -5000) ; 5s
+Else If FolderSizeB = 0                     ; size zero and no errors
+    ToolTipFn(pathContent "`nEmpty Folder/File", -3000) ; 3s
+Else ToolTipFn(pathContent . FolderSizeFn(FolderSizeB) "`n`n" errorDetails, -3000) ; 3s
 }
 
 ;--------
@@ -1685,6 +1863,26 @@ If FolderSizeB >= 1024 {
 Else Return "`nSize: " FolderSizeB " bytes"
 }
 
+;--------
+;    + ValidPath
+
+ValidPath(errorTxt := "") {
+clipped := CallClipboardVar(2, 1) ; 2s, Return
+If clipped == "err0r" {
+    ToolTipFn(A_ThisHotkey ":: Error - Folder/file path copy failed!" errorTxt, -2000) ; 2s
+    Exit
+    }
+If InStr(clipped, "`n") ; If multiple folder/files or single folder or file
+    Return [1, clipped]
+Else If DirExist(clipped)
+    Return [2, clipped]
+Else If FileExist(clipped)
+    Return [3, clipped]
+Else {
+    MsgBox clipped "`nFolder/File does not exist!" errorTxt,, "262144"
+    Exit
+    }
+}
 ;------------------------------------------------------------------------------
 ;  = Control Panel Tools
 
@@ -1916,14 +2114,14 @@ v2.07 - 2024.02.20
  * improve comments
 
 v2.08 - 2024.03.15
+ ★ add 'OpenFolder' function and run 'Recycle Bin shortcut' through it
+ ★ add 'CallClipboardVar' function and improve 'Exchange adjacent letters' function by using it, instead of calling clipboard multiple times
  + add disabled 'Media Keys Group' and 'Media Keys Restored' sections
  + add 'ahk_class #32770' dialogue box to 'FileNameSymbols' group
  + add 'NewThread' function and launch 'CapsWait' function through it
  * change position of "CapsLock" notification, to be more centred
  * change "!=" to "!==" wherever applicable to enable case sensitivity
  * change "&WinID" to "&id" in "Adjust Window Transparency keys" section, in order to differentiate from Global variable 'WinID' used by "SetTransMenuFn"
- + add 'OpenFolder' function and run 'Recycle Bin shortcut' through it
- + add 'CallClipboardVar' function and improve 'Exchange adjacent letters' function by using it, instead of calling clipboard multiple times
  + add "^+f" shortcut to close find bar in Firefox
  + add "^+h" shortcut to go Home in Firefox
  + add "^i" 'Invert selection' to  Windows File Explorer section
@@ -1939,4 +2137,28 @@ v2.08 - 2024.03.15
  * update headings, spelling
  * improve comments and small changes
  * change changelog order for easier access
+
+v2.09 - 2024.09.16
+ ★ add `RefreshExplorer` function to improve `ToggleOSCheck` -- closes Issue #1 (Yipee! My first issue closure!!)
+ + add `Ctrl + G` UnGroup shortcut to `Windows File Explorer` section
+ * change `myduration` argument in `MyNotificationGui` function to use negative numbers because negative Sleep is smaller error than forever cycling SetTimer AND to match ToolTipFn; consequently switch negative multiplier from SetTimer to Sleep 
+ + add `Renaming ahk_exe qbittorrent.exe` to `FileNameSymbols` group
+ + add `NoWrapText` group to replace the lone `WinActive` exclusion for `WrapTextMenuFn` function
+ * update SetTimer for more versatility in `End auto-execute` section and `MyNotificationGui` function
+ * improve `OpenFolder` by moving/changing some commands to new `FocusExplorerAddressBar` function
+ * improve `OpenFolder` by adding a new check to see if existing path is not equal to new path; If equal, no further change is not necessary, refocus on file list
+ * change default notification from `MyNotificationGui` to `ToolTipFn` wherever appropriate -- personal preference shouldn't affect a public script
+ * improve `CallClipboard` and `CallClipboardVar` to return error messages when required; and add `ToolTipFn` notification while waiting for clipboard
+ * improve `ToolTipFn` to allow for position and add numbering
+ - remove `NewThread` function because it is redundant and confusing; replace with `SetTimer`
+ + add RegEx url validation and notifications to `UrlEncode` and `UrlDecode`
+ * fix `SnipFromMenu` for new version of screenshot v11.2407.3.0 and later (as of 2024.09.16). Old code is still present under block comment
+ * rename `PrintScreenExec`to `ScreenshotFileOp` - to reflect the file operations performed by the function and rename variables; add notification on failure
+ * update `SnipMenuFn` as per new order of options in snipping tool, open automatically saved file in mspaint 
+ * improve `GetFolderSize` by moving/changing some commands to new `ValidPath` function and improve ToolTips
+ + add new shortcut for `Display Off` section and update existing `Esc` shortcut to RControl specifically
+ * update `Display Off` section to work with updated shortcuts
+ * improve `CheckRegWrite` to use `==` case sensitive operator since registry values can be non-numeric
+ * rearrange/rename some functions and update headings
+ * improve comments and small changes
 */
