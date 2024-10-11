@@ -1,18 +1,19 @@
-; https://github.com/xypha/AHK-v2-scripts/edit/main/%231%20Showcase.ahk
-; Last updated 2024.09.16
+; https://github.com/xypha/AHK-v2-scripts/edit/main/No-1%20Showcase.ahk
+; Last updated 2024.10.11
 
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
-; Search for below commands/functions by using control + F to search on the help webpage - https://www.autohotkey.com/docs/v2/lib/
+; Search for below commands/functions by using control + F on the help webpage - https://www.autohotkey.com/docs/v2/lib/
 
 ; comments begin with semi-colon ";" at start of line or space+; " ;" in middle of line
 ; comments can also be show like this - "/*" comment text "*/"
 ; and these two methods can be combined too :)
 
-; /* AHK v2 #1 Showcase - CONTENTS */
+; /* AHK v2 No-1 Showcase - CONTENTS */
 ; Settings
 ; Auto-execute
 ;  = Set default state of Lock keys
 ;  = Show/Hide OS files
+;  = Dark ToolTip
 ;  = Customise Tray Icon
 ;  = Capitalise first letter exclusion Group
 ;  = Close With Esc/Q/W Group
@@ -92,13 +93,12 @@
 ;    + ConvertUpper
 ;    + ConvertInvert
 ;    + CaseConvert
-;  = Call ClipWait / Clipboard
+;  = Clipboard functions
 ;    + CallClipWait
 ;    + CallClipboard
 ;    + CallClipboardVar
 ;  = ToolTip functions
 ;    + ToolTipFn
-;    + ToolTipOff
 ;  = Wrap Text In Quotes or Symbols
 ;    + WrapTextMenuFn
 ;    + WrapTextFromMenu
@@ -113,7 +113,7 @@
 ;    + SnipFromMenu
 ;    + PrintScreenFn
 ;    + ScreenshotFileOp
-;  = Show folder size Fn
+;  = Windows File Explorer Fn
 ;    + GetFolderSize
 ;    + FolderSizeFn
 ;    + ValidPath
@@ -137,11 +137,12 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 #1 Showcase v2.09"
+AHKname := "AHK v2 No-1 Showcase v2.09"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, -10000, 1550, 985, 1) ; 10000ms = 10 seconds (negative number so that timer will run only once), position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
+;--------
 ;  = Set default state of Lock keys
 ; Turn on/off upon startup (one-time)
 
@@ -157,18 +158,33 @@ A_TrayMenu.Add                                ; Add a separator
 A_TrayMenu.AddStandard                        ; Restore standard menu
 ToggleOSCheck()                               ; Query registry and check/uncheck
 
+;--------
+;  = Dark ToolTip
+; download `ToolTipOptions.ahk` from the `Lib` folder in this repo
+; and save to disc at the same location as your script but inside a `Lib` folder 
+
+#Include "%A_ScriptDir%\Lib\ToolTipOptions.ahk"
+
+ToolTipOptions.Init()
+
+ToolTipOptions.SetMargins(2, 2, 2, 2)
+ToolTipOptions.SetColors("2b2b2b", "White")
+
+;--------
 ;  = Customise Tray Icon
 
 I_Icon := A_ScriptDir "\icons\1-512.ico"
 ; Icon source: https://www.iconsdb.com/caribbean-blue-icons/1-icon.html     ; CC License
-; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing -- see section on "Check & Reload AHK"
+; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing -- see section on "Check & Reload AHK" below
 If FileExist(I_Icon)
     TraySetIcon I_Icon
 
+;--------
 ;  = Capitalise first letter exclusion Group
 
 GroupAdd "CapitaliseFirstLetter", "ahk_class #32770"                                ; Save as dialogue
 
+;--------
 ;  = Close With Esc/Q/W Group
 
 ; GroupAdd "CloseWithQW"          , "ahk_exe Taskmgr.exe"                             ; Windows Task Manager ; requires UIAccess
@@ -176,6 +192,7 @@ GroupAdd "CloseWithQW"          , "Window Spy for AHKv2 ahk_class AutoHotkeyGUI"
 GroupAdd "CloseWithQW"          , "ahk_class CalcFrame"                             ; classic calculator
 GroupAdd "CloseWithQW"          , "Properties ahk_class #32770 ahk_exe mpc-hc.exe"  ; MediaInfo in mpc
 
+;--------
 ;  = Horizontal Scrolling Group
 
 GroupAdd "HorizontalScroll1"    , "ahk_class ApplicationFrameWindow"                ; Modern UWP apps like calc and screen snip
@@ -183,6 +200,7 @@ GroupAdd "HorizontalScroll1"    , "ahk_class MozillaWindowClass"                
 GroupAdd "HorizontalScroll1"    , "ahk_class SALFRAME"                              ; LibreOffice
 
 /*
+;--------
 ;  = Media Keys Group (disabled)
 ; uncomment to use, if media keys are remapped to navigation keys in "Remap Keys" section
 
@@ -191,6 +209,7 @@ GroupAdd "MediaKeys"            , "MPC-HC D3D Fullscreen"                       
 GroupAdd "MediaKeys"            , "ahk_class PotPlayer64"                           ; PotPlayer
 */
 
+;--------
 ;  = Symbols In File Names Group
 
 GroupAdd "FileNameSymbols"      , "ahk_class CabinetWClass"                         ; Windows file explorer
@@ -200,11 +219,13 @@ GroupAdd "FileNameSymbols"      , "Save ahk_class #32770"                       
 GroupAdd "FileNameSymbols"      , "Export ahk_class #32770"
 GroupAdd "FileNameSymbols"      , "Rename ahk_class #32770"
 
+;--------
 ;  = NoWrapText Group
 
 GroupAdd "NoWrapText"      , "ahk_exe mpc-hc.exe"                                   ; MPC-HC
 GroupAdd "NoWrapText"      , "ahk_class MSPaintApp"                                 ; MS Paint (classic)
 
+;--------
 ;  = End auto-execute
 
 SetTimer () => EndMyNotif(), -1000 ; 1s ; new thread ; Reset notification timer to 1s after code in auto-execute section has finished running
@@ -227,9 +248,9 @@ Return ; Ends auto-execute
 
 ;  = Check & Reload AHK
 
-!Numpad1:: { ; Ctrl + Numpad1 keys pressed together
+!Numpad1:: { ; Alt + Numpad1 keys pressed together
 ListLines
-If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; 3s timeout - wait for ListLines window to open
+If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; 3s timeout ; wait for ListLines window to open
     WinMaximize
 }
 
@@ -315,10 +336,11 @@ MyNotificationGui("CapsLock ON", -10000, 845)   ; 10000ms = 10s, change to match
 SetTimer () => CapsWait(), -100                 ; 100ms ; new thread
 }
 
-CapsWait() { ; runs in new thread and allows for quick toggling of CapsLock-state with +CapsLock / CapsLock / ESC keys in current thread
-KeyWait "Esc", "d t10" ; hit ESC key to skip 10s timeout ; increase timeout duration to keep CapsLock ON for longer
-SetCapsLockState "Off" ; Disables CapsLock immediately
-MyNotification.Destroy ; and remove notification
+CapsWait() {
+; runs in new thread and allows for quick toggling of CapsLock-state with +CapsLock / CapsLock / ESC keys in current thread
+KeyWait "Esc", "d t10"          ; hit ESC key to skip 10s timeout ; increase timeout duration to keep CapsLock ON for longer
+SetCapsLockState "Off"          ; Disables CapsLock immediately
+MyNotification.Destroy()        ; and remove notification
 }
 
 ;--------
@@ -326,7 +348,7 @@ MyNotification.Destroy ; and remove notification
 CapsLock:: { ; Turn off CapsLock immediately, if on
 If GetKeyState("CapsLock", "T") {
     SetCapsLockState "Off"
-    MyNotification.Destroy
+    MyNotification.Destroy()
     }
 }
 
@@ -478,7 +500,7 @@ Else {
     KeyWait "Control"   , "T1"
     }
 Sleep 100 ; wait a bit after key release to prevent key release from waking up the monitor again
-; Sleep 1000  ; alternative to above commands
+; Sleep 1000  ; simpler alternative to KeyWait commands
 SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
 }
 
@@ -501,16 +523,16 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 !q::WrapTextMenuFn ; Alt + Q
 
 ; WrapText Keys - Alt + number row
-!1::EncText("`'" , "`'" )      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
-!2::EncText('`"' , '`"' )      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
-!3::EncText("("  , ")"  )      ; enclose in round brackets ()
-!4::EncText("["  , "]"  )      ; enclose in square brackets []
-!5::EncText("{"  , "}"  )      ; enclose in flower brackets {}
-!6::EncText("``" , "``" )      ; enclose in accent/backtick ``
-!7::EncText("%"  , "%"  )      ; enclose in percent sign %%
-!8::EncText("‘"  , "’"  )      ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
-!9::EncText("“"  , "”"  )      ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
-!0::EncText(""   , ""   )      ; remove above quotes
+!1::EncText( "`'" , "`'")      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
+!2::EncText( '`"' , '`"')      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
+!3::EncText( "("  , ")" )      ; enclose in round brackets  ()
+!4::EncText( "["  , "]" )      ; enclose in square brackets []
+!5::EncText( "{"  , "}" )      ; enclose in flower brackets {}
+!6::EncText( "``" , "``")      ; enclose in accent/backtick ``
+!7::EncText( "%"  , "%" )      ; enclose in percent sign %%
+!8::EncText( "‘"  , "’" )      ; enclose in ‘’ - ‘ U+2018 Left & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+!9::EncText( "“"  , "”" )      ; enclose in “” - “ U+201C Left & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+!0::EncText( ""   , ""  )      ; remove above quotes
 
 #HotIf
 
@@ -521,7 +543,7 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 
 $!l:: { ; Alt + L
 Send "{Left}+{Right 2}"
-clipped := CallClipboardVar(2) ; 2s
+clipped := CallClipboardVar(2) ; 2s, Exit
 Send SubStr(clipped,2) SubStr(clipped,1,1) "{Left}"
 ; Test: AbC
 }
@@ -546,10 +568,10 @@ Else {
 
 ;------------------------------------------------------------------------------
 ;  = Process Priority
-; Hit `Win + Z` to select and change the priority level of a process
+; Hit `Win + P` to select and change the priority level of a process
 ; The current priority level of a process can be seen in the Windows Task Manager.
 
-#z:: {
+#p:: { 
 active_pid := WinGetPID("A")
 Process_Name := WinGetProcessName("ahk_pid " active_pid)
 PPGui := Gui("AlwaysOnTop +Resize -MaximizeBox +MinSize240x230", "! Set Priority")
@@ -560,8 +582,8 @@ LB := PPGui.AddListBox("r5 Choose1", ["Normal","High","Low","BelowNormal","Above
 ; Realtime omitted because any process not designed to run at Realtime priority might reduce system stability if set to that level ; add Realtime to ListBox if necessary
 LB.OnEvent("DoubleClick", SetPriority)
 PPGui.AddButton("default", "OK").OnEvent("Click", SetPriority)
-PPGui.OnEvent("Escape", (*) => PPGui.Destroy)
-PPGui.OnEvent("Close", (*) => PPGui.Destroy)
+PPGui.OnEvent("Escape", (*) => PPGui.Destroy())
+PPGui.OnEvent("Close", (*) => PPGui.Destroy())
 PPGui.Show
 
 SetPriority(*) {
@@ -571,7 +593,7 @@ SetPriority(*) {
         MyNotificationGui("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, -5000) ; 5s
     Else ; if successful
         MyNotificationGui("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, -5000) ; 5s
-    Finally PPGui.Destroy
+    Finally PPGui.Destroy()
     }
 }
 
@@ -611,7 +633,6 @@ If WinActive(" — Mozilla Firefox") ; If not new tab, then open new one
 Else Send "^l"  ; If new tab, focus address bar
 Sleep 500       ; wait for focus - change as per your system performance
 Send "{Raw}chrome://browser/content/places/places.xhtml`n" ; `n = {Enter}
-; PasteAndSend("chrome://browser/content/places/places.xhtml", "{Enter}") ; alternative - use custom function `PasteAndSend` from my other script AHK v2 #2 MultiClip
 }
 
 ; Disable Ctrl + Shift + Q = Exit (default Firefox shortcut)
@@ -745,7 +766,7 @@ Loop 3
 ; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=61084#p61084
 
 ^+c:: { ; Ctrl + Shift + C
-CallClipboard(2) ; Timeout 2s
+CallClipboard(2) ; 2s, Exit
 A_Clipboard := A_Clipboard ; change to plain text
 }
 ; Output Example: C:\Program Files\Mozilla Firefox\firefox.exe
@@ -754,7 +775,7 @@ A_Clipboard := A_Clipboard ; change to plain text
 ;      * Copy file names without path
 
 !n:: { ; Alt + N
-A_Clipboard := RegExReplace(CallClipboardVar(2), "\w:\\|.+\\") ; 2s ; remove path
+A_Clipboard := RegExReplace(CallClipboardVar(2), "\w:\\|.+\\") ; 2s, Exit ; remove path
 }
 
 ; Output Example: firefox.exe
@@ -763,9 +784,9 @@ A_Clipboard := RegExReplace(CallClipboardVar(2), "\w:\\|.+\\") ; 2s ; remove pat
 ;      * Copy file names without extension and path
 
 ^!n:: { ; Ctrl + Alt + N
-files := RegExReplace(CallClipboardVar(2), "\w:\\|.+\\") ; 2s ; remove path
-files := RegExReplace(files, "\.[\w]+(`r`n|`n)","`n")    ; remove ext, CR
-A_Clipboard := RegExReplace(files, "\.[\w]+$")           ; remove last ext
+files := RegExReplace(CallClipboardVar(2), "\w:\\|.+\\")    ; 2s, Exit ; remove path
+files := RegExReplace(files, "\.[\w]+(`r`n|`n)","`n")       ; remove ext, CR
+A_Clipboard := RegExReplace(files, "\.[\w]+$")              ; remove last ext
 }
 
 ; Output Example: firefox
@@ -821,7 +842,7 @@ If cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Ex
 
 #HotIf WinActive("ahk_group CloseWithQW")
 
-Esc::WinClose("A")  ; sends a WM_CLOSE message to the target window
+Esc::WinClose "A"  ; sends a WM_CLOSE message to the target window
 
 ^q::!F4             ; sends Alt + F4
 
@@ -838,8 +859,8 @@ Esc::WinClose("A")  ; sends a WM_CLOSE message to the target window
 ; Method #1 - send window message(WM) directly to move scroll bar(SB) horizontally
 ; default method
 
-+WheelUp::SendMessage 0x0114, 0, 0, ControlGetFocus("A")        ; scroll left - 0x114 is WM_HSCROLL, 0 is SB_LINELEFT
-+WheelDown::SendMessage 0x0114, 1, 0, ControlGetFocus("A")      ; scroll right - 1 is SB_LINERIGHT ; same as Loop 1
++WheelUp::SendMessage 0x0114, 0, 0, ControlGetFocus("A")        ; scroll Left - 0x114 is WM_HSCROLL, 0 is SB_LINELEFT
++WheelDown::SendMessage 0x0114, 1, 0, ControlGetFocus("A")      ; scroll Right - 1 is SB_LINERIGHT ; same as Loop 1
 
 /* ; disabled - uncomment if needed
 ; add additional 'Loop' command to any method to increase the speed of scrolling. For example, in method 1
@@ -1073,7 +1094,7 @@ Explanation: blank lines are deleted and spaces are trimmed, but non-blank lines
 
 ;    + MyNotificationGui
 
-MyNotificationGui(mytext, myduration := -500, xAxis := 1550, yAxis := 985, timer := 1) {
+MyNotificationGui(mytext, myduration := -500, xAxis := 1550, yAxis := 985, timer := 1) { ; 500ms
 Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
 MyNotification.BackColor := "2C2C2E"                ; "2C2C2E" for dark mode ; "EEEEEE" for White background ; can be any RGB colour (it will be made transparent below)
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
@@ -1092,10 +1113,10 @@ If timer = 0 {
 ;    + EndMyNotif
 
 EndMyNotif() {
-MyNotification.Destroy
+MyNotification.Destroy()
 }
 
-;--------
+;------------------------------------------------------------------------------
 ;  = Toggle protected operating system (OS) files
 ; inspiration from https://www.autohotkey.com/board/topic/82603-toggle-hidden-files-system-files-and-file-extensions/?p=670182
 
@@ -1217,7 +1238,7 @@ If WinExist("ahk_class CabinetWClass") {           ; if explorer is open
             Send "{Enter}{F6 2}"
             }
             
-        ; if paths are equal, no further change is not necessary, refocus on file list
+        ; if paths are equal, no further change is necessary, refocus on file list
         Else Send "{F6 2}"
         }
     }
@@ -1317,7 +1338,7 @@ ChangeCaseMenu.Show
 ;    + ConvertLower
 
 ConvertLower(*) {
-CallClipboard(2) ; 2s
+CallClipboard(2) ; 2s, Exit
 CaseConvert(StrLower(A_Clipboard))
 }
 
@@ -1325,21 +1346,20 @@ CaseConvert(StrLower(A_Clipboard))
 ;    + ConvertSentence
 
 ConvertSentence(*) {
-CallClipboard(2) ; 2s
-transformed := RegExReplace(StrLower(A_Clipboard), "(((^\s*|([.!?]+\s*))[a-z])|\Wi\W)", "$U1") ; Code Credit #1
-CaseConvert(transformed)
+CallClipboard(2) ; 2s, Exit
+CaseConvert(RegExReplace(StrLower(A_Clipboard), "(((^\s*|([.!?]+\s*))[a-z])|\Wi\W)", "$U1")) ; Code Credit #1
 }
 
 ; RegEx explanation -
 ; \s = [\r\n\t\f\v ]
-; $U1 = backreference uppercase 1
+; $U1 = back reference uppercase 1
 ; \W = [^a-zA-Z0-9_] = any character that is NOT alphabet, number, underscore
 
 ;--------
 ;    + ConvertTitle
 
 ConvertTitle(*) {
-CallClipboard(2) ; 2s
+CallClipboard(2) ; 2s, Exit
 CaseConvert(StrTitle(A_Clipboard))
 }
 
@@ -1347,7 +1367,7 @@ CaseConvert(StrTitle(A_Clipboard))
 ;    + ConvertUpper
 
 ConvertUpper(*) {
-CallClipboard(2) ; 2s
+CallClipboard(2) ; 2s, Exit
 CaseConvert(StrUpper(A_Clipboard))
 }
 
@@ -1355,7 +1375,7 @@ CaseConvert(StrUpper(A_Clipboard))
 ;    + ConvertInvert
 
 ConvertInvert(*) {
-CallClipboard(2) ; 2s
+CallClipboard(2) ; 2s, Exit
 inverted := ""
 Loop Parse A_Clipboard {     ; Code Credit #2
     If StrLower(A_LoopField) == A_LoopField    ; * Code Credit #3
@@ -1386,7 +1406,7 @@ If Len <= 20 ; and select text only if text ≤ 20 characters (change limit as n
 ; Code Credit #3 - 3 lines of code with a comment "; *" were adapted from a (inaccurate) answer generated from a query to KudoAI's DuckDuckGPT user script - https://greasyfork.org/en/scripts/459849-duckduckgpt
 
 ;------------------------------------------------------------------------------
-;  = Call ClipWait ± Clipboard
+;  = Clipboard functions
 
 ;    + CallClipWait
 
@@ -1436,30 +1456,16 @@ Else {
 
 ToolTipFn(mytext, myduration := -500, xAxis?, yAxis?) { ; 500ms
 
-; turn off ToolTip
-ToolTip()
-Try ToolTip(,,, ToolTipNo)
+Try ToolTip(,,, WhichToolTip) ; turn Off previous ToolTip
 
 ; set/increment WhichToolTip parameter
-If not IsSet(ToolTipNo)
-    Global ToolTipNo := 1
-Else If ToolTipNo = 20
-    ToolTipNo := 1
-Else ToolTipNo++
+static WhichToolTip := 1
+If WhichToolTip = 20
+    WhichToolTip := 1
+Else WhichToolTip++
 
-Try ToolTip mytext, xAxis, yAxis, ToolTipNo
-Catch
-    ToolTip mytext,,, ToolTipNo
-SetTimer () => ToolTipOff(ToolTipNo), myduration ; 500ms ; new thread
-}
-
-;--------
-;    + ToolTipOff
-
-ToolTipOff(ToolTipNo) {
-ToolTip(,,, ToolTipNo)
-Sleep 5000 ; 5s ; max ToolTip duration in script, to prevent persistent tooltip that forces script reload
-ToolTip()
+ToolTip mytext, xAxis?, yAxis?, WhichToolTip
+SetTimer () => ToolTip(,,, WhichToolTip), myduration ; 500ms ; new thread
 }
 
 ;------------------------------------------------------------------------------
@@ -1515,14 +1521,14 @@ Else If position = 10
 ;    + EncText
 
 EncText(q,p) {
-CallClipboard(2) ; 2s
+CallClipboard(2) ; 2s, Exit
 TextString := StrReplace(A_Clipboard, "`r")             ; remove \r for StrLen
 TextStringInitial := TextString                         ; save initial string for later
 TextString := RegExReplace(TextString,'^\s+|\s+$')      ; RegEx remove leading/trailing ; \s = [\r\n\t\f\v ]
-TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``')     ;"; remove leading  ['({%"“‘`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
-TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
+TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``',, &ReplacementCount)     ;"; remove leading  ['({%"“‘`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
+If ReplacementCount > 0 ; don't remove trailing character if leading character is not removed
+    TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
 TextString := q TextString p
-TextString := StrReplace(TextString, "`n" p, p)
 Len := StrLen(TextString)
 
 ; If you regularly include leading/trailing spaces within quotes, comment out above RegEx and below If statements
@@ -1539,33 +1545,8 @@ If RegExMatch(TextStringInitial, "\s+$", &Trail) {   ; If the initial string has
 A_Clipboard := TextString ; pasting from clipboard is faster than send raw, especially for long strings
 Send "^v"                 ; paste
 If Len <= 20              ; and select text string if ≤ 20 characters (change limit as needed)
-    Send "+{left " Len "}"
+    Send "+{Left " Len "}"
 ; A_Clipboard := TextStringInitial  ; restore original text string to clipboard if desired
-}
-
-;------------------------------------------------------------------------------
-;  = Kill All Instances Of An App
-
-;    + GetKillTitles
-
-GetKillTitles(HWNDs) {
-temp := ""
-Loop HWNDs.Length {
-    t := RegExReplace(WinGetTitle(HWNDs[A_Index]), "\s+", A_Space)   ; remove \s = [\r\n\t\f\v ]
-    If t = "" and A_Index < 10
-        tempTitle := "  " A_Index " = #No Title`n    "   ; pad space before 1-9
-    Else If t = ""
-        tempTitle := A_Index " = #No Title`n    "
-    Else If A_Index < 10
-        tempTitle := "  " A_Index " = " t "`n    "
-    Else tempTitle := A_Index " = " t "`n    "
-
-    ; rudimentary word wrap ; for more sophisticated solution (AHK v1) - https://www.autohotkey.com/boards/viewtopic.php?t=59461
-    If StrLen(tempTitle) > 61
-        temp .= SubStr(tempTitle, 1, 50) "-`n            -" SubStr(tempTitle, 51, 50)
-    Else temp .= tempTitle
-    }
-Return temp
 }
 
 ;------------------------------------------------------------------------------
@@ -1632,6 +1613,31 @@ Else {
 }
 
 ;------------------------------------------------------------------------------
+;  = Kill All Instances Of An App
+
+;    + GetKillTitles
+
+GetKillTitles(HWNDs) {
+temp := ""
+Loop HWNDs.Length {
+    t := RegExReplace(WinGetTitle(HWNDs[A_Index]), "\s+", A_Space)   ; remove \s = [\r\n\t\f\v ]
+    If t = "" and A_Index < 10
+        tempTitle := "  " A_Index " = #No Title`n    "   ; pad space before 1-9
+    Else If t = ""
+        tempTitle := A_Index " = #No Title`n    "
+    Else If A_Index < 10
+        tempTitle := "  " A_Index " = " t "`n    "
+    Else tempTitle := A_Index " = " t "`n    "
+
+    ; rudimentary word wrap ; for more sophisticated solution (AHK v1) - https://www.autohotkey.com/boards/viewtopic.php?t=59461
+    If StrLen(tempTitle) > 61
+        temp .= SubStr(tempTitle, 1, 50) "-`n            -" SubStr(tempTitle, 51, 50)
+    Else temp .= tempTitle
+    }
+Return temp
+}
+
+;------------------------------------------------------------------------------
 ;  = Print Screen
 
 ;    + SnipMenuFn
@@ -1675,7 +1681,7 @@ If WinWaitClose("Snipping Tool Overlay ahk_exe SnippingTool.exe",, 15) and (A_Pr
 
     ; If `Automatically save screenshots` is ENABLED in snippingtool
     MyPath := "C:\Users\" A_UserName "\Pictures\Screenshots\Screenshot " FormatTime(, "yyyy-MM-dd HHmmss") ".png"
-    SetTimer () => ScreenshotFileOp(MyPath), -100 ; new thread
+    SetTimer () => ScreenshotFileOp(MyPath), -100 ; 100ms ; new thread
     
 /*  ; If `Automatically save screenshots` is disabled in snippingtool, use below code to open paint and edit/save from clipboard
 
@@ -1773,7 +1779,7 @@ While !FileExist(MyPath) { ; if file does not exist, wait using Sleep and repeat
     Sleep 500        ; wait for 500ms
     If A_Index > 6 { ; max 6 attempts, total wait 3000ms = 3s
         ; If failed ×6, open screenshot folder in explorer
-        Run 'explore "C:\Users\' A_UserName '\Pictures\Screenshots\"',,"Max"
+        OpenFolder("C:\Users\" A_UserName "\Pictures\Screenshots\")
         MsgBox MyPath,, "262144"    ; show calculated path in pop-up to compare with actual file path
         Exit                        ; give up on rename
         }
@@ -1785,16 +1791,15 @@ fileTime := FormatTime(FileGetTime(MyPath, "C"), "yyyy-MM-dd @ HH：mm：ss") ; 
 ; FormatTime - transform Timestamp YYYYMMDDHH24MISS into desired date/time format.
 NewPath := "C:\Users\" A_UserName "\Pictures\Screenshots\" fileTime ".png"
 
-; rename
-FileMove MyPath, NewPath
+FileMove MyPath, NewPath                ; rename
 
 ; Further actions - (uncomment below lines to execute)
 ; Run 'mspaint.exe "' NewPath '"',,"Max"                                ; open in paint
-; Run 'explore "C:\Users\' A_UserName '\Pictures\Screenshots\"',,"Max"  ; open screenshot folder in explorer
+; OpenFolder("C:\Users\" A_UserName "\Pictures\Screenshots\")           ; open screenshot folder in explorer
 }
 
 ;------------------------------------------------------------------------------
-;  = Show folder size Fn
+;  = Windows File Explorer Fn
 
 ;    + GetFolderSize
 
@@ -1840,7 +1845,7 @@ Else FolderSizeB += FileGetSize(pathContent, "B")    ; single line - file ; File
 
 ; check size and display tooltip
 If FolderSizeB = 0 and errorDetails != ""   ; size zero and error present
-    ToolTipFn(errorDetails, -5000) ; 5s     ; show error
+    ToolTipFn(errorDetails, -5000)          ; 5s ; show error
 Else If FolderSizeB = 0                     ; size zero and no errors
     ToolTipFn(pathContent "`nEmpty Folder/File", -3000) ; 3s
 Else ToolTipFn(pathContent . FolderSizeFn(FolderSizeB) "`n`n" errorDetails, -3000) ; 3s
@@ -1927,7 +1932,7 @@ If position = 8
 If position = 9
     Run 'explorer.exe "ms-settings:windowsupdate"'                  ; Windows Update
 If position = 10
-    ComObject("shell.application").ControlPanelItem("winver")       ; Windows version
+    ComObject("shell.application").ControlPanelItem("taskschd.msc") ; Task Scheduler
 }
 
 ;    + List of commands
@@ -1953,11 +1958,14 @@ ComObject("shell.application").ControlPanelItem("resmon.exe")      ; Resource Mo
 Run 'explorer.exe "ms-settings:windowsupdate"'                     ; Windows Update
 ComObject("shell.application").ControlPanelItem("taskschd.msc")    ; Task scheduler
 
-; Others
-ComObject("shell.application").ControlPanelItem("winver")          ; Windows version
+; CLSID List (Windows Class Identifiers)
 ::{21EC2020-3AEA-1069-A2DD-08002B30309D}                           ; Control Panel (view: small icons) ; alt
 ::{26EE0668-A00A-44D7-9371-BEB064C98683}                           ; Control Panel (view: category) ; alternate
 ::{20D04FE0-3AEA-1069-A2D8-08002B30309D}                           ; This PC
+... Find more in AutoHotkey.chm::/docs/misc/CLSID-List.htm
+
+; Others
+ComObject("shell.application").ControlPanelItem("winver")          ; Windows version
 Run 'SnippingTool.exe'                                             ; Snipping Tool ; alternate ; Opens modern app
 Run 'rundll32 sysdm.cpl`,EditEnvironmentVariables'                 ; Environmental Variables
 ComObject("shell.application").ControlPanelItem("powercfg.cpl")    ; Power Configuration ; opens Power Options
@@ -2139,14 +2147,14 @@ v2.08 - 2024.03.15
  * change changelog order for easier access
 
 v2.09 - 2024.09.16
- ★ add `RefreshExplorer` function to improve `ToggleOSCheck` -- closes Issue #1 (Yipee! My first issue closure!!)
+ ★ add `RefreshExplorer` function to improve `ToggleOSCheck` -- closes Issue #1 (Yipee! My first issue AND closure!)
  + add `Ctrl + G` UnGroup shortcut to `Windows File Explorer` section
  * change `myduration` argument in `MyNotificationGui` function to use negative numbers because negative Sleep is smaller error than forever cycling SetTimer AND to match ToolTipFn; consequently switch negative multiplier from SetTimer to Sleep 
  + add `Renaming ahk_exe qbittorrent.exe` to `FileNameSymbols` group
  + add `NoWrapText` group to replace the lone `WinActive` exclusion for `WrapTextMenuFn` function
  * update SetTimer for more versatility in `End auto-execute` section and `MyNotificationGui` function
  * improve `OpenFolder` by moving/changing some commands to new `FocusExplorerAddressBar` function
- * improve `OpenFolder` by adding a new check to see if existing path is not equal to new path; If equal, no further change is not necessary, refocus on file list
+ * improve `OpenFolder` by adding a new check to see if existing path is not equal to new path; If equal, no further change is necessary, refocus on file list
  * change default notification from `MyNotificationGui` to `ToolTipFn` wherever appropriate -- personal preference shouldn't affect a public script
  * improve `CallClipboard` and `CallClipboardVar` to return error messages when required; and add `ToolTipFn` notification while waiting for clipboard
  * improve `ToolTipFn` to allow for position and add numbering
@@ -2160,5 +2168,18 @@ v2.09 - 2024.09.16
  * update `Display Off` section to work with updated shortcuts
  * improve `CheckRegWrite` to use `==` case sensitive operator since registry values can be non-numeric
  * rearrange/rename some functions and update headings
+ * improve comments and small changes
+
+v2.10 - 2024.10.11
+ * rename file by replacing `#` with `No-` to avoid GitHub conflict with issue numbering
+ ★ add `Dark ToolTip` section to adapt `ToolTipFn` function for windows dark mode
+ * improve `ToolTipFn` function by removing unnecessary commands, change variable `ToolTipNo` to `WhichToolTip` (to match AHK docs) and change it from `Global` to `static` variable
+ - remove `ToolTipOff` function
+ * `Process Priority` shortcut changed from 'Win + Z' to `Win + P` (formerly Project shortcut) because Win + Z is newly designated shortcut for Snap Layouts
+ - remove unnecessary variable `transformed` from `ConvertSentence` function
+ * fix `EncText` function from removing trailing character unintentionally if leading character is not removed and remove unnecessary `StrReplace` command (due to previous `RegExReplace`)
+ * use existing `OpenFolder` function to Run explorer command in `Print Screen` section
+ * change `winver` to `taskschd.msc` in `Control Panel Tools`
+ * rearrange/rename some function headings and update TOC
  * improve comments and small changes
 */
