@@ -1,10 +1,10 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/No-2%20MultiClip.ahk
-; Last updated 2024.10.11
+; Last updated 2024.10.15
 
 ; /* AHK v2 No-2 MultiClip - CONTENTS */
 ; Settings
 ; Auto-execute
-;  = Dark ToolTip
+;  = AHK Dark Mode
 ;  = Initialise ClipArr
 ;  = Initialise ClipArr hotstrings
 ;  = Customise Tray Icon
@@ -47,7 +47,7 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 No-2 MultiClip v4.08"
+AHKname := "AHK v2 No-2 MultiClip v4.09"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, -10000, 1550, 945, 1) ; 10000ms = 10 seconds (negative number so that timer will run only once), position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -97,16 +97,13 @@ PasteVStrings(20)   ; User-defined function creates serial hotstrings
 PasteCStrings(20)
 
 ;--------
-;  = Dark ToolTip
-; download `ToolTipOptions.ahk` from the `Lib` folder in this repo
-; and save to disc at the same location as your script but inside a `Lib` folder 
+;  = AHK Dark Mode
+; download .ahk files from the `Lib` folder in this repo
+; and save to disc at the same location as your script, inside a `Lib` folder 
 
-#Include "%A_ScriptDir%\Lib\ToolTipOptions.ahk"
-
-ToolTipOptions.Init()
-
-ToolTipOptions.SetMargins(2, 2, 2, 2)
-ToolTipOptions.SetColors("2b2b2b", "White")
+#Include "%A_ScriptDir%\Lib\Dark Mode - ToolTip.ahk"    ; 2024.10.15
+#Include "%A_ScriptDir%\Lib\Dark Mode - MsgBox.ahk"     ; 2024.10.15
+; Dark Mode - Window Spy                                  ; 2024.10.15
 
 ;--------
 ;  = Customise Tray Icon
@@ -565,4 +562,10 @@ v4.08 - 2024.10.11
  - remove `PasteAndSend` and `SendAndPaste` functions - redundant and ListLines confusion
  * rearrange/rename some function headings and update TOC
  * improve comments and small changes
+
+v4.09 - 2024.10.15
+ * rename `Dark ToolTip` section to `AHK Dark Mode` - to include all lib scripts pertaining to dark mode AHK v2
+ * change dark mode ToolTip lib file from `ToolTipOptions.ahk` to `SystemThemeAwareToolTip.ahk`
+ ★ add `Dark_MsgBox.ahk` and `Dark_WindowSpy` to lib and rename/modify for easier include and tracking
+ * improve comments
 */
