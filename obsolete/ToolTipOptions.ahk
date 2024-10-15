@@ -1,6 +1,8 @@
 /* Source: https://www.autohotkey.com/boards/viewtopic.php?f=83&t=113308
 Last Checked: 2024.10.11
 Last Changed: 2024-03-27
+
+Move to obsolete because switch to https://raw.githubusercontent.com/nperovic/SystemThemeAwareToolTip/main/SystemThemeAwareToolTip.ahk
 */
 ; ======================================================================================================================
 ; ToolTipOptions        -  additional options for ToolTips
