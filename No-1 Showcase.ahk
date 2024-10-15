@@ -1,5 +1,5 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/No-1%20Showcase.ahk
-; Last updated 2024.10.11
+; Last updated 2024.10.15
 
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
 ; Search for below commands/functions by using control + F on the help webpage - https://www.autohotkey.com/docs/v2/lib/
@@ -13,7 +13,7 @@
 ; Auto-execute
 ;  = Set default state of Lock keys
 ;  = Show/Hide OS files
-;  = Dark ToolTip
+;  = AHK Dark Mode
 ;  = Customise Tray Icon
 ;  = Capitalise first letter exclusion Group
 ;  = Close With Esc/Q/W Group
@@ -137,7 +137,7 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 No-1 Showcase v2.09"
+AHKname := "AHK v2 No-1 Showcase v2.11"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, -10000, 1550, 985, 1) ; 10000ms = 10 seconds (negative number so that timer will run only once), position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -159,16 +159,13 @@ A_TrayMenu.AddStandard                        ; Restore standard menu
 ToggleOSCheck()                               ; Query registry and check/uncheck
 
 ;--------
-;  = Dark ToolTip
-; download `ToolTipOptions.ahk` from the `Lib` folder in this repo
-; and save to disc at the same location as your script but inside a `Lib` folder 
+;  = AHK Dark Mode
+; download .ahk files from the `Lib` folder in this repo
+; and save to disc at the same location as your script, inside a `Lib` folder 
 
-#Include "%A_ScriptDir%\Lib\ToolTipOptions.ahk"
-
-ToolTipOptions.Init()
-
-ToolTipOptions.SetMargins(2, 2, 2, 2)
-ToolTipOptions.SetColors("2b2b2b", "White")
+#Include "%A_ScriptDir%\Lib\Dark Mode - ToolTip.ahk"    ; 2024.10.15
+#Include "%A_ScriptDir%\Lib\Dark Mode - MsgBox.ahk"     ; 2024.10.15
+; Dark Mode - Window Spy                                  ; 2024.10.15
 
 ;--------
 ;  = Customise Tray Icon
@@ -2182,4 +2179,11 @@ v2.10 - 2024.10.11
  * change `winver` to `taskschd.msc` in `Control Panel Tools`
  * rearrange/rename some function headings and update TOC
  * improve comments and small changes
+
+v2.11 - 2024.10.15
+ * rename `Dark ToolTip` section to `AHK Dark Mode` - to include all lib scripts pertaining to dark mode AHK v2
+ * change dark mode ToolTip lib file from `ToolTipOptions.ahk` to `SystemThemeAwareToolTip.ahk`
+ ★ add `Dark_MsgBox.ahk` and `Dark_WindowSpy` to lib and rename/modify for easier include and tracking
+ * fix `AHKname` version increment
+ * improve comments
 */
