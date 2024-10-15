@@ -9,7 +9,7 @@ You can copy, use and distribute these icons, even for commercial purposes, all 
 
 Lib files
  * Dark Mode - MsgBox.ahk - Source: https://github.com/nperovic/DarkMsgBox/
- * Dark Mode - ToolTip.ahk - Source: https://github.com/nperovic/SystemThemeAwareToolTip?tab=MIT-1-ov-file
+ * Dark Mode - ToolTip.ahk - Source: https://github.com/nperovic/SystemThemeAwareToolTip
  * Dark Mode - Window Spy.ahk - Source: https://github.com/nperovic/Dark_WindowSpy
 
  All dark mode AHK files were authored by Nikola Perovic under MIT License with Copyright (c) 2024 nPerovic.
