@@ -1,5 +1,5 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/No-2%20MultiClip.ahk
-; Last updated 2024.10.15
+; Last updated 2024.10.31
 
 ; /* AHK v2 No-2 MultiClip - CONTENTS */
 ; Settings
@@ -47,10 +47,19 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 No-2 MultiClip v4.09"
+AHKname := "AHK v2 No-2 MultiClip v4.10"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, -10000, 1550, 945, 1) ; 10000ms = 10 seconds (negative number so that timer will run only once), position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+
+;--------
+;  = AHK Dark Mode
+; download .ahk files from the `Lib` folder in this repo
+; and save to disc at the same location as your script, inside a `Lib` folder 
+
+#Include "Lib\Dark Mode - ToolTip.ahk"            ; 2024.10.15
+#Include "Lib\Dark Mode - MsgBox.ahk"             ; 2024.10.15
+; Dark Mode - Window Spy                          ; 2024.10.15
 
 ;--------
 ;  = Initialise ClipArr
@@ -66,7 +75,7 @@ Global ClipArrFile := A_MyDocuments "\ClipArrFile.txt"
 ; txt file used instead of ini because 'values longer than 65,535 characters are likely to yield inconsistent results' when using IniRead, IniWrite commands
 
 Global delim := "~•~"
-; use a unique string of because if an array-slot contains this delimiter by accident, saving and loading array from file will cause errors
+; use a unique string because if an array-slot contains this delimiter by accident, saving and loading array from file will cause errors
 ; Recommendation: 3 or more characters, preferably symbols with one or more Unicode characters that are difficult to type on standard keyboard
 ; ~ U+007E TILDE
 ; • U+2022 BULLET : black small circle
@@ -95,15 +104,6 @@ OnExit SaveClipArr
 
 PasteVStrings(20)   ; User-defined function creates serial hotstrings
 PasteCStrings(20)
-
-;--------
-;  = AHK Dark Mode
-; download .ahk files from the `Lib` folder in this repo
-; and save to disc at the same location as your script, inside a `Lib` folder 
-
-#Include "%A_ScriptDir%\Lib\Dark Mode - ToolTip.ahk"    ; 2024.10.15
-#Include "%A_ScriptDir%\Lib\Dark Mode - MsgBox.ahk"     ; 2024.10.15
-; Dark Mode - Window Spy                                  ; 2024.10.15
 
 ;--------
 ;  = Customise Tray Icon
@@ -207,15 +207,15 @@ If DataType = 0 { ; 0 Clipboard is now empty
     Exit
     }
 
-If DataType = 2 { ; 2 Clipboard contains something entirely non-text such as a picture
+Else If DataType = 2 { ; 2 Clipboard contains something entirely non-text such as a picture
     ToolTipFn("DataType: 2 - Non-text copied", -1000) ; 1s
     Exit
     }
 
-; Else DataType = 1 ; Clipboard contains text (including files copied from Windows File Explorer)
-
-; check and add to clipArr
-InsertInClipArr(A_Clipboard)
+; Else DataType = 1
+; Clipboard contains text (including files copied from Windows File Explorer)
+; check and add to clipArr (in case of files, file path is copied to clipArr)
+Else InsertInClipArr(A_Clipboard)
 }
 
 ;--------
@@ -253,7 +253,7 @@ Else ClipArrToolTipFn()
 ; clipboard change alert tooltip
 
 ClipArrToolTipFn() {
-If StrLen(ClipArr.Get(1)) > 1000 ; trim If more than 1000 characters
+If StrLen(ClipArr.Get(1)) > 1000                                ; trim If more than 1000 characters
     ToolTipFn(SubStr(ClipArr.Get(1), 1, 1000) "`n... and more") ; 500ms
 Else ToolTipFn(ClipArr.Get(1)) ; 500ms
 }
@@ -304,7 +304,7 @@ Try PasteThis(ClipArr.Get(SubPat[]))
 PasteCStrings(number) {
 Loop number {
     If A_Index = 1  ; do not create c1+ hotstring, already assigned to "{Raw}" ClipArr.Get(1)
-        Continue
+        Continue    ; = same as saying "skip"
     Hotstring(":?*x:c" A_Index "+", PasteC)
     }
 }
@@ -406,8 +406,8 @@ If StrLen(pasteText) <= 15  ; 15; If short text, Send keystrokes instead of past
     SendText pasteText      ; text mode to prevent unintended key press when text contains '^+!#{}'
 Else {
     If A_Clipboard !== pasteText {
-        OnClipboardChange ClipChanged, 0    ; disable callback
         tmp_clip := ClipboardAll()          ; preserve Clipboard
+        OnClipboardChange ClipChanged, 0    ; disable callback
         A_Clipboard := pasteText            ; copy pasteText to clipboard
         tmp_clip2 := A_Clipboard
         While tmp_clip2 !== pasteText {     ; validate clipboard
@@ -467,14 +467,16 @@ tmp_clip2       0           > 1     > 0
 ;    + ToolTipFn
 
 ToolTipFn(mytext, myduration := -500, xAxis?, yAxis?) { ; 500ms
+If not IsSet(WhichToolTip)
+    static WhichToolTip := 1
+Else {
+    ToolTip(,,, WhichToolTip) ; turn Off previous ToolTip
+    WhichToolTip++
+}
 
-Try ToolTip(,,, WhichToolTip) ; turn Off previous ToolTip
-
-; set/increment WhichToolTip parameter
-static WhichToolTip := 1
-If WhichToolTip = 20
+; reset WhichToolTip parameter If it exceeds 20
+If WhichToolTip > 20
     WhichToolTip := 1
-Else WhichToolTip++
 
 ToolTip mytext, xAxis?, yAxis?, WhichToolTip
 SetTimer () => ToolTip(,,, WhichToolTip), myduration ; 500ms ; new thread
@@ -568,4 +570,11 @@ v4.09 - 2024.10.15
  * change dark mode ToolTip lib file from `ToolTipOptions.ahk` to `SystemThemeAwareToolTip.ahk`
  ★ add `Dark_MsgBox.ahk` and `Dark_WindowSpy` to lib and rename/modify for easier include and tracking
  * improve comments
+
+v4.10 - 2024.10.31
+ * correct positioning of `AHK Dark Mode` section as per TOC
+ * remove `%A_ScriptDir%` from #include commands. It is already built in
+ * add missing `Else` commands to `ClipChanged` function
+ * fix `ToolTipFn` - failed to assign 1 and 20 to `WhichToolTip` variable, and hence failure to turn Off some ToolTips
+ * improve comments and small changes
 */
