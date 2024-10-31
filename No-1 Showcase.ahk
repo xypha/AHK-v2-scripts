@@ -1,5 +1,5 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/No-1%20Showcase.ahk
-; Last updated 2024.10.15
+; Last updated 2024.10.31
 
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
 ; Search for below commands/functions by using control + F on the help webpage - https://www.autohotkey.com/docs/v2/lib/
@@ -20,7 +20,8 @@
 ;  = Horizontal Scrolling Group
 ;  = Media Keys Group (disabled)
 ;  = Symbols In File Names Group
-;  = NoWrapText Group
+;  = WrapText variables
+;  = WrapText Disabled Group
 ;  = End auto-execute
 ; Hotkeys
 ;  = Check & Reload AHK
@@ -101,8 +102,8 @@
 ;    + ToolTipFn
 ;  = Wrap Text In Quotes or Symbols
 ;    + WrapTextMenuFn
-;    + WrapTextFromMenu
-;    + EncText
+;    + WrapTextMenuSelectionFn
+;    + WrapTextFn
 ;  = URL Encode/Decode
 ;    + UrlDecode
 ;    + UrlEncode
@@ -137,7 +138,7 @@ KeyHistory 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 No-1 Showcase v2.11"
+AHKname := "AHK v2 No-1 Showcase v2.12"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, -10000, 1550, 985, 1) ; 10000ms = 10 seconds (negative number so that timer will run only once), position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -161,11 +162,11 @@ ToggleOSCheck()                               ; Query registry and check/uncheck
 ;--------
 ;  = AHK Dark Mode
 ; download .ahk files from the `Lib` folder in this repo
-; and save to disc at the same location as your script, inside a `Lib` folder 
+; and save to disc at the same location as your script, inside a `Lib` folder
 
-#Include "%A_ScriptDir%\Lib\Dark Mode - ToolTip.ahk"    ; 2024.10.15
-#Include "%A_ScriptDir%\Lib\Dark Mode - MsgBox.ahk"     ; 2024.10.15
-; Dark Mode - Window Spy                                  ; 2024.10.15
+#Include "Lib\Dark Mode - ToolTip.ahk"            ; 2024.10.15
+#Include "Lib\Dark Mode - MsgBox.ahk"             ; 2024.10.15
+; Dark Mode - Window Spy                          ; 2024.10.15
 
 ;--------
 ;  = Customise Tray Icon
@@ -217,7 +218,20 @@ GroupAdd "FileNameSymbols"      , "Export ahk_class #32770"
 GroupAdd "FileNameSymbols"      , "Rename ahk_class #32770"
 
 ;--------
-;  = NoWrapText Group
+;  = WrapText variables
+
+Global WrapText_Leading1 := "'" , WrapText_Trailing1 := "'"      ; single quotation '' - ' U+0027 : APOSTROPHE
+Global WrapText_Leading2 := '"' , WrapText_Trailing2 := '"'      ; double quotation "" - " U+0022 : QUOTATION MARK
+Global WrapText_Leading3 := "(" , WrapText_Trailing3 := ")"      ; round brackets  ()
+Global WrapText_Leading4 := "[" , WrapText_Trailing4 := "]"      ; square brackets []
+Global WrapText_Leading5 := "{" , WrapText_Trailing5 := "}"      ; flower brackets {}
+Global WrapText_Leading6 := "``" , WrapText_Trailing6 := "``"    ; accent/backtick ``
+Global WrapText_Leading7 := "%" , WrapText_Trailing7 := "%"      ; percent sign %%
+Global WrapText_Leading8 := "‘" , WrapText_Trailing8 := "’"      ; ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+Global WrapText_Leading9 := "“" , WrapText_Trailing9 := "”"      ; “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+
+;--------
+;  = WrapText Disabled Group
 
 GroupAdd "NoWrapText"      , "ahk_exe mpc-hc.exe"                                   ; MPC-HC
 GroupAdd "NoWrapText"      , "ahk_class MSPaintApp"                                 ; MS Paint (classic)
@@ -251,8 +265,8 @@ If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; 3s timeout ; w
     WinMaximize
 }
 
-^!Numpad1:: { ; Ctrl + Alt + Numpad1 keys pressed together
-MyNotificationGui("Updating " AHKname,,, 985, 0) ; 500ms ; use Sleep coz reload cancels timers
+^!Numpad1:: {                                       ; Ctrl + Alt + Numpad1 keys pressed together
+MyNotificationGui("Updating " AHKname,,, 985, 0)    ; 500ms ; use Sleep coz reload cancels timers
 Reload
 }
 
@@ -420,7 +434,7 @@ Display := ( ; continuation
     GetKillTitles(WinGetList("ahk_exe " Process_Name)))
 DetectHiddenWindows True
 Display .= ( ; continuation
-    "`nNo. of all windows: " WinGetCount("ahk_exe " Process_Name) " (incl. hidden)"
+    "`nTotal number of windows: " WinGetCount("ahk_exe " Process_Name) " (incl. hidden)"
     "`nTitles of all windows:`n    "
     GetKillTitles(WinGetList("ahk_exe " Process_Name)))
 DetectHiddenWindows False ; default
@@ -443,7 +457,7 @@ If Result = "Yes"
 
 ^+WheelUp:: {           ; increases Trans value, makes the window more opaque
 MouseGetPos ,, &id
-; id := WinExist("A")  ; alternative - but 'Active' window might not always be the intended target
+; id := WinExist("A")   ; alternative - but 'Active' window might not always be the intended target
 Trans := GetTrans(id)
 If Trans < 255
     Trans := Trans + 20 ; add 20, change for slower/faster transition
@@ -517,19 +531,19 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 #HotIf not WinActive("ahk_group NoWrapText")
 ; disables below hotkeys in apps that belonging to this group because they don't use it or have conflicts
 
-!q::WrapTextMenuFn ; Alt + Q
+!q::WrapTextMenuFn() ; Alt + Q
 
-; WrapText Keys - Alt + number row
-!1::EncText( "`'" , "`'")      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
-!2::EncText( '`"' , '`"')      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
-!3::EncText( "("  , ")" )      ; enclose in round brackets  ()
-!4::EncText( "["  , "]" )      ; enclose in square brackets []
-!5::EncText( "{"  , "}" )      ; enclose in flower brackets {}
-!6::EncText( "``" , "``")      ; enclose in accent/backtick ``
-!7::EncText( "%"  , "%" )      ; enclose in percent sign %%
-!8::EncText( "‘"  , "’" )      ; enclose in ‘’ - ‘ U+2018 Left & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
-!9::EncText( "“"  , "”" )      ; enclose in “” - “ U+201C Left & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
-!0::EncText( ""   , ""  )      ; remove above quotes
+; WrapText Keys - Alt + Number (from the number row)
+!1::WrapTextFn(WrapText_Leading1 , WrapText_Trailing1)      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
+!2::WrapTextFn(WrapText_Leading2 , WrapText_Trailing2)      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
+!3::WrapTextFn(WrapText_Leading3 , WrapText_Trailing3)      ; enclose in round brackets  ()
+!4::WrapTextFn(WrapText_Leading4 , WrapText_Trailing4)      ; enclose in square brackets []
+!5::WrapTextFn(WrapText_Leading5 , WrapText_Trailing5)      ; enclose in flower brackets {}
+!6::WrapTextFn(WrapText_Leading6 , WrapText_Trailing6)      ; enclose in accent/backtick ``
+!7::WrapTextFn(WrapText_Leading7 , WrapText_Trailing7)      ; enclose in percent sign %%
+!8::WrapTextFn(WrapText_Leading8 , WrapText_Trailing8)      ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+!9::WrapTextFn(WrapText_Leading9 , WrapText_Trailing9)      ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+!0::WrapTextFn( ""               , ""  )                    ; remove above quotes
 
 #HotIf
 
@@ -568,7 +582,7 @@ Else {
 ; Hit `Win + P` to select and change the priority level of a process
 ; The current priority level of a process can be seen in the Windows Task Manager.
 
-#p:: { 
+#p:: {
 active_pid := WinGetPID("A")
 Process_Name := WinGetProcessName("ahk_pid " active_pid)
 PPGui := Gui("AlwaysOnTop +Resize -MaximizeBox +MinSize240x230", "! Set Priority")
@@ -656,7 +670,7 @@ F1::F2 ; disable opening help in MS edge
 
 ;--------
 ;      * UnGroup
-; Change the annoying `Group by Date modified` default in Downloads folder to `Group by Date (None)` 
+; Change the annoying `Group by Date modified` default in Downloads folder to `Group by Date (None)`
 
 ^g:: {  ; Ctrl + G
 MouseMove 541, 146
@@ -722,8 +736,8 @@ Else If ClassNN == "Microsoft.UI.Content.DesktopChildSiteBridge1" {
 
 ; If keyboard focus = navigation pane
 Else If ClassNN == "SysTreeView321" {
-    ToolTipFn("Focus is in Navigation Pane!", -2000) ; 2s
-    Send "{F6}{Home}" ; Return focus to file list
+    ToolTipFn("Focus is in Navigation Pane!", -2000)    ; 2s
+    Send "{F6}{Home}"                                   ; Return focus to file list
     Exit
     }
 
@@ -1221,20 +1235,20 @@ OpenFolder(path) {
 If WinExist("ahk_class CabinetWClass") {           ; if explorer is open
     WinActivate
     If WinWaitActive(,, 2) { ; 2s = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
-    
+
         ; wait for cursor focus
         If FocusExplorerAddressBar() == "err0r" {
             Run 'explore "' path '"',,"Max"
             Exit
             }
-        
+
         ; check to see if existing path is not equal to new path
         Else If path !== CallClipboardVar(2, 1) { ; 2s, Return
             Send "{Raw}" path
             WinWaitClose(,, 2) ; 2s - wait for drop down to disappear, then Send Enter ; WinWait commands used to prevent drop down display appearing after Enter - explorer bug
             Send "{Enter}{F6 2}"
             }
-            
+
         ; if paths are equal, no further change is necessary, refocus on file list
         Else Send "{F6 2}"
         }
@@ -1374,10 +1388,10 @@ CaseConvert(StrUpper(A_Clipboard))
 ConvertInvert(*) {
 CallClipboard(2) ; 2s, Exit
 inverted := ""
-Loop Parse A_Clipboard {     ; Code Credit #2
-    If StrLower(A_LoopField) == A_LoopField    ; * Code Credit #3
-        inverted .= StrUpper(A_LoopField)      ; *
-    Else inverted .= StrLower(A_LoopField)     ; *
+Loop Parse A_Clipboard {                        ; Code Credit #2
+    If StrLower(A_LoopField) == A_LoopField     ; * Code Credit #3
+        inverted .= StrUpper(A_LoopField)       ; *
+    Else inverted .= StrLower(A_LoopField)      ; *
     }
 CaseConvert(inverted)
 }
@@ -1393,8 +1407,8 @@ CaseConvert(caseText) {
 string := StrReplace(caseText, "`r") ; remove \r
 Len := StrLen(string)
 A_Clipboard := string
-Send "^v"    ; Paste text
-If Len <= 20 ; and select text only if text ≤ 20 characters (change limit as needed)
+Send "^v"       ; Paste text
+If Len <= 20    ; and select text only if text ≤ 20 characters (change limit as needed)
     Send "+{Left " Len "}"
 }
 
@@ -1420,10 +1434,10 @@ If not ClipWait(secs) {
 ;    + CallClipboard
 
 CallClipboard(secs, retrn := 0) {
+ToolTipFn("Waiting for clipboard", secs * -1000) ; 2s
 Global clipSave := ClipboardAll() ; Global = Return clipSave
 A_Clipboard := ""
 Send "^c"
-ToolTipFn("Waiting for clipboard", secs * -1000) ; 2s
 If not ClipWait(secs) {
     ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; 2s
     A_Clipboard := clipSave
@@ -1452,14 +1466,16 @@ Else {
 ;    + ToolTipFn
 
 ToolTipFn(mytext, myduration := -500, xAxis?, yAxis?) { ; 500ms
+If not IsSet(WhichToolTip)
+    static WhichToolTip := 1
+Else {
+    ToolTip(,,, WhichToolTip) ; turn Off previous ToolTip
+    WhichToolTip++
+}
 
-Try ToolTip(,,, WhichToolTip) ; turn Off previous ToolTip
-
-; set/increment WhichToolTip parameter
-static WhichToolTip := 1
-If WhichToolTip = 20
+; reset WhichToolTip parameter If it exceeds 20
+If WhichToolTip > 20
     WhichToolTip := 1
-Else WhichToolTip++
 
 ToolTip mytext, xAxis?, yAxis?, WhichToolTip
 SetTimer () => ToolTip(,,, WhichToolTip), myduration ; 500ms ; new thread
@@ -1475,56 +1491,77 @@ SetTimer () => ToolTip(,,, WhichToolTip), myduration ; 500ms ; new thread
 WrapTextMenuFn() {
 WrapTextMenu := Menu()
 WrapTextMenu.Delete
-WrapTextMenu.Add("&1   `'  Single Quotation `'"     ,WrapTextFromMenu) ; single quotation '' ; ordered in decreasing frequency of use; reorder as needed
-WrapTextMenu.Add("&2   `" Double Quotation `""      ,WrapTextFromMenu) ; double quotation ""
-WrapTextMenu.Add("&3   (  Round Brackets )"         ,WrapTextFromMenu) ; round brackets ()
-WrapTextMenu.Add("&4   [  Square Brackets ]"        ,WrapTextFromMenu) ; square brackets []
-WrapTextMenu.Add("&5   {  Flower Brackets }"        ,WrapTextFromMenu) ; flower brackets {}
-WrapTextMenu.Add("&6   ``  Accent/Backtick ``"      ,WrapTextFromMenu) ; accent/backtick ``
-WrapTextMenu.Add("&7  `% Percent Sign `%"           ,WrapTextFromMenu) ; percent sign %%
-WrapTextMenu.Add("&8   ‘  Single Comma Quotation ’" ,WrapTextFromMenu) ; single turned comma ‘’
-WrapTextMenu.Add("&9   “ Double Comma Quotation ”"  ,WrapTextFromMenu) ; double turned comma “”
-WrapTextMenu.Add("&0  Remove all"                   ,WrapTextFromMenu) ; remove quotes
+WrapTextMenu.Add("&1   `'  Single Quotation `'"     , WrapTextMenuSelectionFn)
+WrapTextMenu.Add("&2   `" Double Quotation `""      , WrapTextMenuSelectionFn)
+WrapTextMenu.Add("&3   (  Round Brackets )"         , WrapTextMenuSelectionFn)
+WrapTextMenu.Add("&4   [  Square Brackets ]"        , WrapTextMenuSelectionFn)
+WrapTextMenu.Add("&5   {  Flower Brackets }"        , WrapTextMenuSelectionFn)
+WrapTextMenu.Add("&6   ``  Accent/Backtick ``"      , WrapTextMenuSelectionFn)
+WrapTextMenu.Add("&7  `% Percent Sign `%"           , WrapTextMenuSelectionFn)
+WrapTextMenu.Add("&8   ‘  Single Comma Quotation ’" , WrapTextMenuSelectionFn)
+WrapTextMenu.Add("&9   “ Double Comma Quotation ”"  , WrapTextMenuSelectionFn)
+WrapTextMenu.Add("&0  Remove all"                   , WrapTextMenuSelectionFn)
 WrapTextMenu.Show
 }
 
 ;--------
-;    + WrapTextFromMenu
+;    + WrapTextMenuSelectionFn
 
-WrapTextFromMenu(item, position, WrapTextMenu) {
+WrapTextMenuSelectionFn(item, position, WrapTextMenu) {
 If position = 1
-    EncText("'","'")        ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
+    WrapTextFn(WrapText_Leading1 , WrapText_Trailing1)      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
 Else If position = 2
-    EncText('`"','`"')      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
+    WrapTextFn(WrapText_Leading2 , WrapText_Trailing2)      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
 Else If position = 3
-    EncText("(",")")        ; enclose in round brackets ()
+    WrapTextFn(WrapText_Leading3 , WrapText_Trailing3)      ; enclose in round brackets  ()
 Else If position = 4
-    EncText("[","]")        ; enclose in square brackets []
+    WrapTextFn(WrapText_Leading4 , WrapText_Trailing4)      ; enclose in square brackets []
 Else If position = 5
-    EncText("{","}")        ; enclose in flower brackets {}
+    WrapTextFn(WrapText_Leading5 , WrapText_Trailing5)      ; enclose in flower brackets {}
 Else If position = 6
-    EncText("``","``")      ; enclose in accent/backtick ``
+    WrapTextFn(WrapText_Leading6 , WrapText_Trailing6)      ; enclose in accent/backtick ``
 Else If position = 7
-    EncText("%","%")        ; enclose in percent sign %%
+    WrapTextFn(WrapText_Leading7 , WrapText_Trailing7)      ; enclose in percent sign %%
 Else If position = 8
-    EncText("‘","’")        ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+    WrapTextFn(WrapText_Leading8 , WrapText_Trailing8)      ; enclose in ‘’ - ‘ U+2018 Left & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
 Else If position = 9
-    EncText("“","”")        ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
-Else If position = 10
-    EncText("","")          ; remove above quotes
+    WrapTextFn(WrapText_Leading9 , WrapText_Trailing9)      ; enclose in “” - “ U+201C Left & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+Else                                                        ; position = 10
+    WrapTextFn( ""               , ""  )                    ; remove above quotes
 }
 
 ;--------
-;    + EncText
+;    + WrapTextFn
 
-EncText(q,p) {
-CallClipboard(2) ; 2s, Exit
+WrapTextFn(q,p) {
+CallClipboard(2)                                        ; 2s, Exit
 TextString := StrReplace(A_Clipboard, "`r")             ; remove \r for StrLen
 TextStringInitial := TextString                         ; save initial string for later
-TextString := RegExReplace(TextString,'^\s+|\s+$')      ; RegEx remove leading/trailing ; \s = [\r\n\t\f\v ]
+TextString := RegExReplace(TextString,"^\s+|\s+$")      ; RegEx remove leading/trailing ; \s = [\r\n\t\f\v ]
+Len := StrLen(TextString)                               ; string length
+
+; remove existing wrap characters, predefined Global variables for leading '"([{`%‘“ and trailing ”’%`}])"' characters
+; Example: "Hello" -> Hello     and  '"([{`%‘“Hello”’%`}])"' -> Hello
+; However, "Hello' -> "Hello' ---- no change because leading and trailing characters don't match
+Loop {
+    If A_Index = 10
+        Break
+    ; only If wrap characters are the leading (position 1) and trailing characters (last position = length of string)
+    ; Example: '"([{`%‘“Hel'lo”’%`}])"' -> Hel'lo
+    If InStr(TextString, WrapText_Leading%A_Index%) = 1 AND InStr(TextString, WrapText_Trailing%A_Index%, , -1) = Len {
+        TextString := SubStr(TextString, 2, Len - 2)    ; remove wrap characters If found
+        Len := StrLen(TextString)                       ; determine string length again
+        A_Index := 0                                    ; and reset Loop to check for multiple wrapping characters If any
+        }
+    }
+/* ; Alternative to Loop command
+; this works even when string contains mixed leading and trailing wrap characters such as "Hello' -> Hello
 TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``',, &ReplacementCount)     ;"; remove leading  ['({%"“‘`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
 If ReplacementCount > 0 ; don't remove trailing character if leading character is not removed
     TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
+*/
+
+; add new wrapping characters and determine length again
 TextString := q TextString p
 Len := StrLen(TextString)
 
@@ -1538,10 +1575,10 @@ If RegExMatch(TextStringInitial, "\s+$", &Trail) {   ; If the initial string has
     Len += Trail.Len                 ; add the length of &OutputVar to Len
     }
 
-; Send "{Raw}" TextString ; send the string with quotes
-A_Clipboard := TextString ; pasting from clipboard is faster than send raw, especially for long strings
-Send "^v"                 ; paste
-If Len <= 20              ; and select text string if ≤ 20 characters (change limit as needed)
+; Send "{Raw}" TextString   ; send the string with quotes
+A_Clipboard := TextString   ; pasting from clipboard is faster than send raw, especially for long strings
+Send "^v"                   ; paste
+If Len <= 20                ; and select text string if ≤ 20 characters (change limit as needed)
     Send "+{Left " Len "}"
 ; A_Clipboard := TextStringInitial  ; restore original text string to clipboard if desired
 }
@@ -1679,7 +1716,7 @@ If WinWaitClose("Snipping Tool Overlay ahk_exe SnippingTool.exe",, 15) and (A_Pr
     ; If `Automatically save screenshots` is ENABLED in snippingtool
     MyPath := "C:\Users\" A_UserName "\Pictures\Screenshots\Screenshot " FormatTime(, "yyyy-MM-dd HHmmss") ".png"
     SetTimer () => ScreenshotFileOp(MyPath), -100 ; 100ms ; new thread
-    
+
 /*  ; If `Automatically save screenshots` is disabled in snippingtool, use below code to open paint and edit/save from clipboard
 
     If WinExist("ahk_class MSPaintApp")
@@ -2146,7 +2183,7 @@ v2.08 - 2024.03.15
 v2.09 - 2024.09.16
  ★ add `RefreshExplorer` function to improve `ToggleOSCheck` -- closes Issue #1 (Yipee! My first issue AND closure!)
  + add `Ctrl + G` UnGroup shortcut to `Windows File Explorer` section
- * change `myduration` argument in `MyNotificationGui` function to use negative numbers because negative Sleep is smaller error than forever cycling SetTimer AND to match ToolTipFn; consequently switch negative multiplier from SetTimer to Sleep 
+ * change `myduration` argument in `MyNotificationGui` function to use negative numbers because negative Sleep is smaller error than forever cycling SetTimer AND to match ToolTipFn; consequently switch negative multiplier from SetTimer to Sleep
  + add `Renaming ahk_exe qbittorrent.exe` to `FileNameSymbols` group
  + add `NoWrapText` group to replace the lone `WinActive` exclusion for `WrapTextMenuFn` function
  * update SetTimer for more versatility in `End auto-execute` section and `MyNotificationGui` function
@@ -2159,7 +2196,7 @@ v2.09 - 2024.09.16
  + add RegEx url validation and notifications to `UrlEncode` and `UrlDecode`
  * fix `SnipFromMenu` for new version of screenshot v11.2407.3.0 and later (as of 2024.09.16). Old code is still present under block comment
  * rename `PrintScreenExec`to `ScreenshotFileOp` - to reflect the file operations performed by the function and rename variables; add notification on failure
- * update `SnipMenuFn` as per new order of options in snipping tool, open automatically saved file in mspaint 
+ * update `SnipMenuFn` as per new order of options in snipping tool, open automatically saved file in mspaint
  * improve `GetFolderSize` by moving/changing some commands to new `ValidPath` function and improve ToolTips
  + add new shortcut for `Display Off` section and update existing `Esc` shortcut to RControl specifically
  * update `Display Off` section to work with updated shortcuts
@@ -2186,4 +2223,14 @@ v2.11 - 2024.10.15
  ★ add `Dark_MsgBox.ahk` and `Dark_WindowSpy` to lib and rename/modify for easier include and tracking
  * fix `AHKname` version increment
  * improve comments
+
+v2.12 - 2024.10.31
+ * remove `%A_ScriptDir%` from #include commands. It is already built in
+ * rename `EncText` to `WrapTextFn`, `WrapTextFromMenu` to `WrapTextMenuSelectionFn`
+ * improve all `WrapText` functions by adding Global variables for easy customisation
+ * fix `WrapTextFn` by adding `Loop` command, because incorrect removal of leading/trailing characters under the assumption of mixed wrap characters. Note: keep old RegExReplace command in case some users want this behaviour.
+ * fix `CallClipboard` incorrect ToolTip after successful copy by moving it prior to sending `^c`
+ * fix `ToolTipFn` - failed to assign 1 and 20 to `WhichToolTip` variable, and hence failure to turn Off some ToolTips
+ * rearrange/rename some function headings and update TOC
+ * improve comments and small changes
 */
