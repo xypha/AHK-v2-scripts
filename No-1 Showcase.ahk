@@ -1,5 +1,5 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/No-1%20Showcase.ahk
-; Last updated 2024.10.31
+; Last updated 2024.11.10
 
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
 ; Search for below commands/functions by using control + F on the help webpage - https://www.autohotkey.com/docs/v2/lib/
@@ -12,8 +12,8 @@
 ; Settings
 ; Auto-execute
 ;  = Set default state of Lock keys
-;  = Show/Hide OS files
 ;  = AHK Dark Mode
+;  = Show/Hide OS files
 ;  = Customise Tray Icon
 ;  = Capitalise first letter exclusion Group
 ;  = Close With Esc/Q/W Group
@@ -43,13 +43,17 @@
 ;  = Process Priority
 ;  = Print Screen keys
 ; #HotIf Apps
+;  = AHK Main Window
 ;  = Firefox
+;  = Dark Mode - Window Spy
 ;  = Windows File Explorer
 ;    + Explorer main window
 ;      * Unselect
 ;      * UnGroup
 ;      * Invert selection
 ;      * Show folder/file size in ToolTip
+;      * Delete Empty Folder
+;      * Extract from folder & delete
 ;      * Horizontal Scrolling
 ;      * Copy full path
 ;      * Copy file names without path
@@ -60,18 +64,21 @@
 ;  = Horizontal Scrolling
 ;  = Media Keys Restored (disabled)
 ;  = Symbols In File Names keys
-; Hotstrings
+; Hotstrings - Actions
 ;  = Date & Time
 ;    + Format Date / Time
 ;  = URL Encode/Decode
+; Hotstrings - Text Replacement
 ;  = Find & Replace in Clipboard
-;    + Find & Replace dot with space
+;    + Find & Replace dot with space (StrReplace)
 ;    + Find & Replace dot with space (RegEx)
-;  = Trim Clipboard
+;  = Trim and change text
 ; User-defined functions
 ;  = MyNotification
 ;    + MyNotificationGui
 ;    + EndMyNotif
+;  = AHK Dark Mode functions
+;    + ahkDarkMenu
 ;  = Toggle protected operating system (OS) files
 ;    + ToggleOS
 ;    + CheckRegWrite
@@ -109,19 +116,35 @@
 ;    + UrlEncode
 ;  = Kill All Instances Of An App
 ;    + GetKillTitles
-;  = Print Screen
+;    + GetKillTitlesFileList
+;  = Print Screen functions
 ;    + SnipMenuFn
 ;    + SnipFromMenu
 ;    + PrintScreenFn
 ;    + ScreenshotFileOp
 ;  = Windows File Explorer Fn
 ;    + GetFolderSize
-;    + FolderSizeFn
+;    + RBinQuery
+;    + RBinVisible
+;    + RBinHidden
+;    + userSID
+;    + checkDrivesFn
+;    + RBinDisplay
+;    + RBinGenerateTxt
+;    + SizeFn
 ;    + ValidPath
+;    + DeleteEmptyFolder
+;    + CaptureFolderPath
+;  = Check if file exists and create/append
+;    + FileCreate_Or_Append
+;  = Change MsgBox button text
+;    + MsgBox_Custom
+;    + MsgBox_ChangeButtonText
 ;  = Control Panel Tools
 ;    + ControlPanelMenuFn
 ;    + ControlPanelSelect
 ;    + List of commands
+; * Test
 ; ChangeLog
 
 ;------------------------------------------------------------------------------
@@ -131,17 +154,16 @@
 #Requires AutoHotkey v2.0
 #SingleInstance force
 #WinActivateForce
-KeyHistory 500
-; Persistent                 ; uncomment for standalone AHKs to prevent auto-exit
+KeyHistory 500 ; Max 500
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 No-1 Showcase v2.12"
+AHKname := "AHK v2 No-1 Showcase v2.13"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationGui("Loading " AHKname, -10000, 1550, 985, 1) ; 10000ms = 10 seconds (negative number so that timer will run only once), position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationGui("Loading " AHKname, 10000, 1550, 985, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;--------
 ;  = Set default state of Lock keys
@@ -151,6 +173,21 @@ SetCapsLockState    "Off"   ; CapsLock   is off - Use SetCapsLockState "AlwaysOf
 SetNumLockState     "On"    ; NumLock    is ON
 SetScrollLockState  "Off"   ; ScrollLock is off
 
+;--------
+;  = AHK Dark Mode
+; download .ahk files from the `Lib` folder in this repo
+; and save to disc at the same location as your script, inside a `Lib` folder
+
+ahkDarkMenu()                                     ; enable dark theme for AHK menus
+
+#Include "Lib\Dark Mode - ToolTip.ahk"            ; 2024.10.15
+#Include "Lib\Dark Mode - MsgBox.ahk"             ; 2024.10.15
+; Dark Mode - Window Spy                          ; 2024.10.15
+
+; to disable dark mode, comment out above commands and
+; check "MyNotification.AddText" and "MyNotification.BackColor" in `MyNotificationGui` function
+
+;--------
 ;  = Show/Hide OS files
 
 A_TrayMenu.Delete                             ; Delete standard menu
@@ -160,19 +197,10 @@ A_TrayMenu.AddStandard                        ; Restore standard menu
 ToggleOSCheck()                               ; Query registry and check/uncheck
 
 ;--------
-;  = AHK Dark Mode
-; download .ahk files from the `Lib` folder in this repo
-; and save to disc at the same location as your script, inside a `Lib` folder
-
-#Include "Lib\Dark Mode - ToolTip.ahk"            ; 2024.10.15
-#Include "Lib\Dark Mode - MsgBox.ahk"             ; 2024.10.15
-; Dark Mode - Window Spy                          ; 2024.10.15
-
-;--------
 ;  = Customise Tray Icon
 
 I_Icon := A_ScriptDir "\icons\1-512.ico"
-; Icon source: https://www.iconsdb.com/caribbean-blue-icons/1-icon.html     ; CC License
+; Icon source: https://www.iconsdb.com/caribbean-blue-icons/1-icon.html     ; CC License, see credits.md
 ; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing -- see section on "Check & Reload AHK" below
 If FileExist(I_Icon)
     TraySetIcon I_Icon
@@ -239,8 +267,8 @@ GroupAdd "NoWrapText"      , "ahk_class MSPaintApp"                             
 ;--------
 ;  = End auto-execute
 
-SetTimer () => EndMyNotif(), -1000 ; 1s ; new thread ; Reset notification timer to 1s after code in auto-execute section has finished running
-Return ; Ends auto-execute
+SetTimer () => EndMyNotif(), -1000  ; 1s ; new thread ; Reset notification timer to 1s after code in auto-execute section has finished running
+Return                              ; Ends auto-execute
 
 ; Below code can be placed anywhere in your script
 
@@ -343,7 +371,7 @@ Media_Next::End
 
 +CapsLock:: {
 SetCapsLockState "On"
-MyNotificationGui("CapsLock ON", -10000, 845)   ; 10000ms = 10s, change to match KeyWait timeout if needed
+MyNotificationGui("CapsLock ON", 10000, 845)   ; 10000ms = 10s, change to match KeyWait timeout if needed
 SetTimer () => CapsWait(), -100                 ; 100ms ; new thread
 }
 
@@ -395,7 +423,7 @@ MouseGetPos ,, &id
 ; The window does not have to be active to be detected. Hidden windows cannot be detected
 ; WinID := WinExist("A")  ; alternative - but 'Active' window might not always be the intended target
 
-winClass := WinGetClass("ahk_id " id) ; Retrieves the specified window's class name
+winClass := WinGetClass("ahk_id " id)                    ; Retrieves the specified window's class name
 If (winClass !== "Shell_TrayWnd"                         ; exclude windows taskbar
  || winClass !== "TopLevelWindowForOverflowXamlIsland"   ; System tray overflow window
  || winClass !== "Windows.UI.Core.CoreWindow"            ; Notification Center
@@ -424,23 +452,29 @@ ProcessClose WinGetProcessName("ahk_id " id)
 ; Ctrl + Alt + Shift + F4 = attempt to Kill All Instances Of An App
 
 ^!+F4:: {
+titleLimit := 30 ; limit the heigh of resulting message box
 Process_Name := WinGetProcessName("A")
-Display := ( ; continuation
-    "Kill all instances of this app?`n`n"    ; `n = new line
-    "Name of process:`t" Process_Name        ; `t = tab
-    "`n`Path of process:`t" WinGetProcessPath("ahk_exe " Process_Name)
-    "`n`nNo. of visible windows: " WinGetCount("ahk_exe " Process_Name) ; no of windows ≠ no of processes
-    "`nTitles of visible windows:`n    "     ; 4 spaces to add indent, but this may vary depending on system font setting
-    GetKillTitles(WinGetList("ahk_exe " Process_Name)))
+Display := "Kill all instances of this app?`n`n"    ; `n = new line
+        .  "Name of process:`t" Process_Name "`n"   ; `t = tab
+        .  "Path of process:`t" WinGetProcessPath("ahk_exe " Process_Name) "`n`n"
+        .  "No. of visible windows: " WinGetCount("ahk_exe " Process_Name) "`n" ; no of windows ≠ no of processes
+        .  "Titles of visible windows -`n"
+        .  GetKillTitles(WinGetList("ahk_exe " Process_Name), titleLimit) "`n"
+
 DetectHiddenWindows True
-Display .= ( ; continuation
-    "`nTotal number of windows: " WinGetCount("ahk_exe " Process_Name) " (incl. hidden)"
-    "`nTitles of all windows:`n    "
-    GetKillTitles(WinGetList("ahk_exe " Process_Name)))
+HWNDs := WinGetList("ahk_exe " Process_Name)
+msgList := GetKillTitles(HWNDs, titleLimit)
+Display .= "Total number of windows: " WinGetCount("ahk_exe " Process_Name) " (incl. hidden)`n"
+        .  "Titles of all windows:`n"
 DetectHiddenWindows False ; default
-Result := MsgBox(Display, A_ScriptName " - WARNING", "Icon! YesNo Default2 262144")
-; Options: add Exclamation icon; Yes or No buttons; make No the default button to prevent accidental process kill; 262144 = Always on top
-If Result = "Yes"
+
+If HWNDs.Length <= titleLimit
+    result := MsgBox(Display . msgList, A_ScriptName " - WARNING", 1 + 48 + 256 + 262144)
+    ; 1 OKCancel (buttons) 48 Icon! (add Exclamation icon) 256 Default2 (make No the default button to prevent accidental process kill) 262144 = Always on top
+Else result := MsgBox_Custom(Display . msgList, A_ScriptName " - WARNING", 48 + 512 + 262144, 3, "OK", "Title List", "Cancel")
+    ; 3 = Yes / No / Cancel ; 48 Icon! 512 Default3 262144 = Always-on-top
+
+If result == "OK" or result == "Yes" { ; MsgBox_Custom Button1
     While ProcessExist(Process_Name)
         ProcessClose Process_Name
     ; Run A_ComSpec ' /C Taskkill /IM /F "' Process_Name '"' ; alternative - you might see a flash of command prompt/terminal window. Brief explanation of flags -
@@ -449,6 +483,14 @@ If Result = "Yes"
     ; /F forcefully terminates
     ; open Run dialogue (Win + R), paste "cmd.exe /?" and press OK, to see default flags
     ; then paste "Taskkill /?" (without the quotation marks) in cmd window and press enter to see 'Taskkill' specific flags, filters and examples
+    }
+Else If result == "No" { ; MsgBox_Custom Button2 renamed Title List
+    filePath := A_Temp "\Kill list.txt"
+    FileCreate_Or_Append(filePath, Display . GetKillTitlesFileList(HWNDs))
+    Run '"' filePath '"',,"Max"
+    }
+; Else result == "Cancel" ; MsgBox_Custom Button3
+;     Return
 }
 
 ;------------------------------------------------------------------------------
@@ -476,7 +518,7 @@ Else If Trans <= 20
 SetTransByWheel(Trans, id)
 }
 
-F8::SetTransMenuFn
+F8::SetTransMenuFn()
 
 ;------------------------------------------------------------------------------
 ;  = Recycle Bin shortcut
@@ -490,10 +532,16 @@ Else If WinExist("Recycle Bin ahk_class CabinetWClass")     ; If explorer is sho
 ; use user defined function "OpenFolder" to
 ; (a) If an explorer is open but not showing recycle bin, change to Bin and
 ; (b) If an explorer is not open, then open Bin in explorer
-Else OpenFolder("::{645ff040-5081-101b-9f08-00aa002f954e}") ; comment out if not desired
+Else {
+    OpenFolder("::{645ff040-5081-101b-9f08-00aa002f954e}") ; comment out if not desired
+    ; alternative to OpenFolder, directly open recycle bin in a new explorer window with below command
+    ; Run "::{645ff040-5081-101b-9f08-00aa002f954e}"         ; If explorer is not open, then open Bin in explorer
+    }
 
-; alternative to OpenFolder, directly open recycle bin in a new explorer window with below command
-; Else Run "::{645ff040-5081-101b-9f08-00aa002f954e}"         ; If explorer is not open, then open Bin in explorer
+/* display number of files and size of recycle bin */
+; obtain drive letters, Breakdown per drive, total no of files, total size of files, list of files
+; and display results in MsgBox
+RBinDisplay(RBinQuery())
 }
 
 ;------------------------------------------------------------------------------
@@ -552,11 +600,10 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 ; place cursor between 2 letters. The letters reverse positions - `ab|c` becomes `ac|b`.
 ; Modified from http://www.computoredge.com/AutoHotkey/Downloads/LetterSwap.ahk
 
-$!l:: { ; Alt + L
+$!l:: { ; Alt + L ; Test: AbC
 Send "{Left}+{Right 2}"
 clipped := CallClipboardVar(2) ; 2s, Exit
 Send SubStr(clipped,2) SubStr(clipped,1,1) "{Left}"
-; Test: AbC
 }
 
 ;------------------------------------------------------------------------------
@@ -601,9 +648,9 @@ SetPriority(*) {
     PPGui.Hide
     Try ProcessSetPriority(LB.Text, active_pid)
     Catch ; if error
-        MyNotificationGui("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, -5000) ; 5s
+        MyNotificationGui("ERROR! Priority could not be changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, 5000) ; 5s
     Else ; if successful
-        MyNotificationGui("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, -5000) ; 5s
+        MyNotificationGui("Success! Priority changed!`nProcess: " Process_Name "`nPriority :  " LB.Text, 5000) ; 5s
     Finally PPGui.Destroy()
     }
 }
@@ -626,6 +673,83 @@ SnipMenuFn
 ; #HotIf Apps
 ; Tailor keyboard shortcuts, commands and functions to specific windows, apps or pre-defined groups of both
 
+;  = AHK Main Window
+
+#HotIf WinActive(".ahk - AutoHotkey v ahk_class AutoHotkey")
+; because this is to enable below commands to apply on main windows of all running scrips irrespective of v1 or v2
+; alternative to #HotIf WinActive(A_ScriptHwnd) applies only to the main window of current script
+
+^Tab:: { ; cycle through main window views
+winID := WinActive(".ahk - AutoHotkey v ahk_class AutoHotkey")
+Text := WinGetText()
+
+If RegExMatch(Text, "^Script lines most recently executed") {               ; Found - ListLines
+    If A_ScriptHwnd == winID
+        ListVars                ; ListVars - Variables and their contents   ; ^v
+    Else Send "^v"
+    ToolTipFn("2 ListVars - Variables and their contents", 5000, 150, -25)  ; 5s ; add # to avoid confusion
+    }
+Else If RegExMatch(Text, "^Local Variables|^Global Variables") {            ; Found - ListVars
+    If A_ScriptHwnd == winID
+        ListHotkeys             ; ListHotkeys - Hotkeys and their methods   ; ^h
+    Else Send "^h"
+    ToolTipFn("3 ListHotkeys - Hotkeys and their methods", 5000, 150, -25)  ; 5s
+    }
+Else If RegExMatch(Text, "^Type\s+Off\?\s+Level\s+Running\s+Name") {        ; Found - ListHotkeys
+    If A_ScriptHwnd == winID
+        KeyHistory              ; KeyHistory - Key history and script info  ; ^k
+    Else Send "^k"
+    ToolTipFn("4 KeyHistory - Key history and script info", 5000, 150, -25) ; 5s
+    }
+Else If RegExMatch(Text, "^Window: ") {                                     ; Found - KeyHistory
+    If A_ScriptHwnd == winID
+        ListLines               ; ListLines - Lines most recently executed  ; ^L
+    Else Send "^l"
+    ToolTipFn("1 ListLines - Lines most recently executed", 5000, 150, -25) ; 5s
+    }
+Else {
+    ToolTipFn(A_ThisHotkey ":: InStr Text not found!", 2000)                ; 2s
+    Exit
+    }
+}
+
+^+Tab:: { ; cycle through main window views in reverse
+winID := WinActive(".ahk - AutoHotkey v ahk_class AutoHotkey")
+Text := WinGetText()
+
+If RegExMatch(Text, "^Script lines most recently executed") {               ; Found - ListLines
+    If A_ScriptHwnd == winID
+        KeyHistory              ; KeyHistory - Key history and script info  ; ^k
+    Else Send "^k"
+    ToolTipFn("4 KeyHistory - Key history and script info", 5000, 150, -25) ; 5s
+    }
+Else If RegExMatch(Text, "^Local Variables|^Global Variables") {            ; Found - ListVars
+    If A_ScriptHwnd == winID
+        ListLines               ; ListLines - Lines most recently executed  ; ^L
+    Else Send "^l"
+    ToolTipFn("1 ListLines - Lines most recently executed", 5000, 150, -25) ; 5s
+    }
+Else If RegExMatch(Text, "^Type\s+Off\?\s+Level\s+Running\s+Name") {        ; Found - ListHotkeys
+    If A_ScriptHwnd == winID
+        ListVars                ; ListVars - Variables and their contents   ; ^v
+    Else Send "^v"
+    ToolTipFn("2 ListVars - Variables and their contents", 5000, 150, -25)  ; 5s
+    }
+Else If RegExMatch(Text, "^Window: ") {                                     ; Found - KeyHistory
+    If A_ScriptHwnd == winID
+        ListHotkeys             ; ListHotkeys - Hotkeys and their methods   ; ^h
+    Else Send "^h"
+    ToolTipFn("3 ListHotkeys - Hotkeys and their methods", 5000, 150, -25)  ; 5s
+    }
+Else {
+    ToolTipFn(A_ThisHotkey ":: InStr Text not found!", 2000)                ; 2s
+    Exit
+    }
+}
+
+#HotIf
+
+;--------
 ;  = Firefox
 
 #HotIf WinActive("ahk_class MozillaWindowClass") ; main window ; excludes other dialogue boxes like "Save As" originating from ahk_exe firefox.exe
@@ -633,9 +757,10 @@ SnipMenuFn
 ; Ctrl + Shift + F = close Find Bar
 ^+f::Send "^f{Esc}"
 
-; Ctrl + Shift + H = open Homepage
-^+h::Send "^labout:home{Enter}" ; Go backwards and Go forwards button history is preserved, but blank grey background may be seen instead of new tab background image
-; Send "^w^t"     ; alternative - Go backwards and Go forwards button history is lost, but wallpaper loads correctly
+; Alt + H = open Homepage
+!h::Send "^w^t"
+; Background image loads correctly. Go backwards and Go forwards button history is lost, but not permanently. Use ^+t to restore most recent closed tab and check tab history OR use check recent history in Firefox Library.
+; Send "^Labout:home{Enter}" ; alternative - Go backwards and Go forwards button history is preserved, but blank grey background may be seen instead of new tab background image
 
 ; Ctrl + Shift + O = open library / bookmark manager
 ^+o:: {
@@ -646,12 +771,24 @@ Sleep 500       ; wait for focus - change as per your system performance
 Send "{Raw}chrome://browser/content/places/places.xhtml`n" ; `n = {Enter}
 }
 
-; Disable Ctrl + Shift + Q = Exit (default Firefox shortcut)
+; Ctrl + Shift + Q = Exit (Disable default Firefox shortcut)
 ^+q::Return
 
 #HotIf
 
-;--------
+
+;------------------------------------------------------------------------------
+;  = Dark Mode - Window Spy
+
+#HotIf WinActive("Window Spy for AHKv2 ahk_class AutoHotkeyGUI")
+
+^c:: {
+A_Clipboard := StrReplace(CallClipboardVar(2), "`r`n", "`s") ; 2s, Exit ; copy contents to one line
+}
+
+#HotIf
+
+;------------------------------------------------------------------------------
 ;  = Windows File Explorer
 
 #HotIf WinActive("ahk_class CabinetWClass")
@@ -665,8 +802,9 @@ F1::F2 ; disable opening help in MS edge
 ; Unselect multiple files/folders
 ; Source: https://superuser.com/questions/78891/is-there-a-keyboard-shortcut-to-unselect-in-windows-explorer
 
-^+a::F5 ; Ctrl + Shift + A = unselect by sending {F5} key ; same as Right Click > Refresh
-
+; Ctrl + Shift + A = unselect by sending {F5} key ; same as Right Click > Refresh
+^+a::F5
+; alternative - WindowsRefreshOrRun()
 
 ;--------
 ;      * UnGroup
@@ -689,7 +827,7 @@ If WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge ahk_e
 MouseMove 750, 150        ; see Note 1
 Send "{Click}"            ; click on "see more" option
 If WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge ahk_exe explorer.exe",, 1) { ; 1s
-; Sleep 500                 ; alternative to WinWait ; see Note 2
+    ; Sleep 500           ; alternative to WinWait ; see Note 2
     Send "{Up 3}"         ; select "Invert selection" option
     ; Send "{Enter}"        ; see Note 3
     }
@@ -721,34 +859,78 @@ or leave it as is if you prefer to do this step manually, especially if you noti
 
 ^+s:: {
 
-; check keyboard focus
-ClassNN := ControlGetClassNN(ControlGetFocus("A"))
-
-; If keyboard focus = file list
-If ClassNN == "DirectUIHWND2"
-    path := ValidPath()
-
-; If keyboard focus = address bar
-Else If ClassNN == "Microsoft.UI.Content.DesktopChildSiteBridge1" {
-    path := ValidPath()
-    Send "{F6 2}{Down}{Home}" ; Return focus to file list
+If WinActive("Recycle Bin - File Explorer ahk_class CabinetWClass ahk_exe explorer.exe") {
+    ; obtain drive letters, Breakdown per drive, total no of files, total size of files, list of files
+    ; and display results in MsgBox
+    RBinDisplay(RBinQuery())
     }
-
-; If keyboard focus = navigation pane
-Else If ClassNN == "SysTreeView321" {
-    ToolTipFn("Focus is in Navigation Pane!", -2000)    ; 2s
-    Send "{F6}{Home}"                                   ; Return focus to file list
-    Exit
-    }
-
-; keyboard focus = unknown.. search or dialogue box or something else?
 Else {
-    ToolTipFn("Unknown focus!`nClassNN: " ClassNN, -2000) ; 2s
+    ; check keyboard focus
+    ClassNN := ControlGetClassNN(ControlGetFocus("A"))
+
+    ; If keyboard focus = file list
+    If ClassNN == "DirectUIHWND2"
+        path := ValidPath()
+
+    ; If keyboard focus = address bar
+    Else If ClassNN == "Microsoft.UI.Content.DesktopChildSiteBridge1" {
+        path := ValidPath()
+        Send "{F6 2}{Down}{Home}" ; Return focus to file list
+        }
+
+    ; If keyboard focus = navigation pane
+    Else If ClassNN == "SysTreeView321" {
+        ToolTipFn("Focus is in Navigation Pane! Operation Aborted!", 2000) ; 2s
+        Send "{F6}{Home}"                                                   ; Return focus to file list
+        Exit
+        }
+
+    ; keyboard focus = unknown.. search or dialogue box or something else?
+    Else {
+        ToolTipFn("Operation aborted because of unknown focus!`nClassNN: " ClassNN, 2000) ; 2s
+        Exit
+        }
+
+    ; calculate folder size and display
+    GetFolderSize(path[1], path[2])
+    }
+}
+
+;--------
+;      * Delete Empty Folder
+
+^+d::DeleteEmptyFolder(CaptureFolderPath())
+
+;--------
+;      * Extract from folder & delete
+
+^+e:: {
+SourceFolder := CaptureFolderPath("`nSource Folder")            ; D:\Torrent\Complete\Movies
+DestinationFolder := RegExReplace(SourceFolder, "\\[^\\]+$")    ; D:\Torrent\Complete
+If not DirExist(DestinationFolder) {
+    MsgBox "Source: " SourceFolder "`nDestination: " DestinationFolder "`nDirectory does not exist!",, 262144 ; 262144 = Always-on-top
     Exit
     }
 
-; calculate folder size and display
-GetFolderSize(path[1], path[2])
+; move files
+Try FileMove SourceFolder "\*.*", DestinationFolder
+Catch as Err
+    ErrorMsg := "FileMove`nSource: " SourceFolder "`nDestination: " DestinationFolder "`nErrors: " Err.Extra
+
+; move folders
+Loop Files, SourceFolder "\*.*", "D" {
+    Try DirMove A_LoopFilePath, DestinationFolder "\" A_LoopFileName
+    Catch {
+        If IsSet(ErrorMsg)
+            ErrorMsg .= "`nDirMove Error #" A_Index ": " A_LoopFilePath
+        Else ErrorMsg := "DirMove Error #" A_Index ": " A_LoopFilePath
+        }
+    }
+
+; show error or delete empty folder
+If IsSet(ErrorMsg)
+    MsgBox ErrorMsg,, 262144 ; 262144 = Always-on-top
+Else DeleteEmptyFolder(SourceFolder)
 }
 
 ;--------
@@ -812,7 +994,7 @@ A_Clipboard := RegExReplace(files, "\.[\w]+$")              ; remove last ext
 
 #HotIf not WinActive("ahk_group CapitaliseFirstLetter") ; exclude 'Save As' dialogue box
 
-; triggers ; add or disable one or more as needed
+; Triggers       ; add or disable one or more as needed
 ; ~NumpadEnter:: ; disabled by default because of too many false positives
 ; ~Enter::       ; disabled - uncomment to use
 ~NumpadDot::
@@ -822,8 +1004,8 @@ A_Clipboard := RegExReplace(files, "\.[\w]+$")              ; remove last ext
 cfc1 := InputHook("L1 V C","{Space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
 cfc1.Start
 cfc1.Wait
-If cfc1.EndReason = "Match" {
-    If ThisHotkey = "~!" or ThisHotkey = "~?" ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
+If cfc1.EndReason == "Match" {
+    If ThisHotkey == "~!" or ThisHotkey == "~?" ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
         Send "{BS} +" cfc1.Input
     Else {
         Send "{BS}+" cfc1.Input ; If Dot or NumpadDot is the trigger, don't add space, coz typing the website address is problematic
@@ -833,11 +1015,11 @@ If cfc1.EndReason = "Match" {
         }
     Exit
     }
-If cfc1.EndKey = "space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
+If cfc1.EndKey == "Space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
     cfc2 := InputHook("L1 V C","{Space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
     cfc2.Start
     cfc2.Wait
-    If cfc2.EndReason = "Match"
+    If cfc2.EndReason == "Match"
         Send "{BS}+" cfc2.Input
     }
 }
@@ -890,7 +1072,7 @@ Loop 3
 
 ;--------
 ; Method #2 - simulate horizontal mouse wheel action
-; test whether method #2 works using Win + Shift + Wheel Up/Down keys (3-key combo),
+; Test whether method #2 works using Win + Shift + Wheel Up/Down keys (3-key combo)
 ; then add window title/class to group #1 in auto-execute section
 ; to enable simpler Shift + Wheel Up/Down (2-key combo) via #HotIf command
 ; source: https://www.AutoHotkey.com/boards/viewtopic.php?t=76415
@@ -985,16 +1167,16 @@ Media_Play_Pause::Media_Play_Pause
 #HotIf
 
 ;------------------------------------------------------------------------------
-; Hotstrings
+; Hotstrings - Actions
 
 ;  = Date & Time
 
 ;    + Format Date / Time
 
-:*x:d++::      Send FormatTime(, "yyyy.MM.dd")          ; sends 2021.02.31
-:*x:date+::    Send FormatTime(, "dd.MM.yyyy")          ; sends 28.03.2020
-:*x:time+::    Send FormatTime(, "h:mm tt")             ; sends 6:48 PM
-:*x:datetime+::Send FormatTime(, "dd/MM/yyyy h:mm tt")  ; sends 28/03/2020 6:46 PM
+:*x:d++::       Send FormatTime(, "yyyy.MM.dd")             ; sends 2021.02.31
+:*x:date+::     Send FormatTime(, "dd.MM.yyyy")             ; sends 28.03.2020
+:*x:time+::     Send FormatTime(, "h:mm tt")                ; sends 6:48 PM
+:*x:datetime+:: Send FormatTime(, "dd/MM/yyyy h:mm tt")     ; sends 28/03/2020 6:46 PM
 
 ;------------------------------------------------------------------------------
 ;  = URL Encode/Decode
@@ -1018,9 +1200,11 @@ Media_Play_Pause::Media_Play_Pause
 */
 
 ;------------------------------------------------------------------------------
+; Hotstrings - Text Replacement
+
 ;  = Find & Replace in Clipboard
 
-;    + Find & Replace dot with space
+;    + Find & Replace dot with space (StrReplace)
 
 :*:.++:: { ; hotstring ".++"
 A_Clipboard := StrReplace(A_Clipboard,"."," ") ; replace each dot with space
@@ -1044,7 +1228,7 @@ Replacement text:   "ABC def GHI"
 */
 
 ;------------------------------------------------------------------------------
-;  = Trim Clipboard
+;  = Trim and change text
 
 ; Trim and change multi-line text to single line
 ; Modified from https://www.autohotkey.com/board/topic/89839-pasting-plain-text-from-the-clipboard/?p=568613
@@ -1105,17 +1289,23 @@ Explanation: blank lines are deleted and spaces are trimmed, but non-blank lines
 
 ;    + MyNotificationGui
 
-MyNotificationGui(mytext, myduration := -500, xAxis := 1550, yAxis := 985, timer := 1) { ; 500ms
-Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
-MyNotification.BackColor := "2C2C2E"                ; "2C2C2E" for dark mode ; "EEEEEE" for White background ; can be any RGB colour (it will be made transparent below)
+MyNotificationGui(mytext, myduration := 500, xAxis := 1550, yAxis := 985, timer := 1) { ; 500ms
+Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
-MyNotification.AddText("cWhite w230 Left", mytext)  ; "cWhite" for dark mode ; use "cBlack" for black text on white background
+
+; For dark mode
+MyNotification.BackColor := "2C2C2E"                ; "2C2C2E" for dark mode background
+MyNotification.AddText("cWhite w230 Left", mytext)  ; "cWhite" for dark mode text
+
+; For light mode, comment out the above dark mode commands and uncomment below command -
+; MyNotification.AddText("w230 Left", mytext) ; light mode text (background unchanged)
+
 MyNotification.Show("x1650 y985 NoActivate")        ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
 If timer = 1
-    SetTimer () => EndMyNotif(), myduration ; 500ms ; new thread
+    SetTimer () => EndMyNotif(), Abs(myduration) * -1 ; 500ms ; new thread ; always negative number
 If timer = 0 {
-    Sleep myduration * -1
+    Sleep Abs(myduration)                           ; always positive number
     EndMyNotif()
     }
 }
@@ -1125,6 +1315,25 @@ If timer = 0 {
 
 EndMyNotif() {
 MyNotification.Destroy()
+}
+
+;------------------------------------------------------------------------------
+;  = AHK Dark Mode functions
+
+;    + ahkDarkMenu
+/* primary source: https://stackoverflow.com/a/58547831/894589
+   with modifications by
+     * lexikos https://www.autohotkey.com/boards/viewtopic.php?p=426482#p426482
+     * mcd https://www.autohotkey.com/boards/viewtopic.php?p=511756#p511756
+*/
+
+ahkDarkMenu() {
+    static uxtheme := DllCall("GetModuleHandle", "str", "uxtheme", "ptr")
+    static SetPreferredAppMode := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 135, "ptr")
+    static FlushMenuThemes := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 136, "ptr")
+
+    DllCall(SetPreferredAppMode, "int", 1) ; 0 = Default, 1 = AllowDark, 2 = ForceDark, 3 = ForceLight, 4=Max
+    DllCall(FlushMenuThemes)
 }
 
 ;------------------------------------------------------------------------------
@@ -1155,8 +1364,8 @@ Else { ; disable if enabled
 CheckRegWrite(value) { ; check if RegWrite was success
 Global Status := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
 If value == Status {
-    MsgBox "ToggleOS Failed",, "262144" ; 262144 = Always-on-top
-    ; ToolTipFn("ToggleOS Failed", -1000) ; 1s, use tooltip and exit as an alternative to MsgBox
+    MsgBox "ToggleOS Failed",, 262144 ; 262144 = Always-on-top
+    ; ToolTipFn("ToggleOS Failed", 1000) ; 1s, use tooltip and exit as an alternative to MsgBox
     Exit
     }
 }
@@ -1176,16 +1385,17 @@ Else A_TrayMenu.Check "&Toggle OS files"
 ;    + WindowsRefreshOrRun
 
 WindowsRefreshOrRun() {
-Sleep 2000                                  ; 2s wait for registry change to be enforced
+; Sleep 2000                                  ; 2s ; uncomment If necessary - wait for registry change to be enforced
 If WinExist("ahk_class CabinetWClass") {    ; If Windows File Explorer window exists
-    WinActivate
-    If WinWaitActive(,, 2)                  ; 2s timeout ; wait for explorer to become active window
-        RefreshExplorer()
+    RefreshExplorer()
+    If not WinActive()
+        WinActivate
     }
 Else { ; open new explorer window if one doesn't already exist ; comment out this section if not desired
     Run 'explorer.exe',,"Max"
-    WinWait("ahk_class CabinetWClass",, 10) ; 10s timeout
-    WinActivate
+    If WinWait("ahk_class CabinetWClass",, 10) ; 10s timeout
+        If not WinActive()
+            WinActivate
     }
 }
 
@@ -1195,7 +1405,7 @@ Else { ; open new explorer window if one doesn't already exist ; comment out thi
 
 RefreshExplorer() {
     Local Windows := ComObject("Shell.Application").Windows
-    Windows.Item(ComValue(0x13, 8)).Refresh()
+    Windows.Item(ComValue(0x13, 8)).Refresh()   ; 0x13 = VT_UI4 32-bit unsigned int
     For Window in Windows
         If (Window.Name != "Internet Explorer")
             Window.Refresh()
@@ -1232,9 +1442,9 @@ PostMessage 0x111, 41504
 ;    + OpenFolder
 
 OpenFolder(path) {
-If WinExist("ahk_class CabinetWClass") {           ; if explorer is open
+If WinExist("ahk_class CabinetWClass") {            ; if explorer is open
     WinActivate
-    If WinWaitActive(,, 2) { ; 2s = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
+    If WinWaitActive(,, 2) {                        ; 2s = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
 
         ; wait for cursor focus
         If FocusExplorerAddressBar() == "err0r" {
@@ -1243,9 +1453,9 @@ If WinExist("ahk_class CabinetWClass") {           ; if explorer is open
             }
 
         ; check to see if existing path is not equal to new path
-        Else If path !== CallClipboardVar(2, 1) { ; 2s, Return
+        Else If path !== CallClipboardVar(2, 1) {   ; 2s, Return
             Send "{Raw}" path
-            WinWaitClose(,, 2) ; 2s - wait for drop down to disappear, then Send Enter ; WinWait commands used to prevent drop down display appearing after Enter - explorer bug
+            WinWaitClose(,, 2)                      ; 2s - wait for drop down to disappear, then Send Enter ; WinWait commands used to prevent drop down display appearing after Enter - explorer bug
             Send "{Enter}{F6 2}"
             }
 
@@ -1265,8 +1475,8 @@ FocusExplorerAddressBar() {
 Send "{F4}"
 While ControlGetClassNN(ControlGetFocus("A")) !== "Microsoft.UI.Content.DesktopChildSiteBridge1" {
     Sleep 100
-    If A_Index > 5 { ; = Sleep 500 ; wait until focus is on address bar, max 500ms
-        ToolTipFn("Failed to focus address bar", -1000) ; 1s
+    If A_Index > 5 {                                        ; = Sleep 500ms ; wait until focus is on address bar
+        ToolTipFn("Failed to focus address bar", 1000)      ; 1s
         Return "err0r"
         }
     }
@@ -1291,7 +1501,7 @@ Return Trans
 ;    + SetTransByWheel
 
 SetTransByWheel(Transparency, id) {
-If Transparency = "Off"
+If Transparency == "Off"
     WinSetTransparent 255, "ahk_id " id
     ; Set transparency to 255 before using Off - might avoid window redrawing problems such as a black background. If the window still fails to be redrawn correctly, try WinRedraw, WinMove or WinHide + WinShow for a possible workaround.
 WinSetTransparent Transparency, "ahk_id " id
@@ -1303,9 +1513,9 @@ ToolTipFn("Transparency: " Transparency) ; 500ms
 ; modified from http://www.computoredge.com/AutoHotkey/Downloads/Always_on_Top.ahk
 
 SetTransMenuFn() {
-MouseGetPos ,, &WinID   ; identify window id
-; WinID := WinExist("A")  ; alternative - but 'Active' window might not always be the intended target
-Global WinID            ; so that SetTransByMenu can use it to set transparency
+MouseGetPos ,, &WinID       ; identify window id
+; WinID := WinExist("A")    ; alternative - but 'Active' window might not always be the intended target
+Global WinID                ; so that SetTransByMenu can use it to set transparency
 SetTransMenu := Menu()
 SetTransMenu.Delete
 SetTransMenu.Add("&1 255 Opaque"            ,SetTransByMenu)
@@ -1325,7 +1535,7 @@ WinSetTransparent Transparency, "ahk_id " WinID
 If Transparency = 255 {
     WinSetTransparent "Off", "ahk_id " WinID ; Specifying Off - may improve performance and reduce usage of system resources
     }
-ToolTipFn("Transparency: " Trim(SubStr(item, 4)), -2000) ; 2s
+ToolTipFn("Transparency: " Trim(SubStr(item, 4)), 2000) ; 2s
 }
 
 ;------------------------------------------------------------------------------
@@ -1422,10 +1632,10 @@ If Len <= 20    ; and select text only if text ≤ 20 characters (change limit a
 ;    + CallClipWait
 
 CallClipWait(secs) {
-ToolTipFn("Waiting for clipboard", secs * -1000) ; 2s
+ToolTipFn("Waiting for clipboard", secs * 1000)        ; 2s
 If not ClipWait(secs) {
-    ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; 2s
-    ; MyNotificationGui(A_ThisHotkey ":: Clip Failed", -2000) ; 2s ; alternative to tooltip
+    ToolTipFn(A_ThisHotkey ":: Clip Failed", 2000)     ; 2s
+    ; MyNotificationGui(A_ThisHotkey ":: Clip Failed", 2000) ; 2s ; alternative to tooltip
     Exit
     }
 }
@@ -1434,16 +1644,16 @@ If not ClipWait(secs) {
 ;    + CallClipboard
 
 CallClipboard(secs, retrn := 0) {
-ToolTipFn("Waiting for clipboard", secs * -1000) ; 2s
-Global clipSave := ClipboardAll() ; Global = Return clipSave
+ToolTipFn("Waiting for clipboard", secs * 1000)     ; 2s
+Global clipSave := ClipboardAll()                   ; Global = Return clipSave
 A_Clipboard := ""
 Send "^c"
 If not ClipWait(secs) {
-    ToolTipFn(A_ThisHotkey ":: Clip Failed", -2000) ; 2s
+    ToolTipFn(A_ThisHotkey ":: Clip Failed", 2000)  ; 2s
     A_Clipboard := clipSave
     If retrn = 0
         Exit
-    Else Return "err0r" ; If retrn = 1
+    Else Return "err0r"                             ; If retrn = 1
     }
 }
 
@@ -1465,20 +1675,20 @@ Else {
 
 ;    + ToolTipFn
 
-ToolTipFn(mytext, myduration := -500, xAxis?, yAxis?) { ; 500ms
+ToolTipFn(mytext, myduration := 500, xAxis?, yAxis?) { ; 500ms
 If not IsSet(WhichToolTip)
-    static WhichToolTip := 1
+    Static WhichToolTip := 1    ; 1
 Else {
-    ToolTip(,,, WhichToolTip) ; turn Off previous ToolTip
-    WhichToolTip++
+    ToolTip(,,, WhichToolTip)   ; turn Off previous ToolTip
+    WhichToolTip++              ; add 1 to variable
 }
 
-; reset WhichToolTip parameter If it exceeds 20
-If WhichToolTip > 20
-    WhichToolTip := 1
+; If WhichToolTip variable exceeds 20
+If WhichToolTip > 20            ; inbuilt limit of 20
+    WhichToolTip := 1           ; reset to 1
 
 ToolTip mytext, xAxis?, yAxis?, WhichToolTip
-SetTimer () => ToolTip(,,, WhichToolTip), myduration ; 500ms ; new thread
+SetTimer () => ToolTip(,,, WhichToolTip), Abs(myduration) * -1 ; 500ms ; new thread ; always negative number
 }
 
 ;------------------------------------------------------------------------------
@@ -1523,9 +1733,9 @@ Else If position = 6
 Else If position = 7
     WrapTextFn(WrapText_Leading7 , WrapText_Trailing7)      ; enclose in percent sign %%
 Else If position = 8
-    WrapTextFn(WrapText_Leading8 , WrapText_Trailing8)      ; enclose in ‘’ - ‘ U+2018 Left & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+    WrapTextFn(WrapText_Leading8 , WrapText_Trailing8)      ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
 Else If position = 9
-    WrapTextFn(WrapText_Leading9 , WrapText_Trailing9)      ; enclose in “” - “ U+201C Left & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+    WrapTextFn(WrapText_Leading9 , WrapText_Trailing9)      ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
 Else                                                        ; position = 10
     WrapTextFn( ""               , ""  )                    ; remove above quotes
 }
@@ -1541,13 +1751,14 @@ TextString := RegExReplace(TextString,"^\s+|\s+$")      ; RegEx remove leading/t
 Len := StrLen(TextString)                               ; string length
 
 ; remove existing wrap characters, predefined Global variables for leading '"([{`%‘“ and trailing ”’%`}])"' characters
-; Example: "Hello" -> Hello     and  '"([{`%‘“Hello”’%`}])"' -> Hello
-; However, "Hello' -> "Hello' ---- no change because leading and trailing characters don't match
+; Example: "Hello" → Hello     and  '"([{`%‘“Hello”’%`}])"' → Hello
+; However, "Hello' → "Hello' ---- no change because leading and trailing characters don't match
 Loop {
     If A_Index = 10
         Break
+
     ; only If wrap characters are the leading (position 1) and trailing characters (last position = length of string)
-    ; Example: '"([{`%‘“Hel'lo”’%`}])"' -> Hel'lo
+    ; Example: '"([{`%‘“Hel'lo”’%`}])"' → Hel'lo
     If InStr(TextString, WrapText_Leading%A_Index%) = 1 AND InStr(TextString, WrapText_Trailing%A_Index%, , -1) = Len {
         TextString := SubStr(TextString, 2, Len - 2)    ; remove wrap characters If found
         Len := StrLen(TextString)                       ; determine string length again
@@ -1555,7 +1766,7 @@ Loop {
         }
     }
 /* ; Alternative to Loop command
-; this works even when string contains mixed leading and trailing wrap characters such as "Hello' -> Hello
+; this works even when string contains mixed leading and trailing wrap characters such as "Hello' → Hello
 TextString := RegExReplace(TextString,'^[\[`'\(\{%`"“‘]+|^``',, &ReplacementCount)     ;"; remove leading  ['({%"“‘`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
 If ReplacementCount > 0 ; don't remove trailing character if leading character is not removed
     TextString := RegExReplace(TextString,'[\]`'\)\}%`"”’]+$|``$')     ;"; remove trailing ]')}%"”’`  ; customise as your needs in WrapTextMenuFn and WrapText Keys
@@ -1604,7 +1815,7 @@ Loop {
         NumPut("UChar", Integer("0x" A_LoopField), var, A_Index - 1)
     Url := StrReplace(Url, "`%" code, StrGet(var, Enc))
     }
-ToolTipFn("Decoding successful!", -2000) ; 2s
+ToolTipFn("Decoding successful!", 2000) ; 2s
 Return Url
 }
 
@@ -1616,10 +1827,10 @@ validateURL := "^http(s|)://[\w-@:%~#&=\.\+\?]{2,256}\.[a-z]{2,6}($|/[\w-@:%~#&=
 If not RegExMatch(str, validateURL) {
     Try UrlDecode(str) ; url is already encoded
     Catch {
-        MsgBox "ERROR!`n`nString: " str "`nRegEx: " validateURL "`n`nNot a valid URL.",, "262144"
+        MsgBox "ERROR!`n`nString: " str "`nRegEx: " validateURL "`n`nNot a valid URL.",, 262144 ; 262144 = Always-on-top
         Exit
         }
-    Else ToolTipFn("URL already encoded!", -2000) ; 2s
+    Else ToolTipFn("URL already encoded!", 2000) ; 2s
     Return str
     }
 Else {
@@ -1641,7 +1852,7 @@ Else {
             encoded .= hex
             }
         }
-    ToolTipFn("Valid URL! Encoding successful!", -2000) ; 2s
+    ToolTipFn("Valid URL! Encoding successful!", 2000) ; 2s
     Return encoded
     }
 }
@@ -1651,28 +1862,45 @@ Else {
 
 ;    + GetKillTitles
 
-GetKillTitles(HWNDs) {
-temp := ""
+GetKillTitles(HWNDs, titleLimit) {
+msgList := ""
 Loop HWNDs.Length {
-    t := RegExReplace(WinGetTitle(HWNDs[A_Index]), "\s+", A_Space)   ; remove \s = [\r\n\t\f\v ]
-    If t = "" and A_Index < 10
-        tempTitle := "  " A_Index " = #No Title`n    "   ; pad space before 1-9
-    Else If t = ""
-        tempTitle := A_Index " = #No Title`n    "
-    Else If A_Index < 10
-        tempTitle := "  " A_Index " = " t "`n    "
-    Else tempTitle := A_Index " = " t "`n    "
+    t := RegExReplace(WinGetTitle(HWNDs[A_Index]), "\s+", A_Space)   ; remove multiple \s = [\r\n\t\f\v ]
+
+    If t == ""
+        tempTitle := Format("{:5}", A_Index) " = #No Title`n"
+    Else tempTitle := Format("{:5}", A_Index) " = " t "`n"
 
     ; rudimentary word wrap ; for more sophisticated solution (AHK v1) - https://www.autohotkey.com/boards/viewtopic.php?t=59461
-    If StrLen(tempTitle) > 61
-        temp .= SubStr(tempTitle, 1, 50) "-`n            -" SubStr(tempTitle, 51, 50)
-    Else temp .= tempTitle
+    If StrLen(tempTitle) > 50
+        msgList .= SubStr(tempTitle, 1, 50) "…`n"
+    Else msgList .= tempTitle
+
+    If A_Index = titleLimit {
+        msgList .= "    … and more. Too many to show here! Check Title List!"
+        Break
+        }
     }
-Return temp
+Return msgList
+}
+
+;--------
+;    + GetKillTitlesFileList
+
+GetKillTitlesFileList(HWNDs) {
+FileList := ""
+Loop HWNDs.Length {
+    t := RegExReplace(WinGetTitle(HWNDs[A_Index]), "\s+", A_Space)   ; remove multiple \s = [\r\n\t\f\v ]
+
+    If t == ""
+        FileList .= Format("{:5}", A_Index) " = #No Title`n"
+    Else FileList .= Format("{:5}", A_Index) " = " t "`n"
+    }
+Return FileList
 }
 
 ;------------------------------------------------------------------------------
-;  = Print Screen
+;  = Print Screen functions
 
 ;    + SnipMenuFn
 
@@ -1702,12 +1930,12 @@ If WinWaitActive("Snipping Tool Overlay ahk_exe SnippingTool.exe",, 3) { ; 3s
         Send "{Down " ItemPos - 1 "}{Enter}"
         }
     Else {
-        ToolTipFn(A_ThisHotkey ":: Snipping Tool Pop-up timed out", -2000) ; 2s
+        ToolTipFn(A_ThisHotkey ":: Snipping Tool Pop-up timed out", 2000) ; 2s
         Exit
         }
     }
 Else {
-    ToolTipFn(A_ThisHotkey ":: Screen Snipping Overlay timed out", -2000) ; 2s
+    ToolTipFn(A_ThisHotkey ":: Screen Snipping Overlay timed out", 2000) ; 2s
     Exit
     }
 ; wait for screenshot to be taken ; abort further action if timeout or Esc key is pressed
@@ -1732,9 +1960,9 @@ If WinWaitClose("Snipping Tool Overlay ahk_exe SnippingTool.exe",, 15) and (A_Pr
         }
  */
     }
-Else If A_PriorKey = "Escape"
-    ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - Esc", -2000) ; 2s
-Else ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - 15s timeout", -2000) ; 2s
+Else If A_PriorKey == "Escape"
+    ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - Esc", 2000) ; 2s
+Else ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - 15s timeout", 2000) ; 2s
 }
 
 /* For older versions of screen snippingtool, below code may work
@@ -1748,7 +1976,7 @@ If WinWaitActive("Screen Snipping ahk_class Windows.UI.Core.CoreWindow",, 3) { ;
     Send "{Tab " ItemPos "}{Enter}"
     }
 Else {
-    ToolTipFn(A_ThisHotkey ":: Screen Snipping timed out", -2000) ; 2s
+    ToolTipFn(A_ThisHotkey ":: Screen Snipping timed out", 2000) ; 2s
     Exit
     }
 
@@ -1764,7 +1992,7 @@ If WinWaitClose(,, 15) and (A_PriorKey != "Escape") { ; 15s
         ; Send "^v"                                 ; alternative to PostMessage
         ; ControlSend "^v",, "ahk_class MSPaintApp" ; alternative to Send / PostMessage
     }
-Else ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - 15s timeout / Esc", -2000) ; 2s
+Else ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - 15s timeout / Esc", 2000) ; 2s
 }
 
 ;--------
@@ -1787,7 +2015,7 @@ Ellipse         643
 Rounded_Rect    634
 
 PostMessage 0x111, 620,,, "ahk_pid " <Process ID> ; alternative to "ahk_class MSPaintApp"
-paint settings in registry = HKCU\Software\Microsoft\Windows\CurrentVersion\Applets\Paint\
+paint settings in registry → HKCU\Software\Microsoft\Windows\CurrentVersion\Applets\Paint\
 */
 
 ;--------
@@ -1809,12 +2037,12 @@ SetTimer () => ScreenshotFileOp("C:\Users\" A_UserName "\Pictures\Screenshots\Sc
 ;    + ScreenshotFileOp
 
 ScreenshotFileOp(MyPath) {
-While !FileExist(MyPath) { ; if file does not exist, wait using Sleep and repeat check
-    Sleep 500        ; wait for 500ms
-    If A_Index > 6 { ; max 6 attempts, total wait 3000ms = 3s
+While not FileExist(MyPath) {   ; if file does not exist, wait using Sleep and repeat check
+    Sleep 500                   ; wait for 500ms
+    If A_Index > 6 {            ; max 6 attempts, total wait 3000ms = 3s
         ; If failed ×6, open screenshot folder in explorer
         OpenFolder("C:\Users\" A_UserName "\Pictures\Screenshots\")
-        MsgBox MyPath,, "262144"    ; show calculated path in pop-up to compare with actual file path
+        MsgBox MyPath,, 262144      ; 262144 = Always-on-top ; show calculated path in pop-up to compare with actual file path
         Exit                        ; give up on rename
         }
     }
@@ -1839,7 +2067,7 @@ FileMove MyPath, NewPath                ; rename
 
 GetFolderSize(pathType, pathContent) {
 ; variables
-FolderSizeB := 0
+SizeB := 0
 errorDetails := ""
 folderName := ""
 fileName := ""
@@ -1848,67 +2076,288 @@ If pathType = 1 {   ; multiple lines ; InStr(pathContent, "`n")
     Loop Parse pathContent, "`n", "`r" {
         If DirExist(A_LoopField) {          ; is folder
             Loop Files A_LoopField "\*.*", "R"
-                FolderSizeB += A_LoopFileSize
+                SizeB += A_LoopFileSize
             folderName .= A_LoopField "`n"
             }
         Else If FileExist(A_LoopField) {    ; is file
-            FolderSizeB += FileGetSize(A_LoopField, "B")
+            SizeB += FileGetSize(A_LoopField, "B")
             fileName .= A_LoopField "`n"
             }
-        Else errorDetails .= "#" A_Index ": " A_LoopField " -> Not a folder or file`n"
+        Else errorDetails .= "#" A_Index ": " A_LoopField " → Not a folder or file`n"
         }
 
     ; display folders first in pathContent
-    If folderName = ""
-        pathContent := Trim(Sort(fileName), "`n")
-    Else If fileName = ""
-        pathContent := Trim(Sort(folderName), "`n")
-    Else pathContent := Trim(Sort(folderName), "`n") "`n" Trim(Sort(fileName), "`n")
+    If folderName == ""
+        pathContent := Trim(Sort(fileName, "N"), "`n")
+    Else If fileName == ""
+        pathContent := Trim(Sort(folderName, "N"), "`n")
+    Else pathContent := Trim(Sort(folderName, "N"), "`n") "`n" Trim(Sort(fileName, "N"), "`n")
 
     ; limit string to 1000 characters
     If StrLen(pathContent) > 1500 {
         RegExMatch(pathContent, "[\s\S]{1,1500}`n", &output)
-        pathContent := output.0 "... and more"
+        pathContent := output.0 "… and more!"
         }
     }
 Else If pathType = 2 { ;          ; single line - folder ; DirExist(pathContent)
     Loop Files pathContent "\*.*", "R"
-        FolderSizeB += A_LoopFileSize
+        SizeB += A_LoopFileSize
     }
-Else FolderSizeB += FileGetSize(pathContent, "B")    ; single line - file ; FileExist(pathContent)
+Else SizeB += FileGetSize(pathContent, "B")    ; single line - file ; FileExist(pathContent)
 
 ; check size and display tooltip
-If FolderSizeB = 0 and errorDetails != ""   ; size zero and error present
-    ToolTipFn(errorDetails, -5000)          ; 5s ; show error
-Else If FolderSizeB = 0                     ; size zero and no errors
-    ToolTipFn(pathContent "`nEmpty Folder/File", -3000) ; 3s
-Else ToolTipFn(pathContent . FolderSizeFn(FolderSizeB) "`n`n" errorDetails, -3000) ; 3s
+If SizeB = 0 and errorDetails != ""   ; size zero and error present
+    ToolTipFn(errorDetails, 5000)          ; 5s ; show error
+Else If SizeB = 0                     ; size zero and no errors
+    ToolTipFn(pathContent "`nEmpty Folder/File", 3000) ; 3s
+Else ToolTipFn(pathContent "`nSize: " SizeFn(SizeB) "`n`n" errorDetails, 3000) ; 3s
 }
 
 ;--------
-;    + FolderSizeFn
+;    + RBinQuery
+; Modified from https://www.autohotkey.com/boards/viewtopic.php?p=125495#p125495
 
-FolderSizeFn(FolderSizeB) {
-If FolderSizeB >= 1024 {
-    FolderSizeKB := FolderSizeB / 1024
-    If FolderSizeKB >= 1024 {
-        FolderSizeMB := FolderSizeKB / 1024
-        If FolderSizeMB >= 1024
-            Return "`nSize: " Round(FolderSizeMB / 1024, 2) " GB"
-        Else Return "`nSize: " Round(FolderSizeMB, 2) " MB"
-        }
-    Else Return "`nSize: " Round(FolderSizeKB, 2) " KB"
+RBinQuery(userDriveInput := "") {
+Global err0r := "" ; store errors
+
+RBinArr         := [] ; array to store return
+driveLetters    := checkDrivesFn(userDriveInput)
+
+If userDriveInput == ""
+    userDriveInfo := "User Query - Blank"
+Else userDriveInfo := 'User Query - "' userDriveInput '"'
+
+If userDriveInput == "" and err0r == ""
+    ErrorReturn := ""
+Else If err0r == ""
+    ErrorReturn := "No errors in user query!`n"
+Else ErrorReturn := "Errors in user query:`n" err0r
+
+If driveLetters == "" {
+    MsgBox("No matches to drive letters found!`n`n"
+         . userDriveInfo "`n"
+         . ErrorReturn,, 262144) ; 262144 = Always-on-top
+    Exit
     }
-Else Return "`nSize: " FolderSizeB " bytes"
+
+SID             := userSID()
+
+; list of folders/files visible in windows file explorer
+visibleArr := RBinVisible(driveLetters) ; returns [visibleSummary, visibleRBFCount, visibleTotalSizeB]
+
+; list of folders/files *NOT* visible in windows file explorer
+hiddenArr := RBinHidden(driveLetters, SID, visibleArr[1]) ; returns [RBSummary, TotalRBFCount, TotalSizeB, hiddenFileList]
+
+RBinArr.InsertAt(1, driveLetters)
+RBinArr.InsertAt(2, visibleArr[1])                              ; visibleSummary
+RBinArr.InsertAt(3, visibleArr[2])                              ; visibleRBFCount   (used for hiddenRBFCount)
+RBinArr.InsertAt(4, SizeFn(visibleArr[3]))                      ; visibleTotalSizeB (used for hiddenTotalSizeB)
+
+RBinArr.InsertAt(5, hiddenArr[1])                               ; RBSummary
+RBinArr.InsertAt(6, hiddenArr[2])                               ; TotalRBFCount
+RBinArr.InsertAt(7, SizeFn(hiddenArr[3]))                       ; TotalSizeB
+
+RBinArr.InsertAt(8, hiddenArr[2] - visibleArr[2])               ; hiddenRBFCount
+RBinArr.InsertAt(9, SizeFn(hiddenArr[3] - visibleArr[3]))       ; hiddenTotalSizeB
+RBinArr.InsertAt(10, hiddenArr[4])                              ; hiddenFileList
+
+RBinArr.InsertAt(11, userDriveInfo)                             ; userDriveInfo
+RBinArr.InsertAt(12, ErrorReturn)                               ; ErrorReturn
+
+Return RBinArr
+}
+
+;--------
+;    + RBinVisible
+; Source of original power shell code: https://stackoverflow.com/a/27769278/5282788
+; Source of additional recycle bin item properties power shell code - https://jdhitsolutions.com/blog/powershell/7024/managing-the-recycle-bin-with-powershell/
+; For ONLY this function - the power shell code was converted to AHK v2 by DuckDuckGo AI (Model: Chat GPT-4o mini @ https://duckduckgo.com/) on 2024.11.09
+; The output was *very* FLAWED. It was corrected, further modified and tested by me.
+
+RBinVisible(driveLetters) {
+
+visibleFiles        := []  ; Create an empty array to hold the file information
+visibleTotalSizeB   := 0   ; Create an empty variable to calculate total file size
+
+; Use COM to access the Shell.Application
+recycleBin := ComObject("shell.application").NameSpace(10) ; 10 is the identifier for the Recycle Bin
+
+; Loop through each item in the Recycle Bin
+For item in recycleBin.Items {
+
+    If not RegExMatch(item.Path, "[" driveLetters "]+\:\\")
+        Continue ; skip
+
+    ; Add the information to the array
+    visibleFiles.Push({
+        Location: item.Path,
+        OriginalLocation: item.ExtendedProperty("{9B174B33-40FF-11D2-A27E-00C04FC30871} 2"),
+        Name: item.Name,
+        FileSize: item.Size
+        })
+
+    visibleTotalSizeB += item.Size
+    }
+
+visibleRBFCount := visibleFiles.Length
+visibleSummary := "; List of folders/files visible in File Explorer Recycle Bin -`n`n"
+          . "Number of visible items     : " visibleRBFCount "`n"
+          . "Total size of visible items : " SizeFn(visibleTotalSizeB) "`n`n"
+
+For item in visibleFiles {
+    visibleSummary .= "#" Format("{:03d}", A_Index) " Recycle Bin Location   : " item.Location
+                   .  "`n     Original Location      : " item.OriginalLocation  "\" item.Name
+                   .  "`n     File Size              : " SizeFn(item.FileSize) "`n`n"
+    }
+
+Return [visibleSummary, visibleRBFCount, visibleTotalSizeB]
+}
+
+;--------
+;    + RBinHidden
+
+RBinHidden(driveLetters, SID, visibleSummary) {
+
+TotalRBFCount   := 0    ; total number of recycled files
+TotalSizeB      := 0    ; total size in bytes
+RBSummary       := ""
+
+Loop StrLen(driveLetters) {
+    RBFCount    := 0        ; Recycle Bin File count
+    SizeB       := 0        ; size in bytes
+    DriveL      := SubStr(driveLetters, A_Index, 1)
+    Loop Files DriveL ":\$Recycle.Bin\" SID "\*.*", "R" {
+        RBFCount++
+        SizeB += A_LoopFileSize
+        If not InStr(visibleSummary, A_LoopFileFullPath) ; exclude file name if already in visibleSummary
+            FileNames .= Format("{:-80}", A_LoopFileFullPath) "(" SizeFn(A_LoopFileSize) ")`n"
+        }
+    RBSummary .= "Drive: " DriveL "`n"
+              .  "No. of files: " RBFCount "`n"
+              .  "Size: " SizeFn(SizeB) "`n`n"
+    TotalRBFCount += RBFCount
+    TotalSizeB += SizeB
+    }
+
+hiddenFileList := Trim(Sort(FileNames, "N"), "`n")
+Return [RBSummary, TotalRBFCount, TotalSizeB, hiddenFileList]
+}
+
+;--------
+;    + userSID
+
+userSID() {
+    If IsSet(SID)
+        Return SID
+
+    Loop Reg "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList", "R KV" {
+        If (A_LoopRegName == "ProfileImagePath") {
+            If InStr(RegRead(), A_UserName) {
+                static SID := StrReplace(A_LoopRegKey, "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\")
+                Return SID
+                }
+            }
+        }
+    Else {
+        ToolTipFn(A_ThisHotkey ":: RBinQuery - userSID() error", 2000) ; 2s
+        Exit
+        }
+}
+
+;--------
+;    + checkDrivesFn
+
+checkDrivesFn(userDriveInput := "") {
+Global err0r
+driveList := DriveGetList()
+
+If userDriveInput == ""        ; If drive letters are not specified or not valid
+    Return driveList           ; get list of drives - e.g., ACDEZ
+Else {
+    checkedDrives := ""
+    Loop Parse userDriveInput {
+        If A_LoopField ~= "[" driveList "]"
+            checkedDrives .= A_LoopField "`n"
+        Else err0r .= ' * Bad Match - "' A_LoopField '" → Available drives: ' driveList "`n"
+        }
+    Return StrReplace(Sort(checkedDrives, "U"), "`n") ; remove U duplicates and `n line feed
+    }
+}
+
+;--------
+;    + RBinDisplay
+
+RBinDisplay(RBinArr) {
+
+msgTitle := "RBinQuery: " RBinArr[1]                                                  ; driveLetters
+msgText := RBinArr[11] "`n"                                                           ; userDriveInfo
+        .  RBinArr[12] "`n"                                                           ; ErrorReturn
+        .  "# Below summary includes all files (visible + hidden)`n`n"
+        .  RBinArr[5] "Total No. of files: " RBinArr[6] "`nSize: " RBinArr[7]         ; RBSummary, totals
+
+mbcResult := MsgBox_Custom(msgText, msgTitle, 256 + 262144, 2, "File List", "OK")
+; = Yes / No ; 256 Default2 262144 = Always-on-top
+
+If mbcResult == "Yes" { ; renamed button - File List
+    rbFile := A_Temp "\List of files in Recycle bin.txt"
+    Results := RBinGenerateTxt(msgTitle, msgText, RBinArr)
+    FileCreate_Or_Append(rbFile, Results)
+    Run '"' rbFile '"',,"Max" ;"
+    }
+}
+
+;--------
+;    + RBinGenerateTxt
+
+RBinGenerateTxt(msgTitle, msgText, RBinArr) {
+Results := " ;" continuation
+(
+; * Table of contents *
+; Summary
+; List of folders/files visible in File Explorer Recycle Bin -
+; List of hidden folders/files in Recycle Bin -
+
+;------------------------------------------------------------------------------
+; Summary
+
+
+)" . msgTitle "`n`n" ;" 1 driveLetters
+   . msgText  "`n`n" ; 5 RBSummary, 6 TotalRBFCount, 7 TotalSizeB
+   . ";------------------------------------------------------------------------------`n"
+   . RBinArr[2]      ; visibleSummary
+   . ";------------------------------------------------------------------------------`n"
+   . "; List of hidden folders/files in Recycle Bin -`n`n"
+   . "Number of hidden items     : " RBinArr[8] "`n"        ; hiddenRBFCount
+   . "Total size of hidden items : " RBinArr[9] "`n`n"      ; hiddenTotalSizeB
+   . RBinArr[10]                                            ; hiddenFileList
+
+return Results
+}
+
+;--------
+;    + SizeFn
+
+SizeFn(SizeB) {
+If SizeB >= 1024 {
+    readableSizeKB := SizeB / 1024
+    If readableSizeKB >= 1024 {
+        readableSizeMB := readableSizeKB / 1024
+        If readableSizeMB >= 1024
+            Return Round(readableSizeMB / 1024, 2) " GB"
+        Else Return Round(readableSizeMB, 2) " MB"
+        }
+    Else Return Round(readableSizeKB, 2) " KB"
+    }
+Else Return SizeB " bytes"
 }
 
 ;--------
 ;    + ValidPath
 
-ValidPath(errorTxt := "") {
+ValidPath() {
 clipped := CallClipboardVar(2, 1) ; 2s, Return
 If clipped == "err0r" {
-    ToolTipFn(A_ThisHotkey ":: Error - Folder/file path copy failed!" errorTxt, -2000) ; 2s
+    ToolTipFn(A_ThisHotkey ":: Error - Folder/file path copy failed!", 2000) ; 2s
     Exit
     }
 If InStr(clipped, "`n") ; If multiple folder/files or single folder or file
@@ -1918,10 +2367,120 @@ Else If DirExist(clipped)
 Else If FileExist(clipped)
     Return [3, clipped]
 Else {
-    MsgBox clipped "`nFolder/File does not exist!" errorTxt,, "262144"
+    MsgBox clipped "`nFolder/File does not exist!",, 262144 ; 262144 = Always-on-top
     Exit
     }
 }
+
+;--------
+;    + DeleteEmptyFolder
+
+DeleteEmptyFolder(WhichFolder) {
+FolderSizeB := 0
+contents := ""
+Loop Files WhichFolder "\*.*", "R" {
+    FolderSizeB += A_LoopFileSize
+    contents .= A_LoopFileFullPath "`n"
+    }
+If contents == ""
+    contents := "Nil"
+If FolderSizeB = 0 {            ; If zero size
+    FileRecycle WhichFolder     ; delete empty folder, recursive
+    ToolTipFn(WhichFolder "`nEmpty folder deleted!", 1000) ; 1s
+    }
+Else ToolTipFn(WhichFolder . SizeFn(FolderSizeB) "`n`nContents:`n" contents, 5000) ; 5s
+}
+
+;--------
+;    + CaptureFolderPath
+
+CaptureFolderPath(errorTxt := "") {
+clipped := CallClipboardVar(2, 1) ; 2s, Return
+If clipped == "err0r" {
+    ToolTipFn(A_ThisHotkey ":: Error - Folder path copy failed!" errorTxt, 2000) ; 2s
+    Exit
+    }
+If not DirExist(clipped) {
+    MsgBox clipped "`nNot a folder!" errorTxt,, 262144 ; 262144 = Always-on-top
+    Exit
+    }
+Else Return clipped
+}
+
+;------------------------------------------------------------------------------
+;  = Check if file exists and create/append
+
+;    + FileCreate_Or_Append
+; modified from AutoHotkey.chm::/docs/lib/FileOpen.htm#ExWriteRead
+
+FileCreate_Or_Append(FilePath, FileContent) {
+If FileExist(FilePath) {    ; If file exists, replace existing contents with FileContent
+        Try FileObj := FileOpen(FilePath, "w", "UTF-8")
+        Catch as Err {
+            MsgBox FilePath "`nCan't open for writing.`n`n" Type(Err) ": " Err.Message
+            return
+            }
+        FileObj.Write(FileContent)
+        FileObj.Close()
+        }
+    Else FileAppend FileContent, FilePath ; create new file
+}
+
+;------------------------------------------------------------------------------
+;  = Change MsgBox button text
+
+;    + MsgBox_Custom
+; Modified from AutoHotkey.chm::/docs/scripts/index.htm#MsgBoxButtonNames
+
+MsgBox_Custom(MsgText := "Text", MsgTitle := A_ScriptName, msgOption := 262144, nButtons := 1, bName1 := "Button_Name", bName2?, bName3?) { ; 262144 = Always-on-top ; nButtons = 1/2/3 button options
+
+If nButtons = 1 {
+    msgOption += 0 ; OK button
+} Else If nButtons = 2 and isSet(bName2) {
+    msgOption += 4 ; YesNo button
+} Else If nButtons = 3 and isSet(bName2) and isSet(bName3) {
+    msgOption += 3 ; YesNoCancel button
+} Else {
+    MsgBox A_ThisHotkey "::" A_ThisFunc "`nError! Check options and button number and names",, 262144 ; 262144 = Always-on-top
+    Exit
+    }
+
+RandomMsg := Random(1, 194161877)
+SetTimer () => MsgBox_ChangeButtonText(RandomMsg, MsgTitle, nButtons, bName1, bName2?, bName3?), -100 ; 100ms ; new thread
+Return MsgBox(MsgText, RandomMsg, msgOption)
+}
+
+;--------
+;    + MsgBox_ChangeButtonText
+
+MsgBox_ChangeButtonText(RandomMsg := 0, MsgTitle := A_ScriptName, nButtons := 1, bName1 := "OK", bName2?, bName3?) {
+err0r := ""
+If RandomMsg = 0 {
+    If WinWait(MsgTitle " ahk_class #32770",, 2)
+        SetButtonNames()
+    Else err0r .= ":: MsgBox_ChangeButtonText failed! MsgTitle - " MsgTitle ": Timed out!"
+    }
+Else If WinWait(RandomMsg " ahk_class #32770",, 2) { ; 2s
+    WinSetTitle MsgTitle
+    SetButtonNames()
+    }
+Else err0r .= ":: MsgBox_ChangeButtonText failed! RandomMsg - " RandomMsg ": Timed out!"
+
+If err0r != ""
+    ToolTipFn(A_ThisHotkey "`n" err0r, 2000) ; 2s
+Else Return
+
+    SetButtonNames() {
+    ControlSetText bName1, "Button1"
+
+    If isSet(bName2)
+        ControlSetText bName2, "Button2"
+
+    If isSet(bName3)
+        ControlSetText bName3, "Button3"
+    }
+}
+
 ;------------------------------------------------------------------------------
 ;  = Control Panel Tools
 
@@ -1992,11 +2551,10 @@ ComObject("shell.application").ControlPanelItem("resmon.exe")      ; Resource Mo
 Run 'explorer.exe "ms-settings:windowsupdate"'                     ; Windows Update
 ComObject("shell.application").ControlPanelItem("taskschd.msc")    ; Task scheduler
 
-; CLSID List (Windows Class Identifiers)
+; CLSID List (Windows Class Identifiers)                           ; Find more in AutoHotkey.chm::/docs/misc/CLSID-List.htm
 ::{21EC2020-3AEA-1069-A2DD-08002B30309D}                           ; Control Panel (view: small icons) ; alt
 ::{26EE0668-A00A-44D7-9371-BEB064C98683}                           ; Control Panel (view: category) ; alternate
 ::{20D04FE0-3AEA-1069-A2D8-08002B30309D}                           ; This PC
-... Find more in AutoHotkey.chm::/docs/misc/CLSID-List.htm
 
 ; Others
 ComObject("shell.application").ControlPanelItem("winver")          ; Windows version
@@ -2060,6 +2618,13 @@ more? Check jeeswg's Explorer tutorial - https://www.autohotkey.com/boards/viewt
 */
 
 ; End of script code
+
+;------------------------------------------------------------------------------
+; * Test
+
+:*:test++:: {
+MsgBox ThisHotkey ":: Not assigned!",, 262144 ; 262144 = Always-on-top
+}
 
 ;------------------------------------------------------------------------------
 ; ChangeLog
@@ -2233,4 +2798,27 @@ v2.12 - 2024.10.31
  * fix `ToolTipFn` - failed to assign 1 and 20 to `WhichToolTip` variable, and hence failure to turn Off some ToolTips
  * rearrange/rename some function headings and update TOC
  * improve comments and small changes
+
+v2.13 - 2024.11.08
+ ★ add new shortcuts for `AHK Main Window` - cycling views through `Tab and `+Tab` (like browser tabs)
+ ★ add shortcut for copying text into a single line when using `Dark Mode - Window Spy`
+ ★ add shortcut for `Delete Empty Folder` in Windows File Explorer -- `^+d`
+ ★ add shortcut for `Extract from folder & delete` -- `^+e` -- this extracts all items(folders & files) from selected folder to parent folder and deletes the file after emptying it
+ ★ add `ahkDarkMenu()` to enable dark mode for `Menu()`
+ ★ add several functions that allow querying recycle bin for size and folders/files; display results and generate reports -- see shortcut `^+s` or function `RBinDisplay()`
+ ★ add new function `FileCreate_Or_Append` to open existing file If it exists to given path or open a new file and write contents of provided input
+ ★ add new function `MsgBox_Custom` to create custom MsgBox and rename 1/2/3 built-in buttons as required
+ * rebuild `GetKillTitles` function - add variable to limit size of MsgBox; add file list button If limit is exceeded and function `GetKillTitlesFileList` for it; improve displayed messages
+ * rename function and variables within - `FolderSizeFn` to `SizeFn` ; `FolderSizeB` to `SizeB` and so on
+ * remove "Size: " text additions in `SizeFn`. These can be added by calling function after returning results
+ * improve `Sort` commands by adding numerical sorting to match file sorting in windows file explorer as applicable
+ * remove negative numbers for Sleep and SetTimer commands from user-defined functions by using `Abs()` command and pre-assigned sign
+ * improve MsgBox commands by changing options from string to numbers (math)
+ * change shortcut to open Firefox Homepage from `^+h` to `!h`, and add explanation in comments
+ * change "=" to "==" (again) wherever applicable to enable case sensitivity
+ * improve `WindowsRefreshOrRun()` - comment out unnecessary `Sleep` command; rearrange/modify remaining commands
+ * replace `!` in If commands with `not` to improve readability
+ - remove unnecessary variable `errorTxt` from `ValidPath()`
+ * rearrange/rename some function headings and update TOC
+ * improve comments and other small changes
 */
