@@ -1,5 +1,12 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/No-2%20MultiClip.ahk
-; Last updated 2024.10.31
+; Last updated 2024.11.10
+
+; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
+; Search for below commands/functions by using control + F on the help webpage - https://www.autohotkey.com/docs/v2/lib/
+
+; comments begin with semi-colon ";" at start of line or space+; " ;" in middle of line
+; comments can also be show like this - "/*" comment text "*/"
+; and these two methods can be combined too :)
 
 ; /* AHK v2 No-2 MultiClip - CONTENTS */
 ; Settings
@@ -17,6 +24,8 @@
 ;  = MyNotification
 ;    + MyNotificationGui
 ;    + EndMyNotif
+;  = AHK Dark Mode functions
+;    + ahkDarkMenu
 ;  = MultiClip ClipArr
 ;    + ClipChanged
 ;    + InsertInClipArr
@@ -33,33 +42,39 @@
 ;    + RestoreClip
 ;  = ToolTip functions
 ;    + ToolTipFn
-; Test
+; * Test
 ; ChangeLog
 
 ;------------------------------------------------------------------------------
 ; Settings
+; Start of script code
 
 #Requires AutoHotkey v2.0
 #SingleInstance force
-KeyHistory 500
+KeyHistory 500 ; Max 500
 
 ;------------------------------------------------------------------------------
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 No-2 MultiClip v4.10"
+AHKname := "AHK v2 No-2 MultiClip v4.11"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
-MyNotificationGui("Loading " AHKname, -10000, 1550, 945, 1) ; 10000ms = 10 seconds (negative number so that timer will run only once), position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
+MyNotificationGui("Loading " AHKname, 10000, 1550, 945, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;--------
 ;  = AHK Dark Mode
 ; download .ahk files from the `Lib` folder in this repo
-; and save to disc at the same location as your script, inside a `Lib` folder 
+; and save to disc at the same location as your script, inside a `Lib` folder
+
+ahkDarkMenu()                                     ; enable dark theme for AHK menus
 
 #Include "Lib\Dark Mode - ToolTip.ahk"            ; 2024.10.15
 #Include "Lib\Dark Mode - MsgBox.ahk"             ; 2024.10.15
 ; Dark Mode - Window Spy                          ; 2024.10.15
+
+; to disable dark mode, comment out above commands and
+; check "MyNotification.AddText" and "MyNotification.BackColor" in `MyNotificationGui` function
 
 ;--------
 ;  = Initialise ClipArr
@@ -95,7 +110,7 @@ OnClipboardChange ClipChanged
 ; add current clipboard contents to first clipboard slot in ClipArr on start
 InsertInClipArr(A_Clipboard, 1) ; onstart = 1
 
-; save `ClipArr` contents to `ClipArrFile.txt` when the script exits by any means,
+; save `ClipArr` contents to `ClipArrFile.txt` when the script exits
 ; except when it is killed by something like "End Task" via Taskbar, Task Manager or similar
 OnExit SaveClipArr
 
@@ -109,7 +124,7 @@ PasteCStrings(20)
 ;  = Customise Tray Icon
 
 I_Icon := A_ScriptDir "\icons\2-512.ico"
-; Icon source: https://www.iconsdb.com/caribbean-blue-icons/2-icon.html     ; CC License
+; Icon source: https://www.iconsdb.com/caribbean-blue-icons/2-icon.html     ; CC License, see credits.md
 ; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing -- see section on "Check & Reload AHK" below
 If FileExist(I_Icon)
     TraySetIcon I_Icon
@@ -117,8 +132,8 @@ If FileExist(I_Icon)
 ;--------
 ;  = End auto-execute
 
-SetTimer () => EndMyNotif(), -1000 ; 1s ; new thread ; Reset notification timer to 1s after code in auto-execute section has finished running
-Return ; Ends auto-execute
+SetTimer () => EndMyNotif(), -1000  ; 1s ; new thread ; Reset notification timer to 1s after code in auto-execute section has finished running
+Return                              ; Ends auto-execute
 
 ; Below code can be placed anywhere in your script
 
@@ -143,8 +158,8 @@ If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; 3s timeout ; w
     WinMaximize
 }
 
-^!Numpad2:: { ; Ctrl + Alt + Numpad2 keys pressed together
-MyNotificationGui("Updating " AHKname,,, 945, 0) ; 500ms ; use Sleep coz reload cancels timers
+^!Numpad2:: {                                       ; Ctrl + Alt + Numpad2 keys pressed together
+MyNotificationGui("Updating " AHKname,,, 945, 0)    ; 500ms ; use Sleep coz reload cancels timers
 Reload
 }
 
@@ -155,7 +170,7 @@ Reload
 
 :?*x:v0+::PasteV(10) ; same as v10+ ; pastes value in slot #10 in ClipArr ; default value "j10"
 
-:?*x:c1+::Send "{Raw}" ClipArr.Get(1) ; Send first entry in raw mode, useful when Ctrl + V is disabled such as on banking sites
+:?*x:c1+::Send "{Raw}" ClipArr[1] ; Send first entry in raw mode, useful when Ctrl + V is disabled such as on banking sites
 
 :?*x:c0+::PasteC(10) ; same as c10+
 
@@ -169,17 +184,23 @@ Reload
 
 ;    + MyNotificationGui
 
-MyNotificationGui(mytext, myduration := -500, xAxis := 1550, yAxis := 985, timer := 1) { ; 500ms
-Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item.
-MyNotification.BackColor := "2C2C2E"                ; "2C2C2E" for dark mode ; "EEEEEE" for White background ; can be any RGB colour (it will be made transparent below)
+MyNotificationGui(mytext, myduration := 500, xAxis := 1550, yAxis := 985, timer := 1) { ; 500ms
+Global MyNotification := Gui("+AlwaysOnTop -Caption +ToolWindow")   ; +ToolWindow avoids a taskbar button and an Alt-Tab menu item
 MyNotification.SetFont("s9 w1000", "Arial")         ; font size 9, bold
-MyNotification.AddText("cWhite w230 Left", mytext)  ; "cWhite" for dark mode ; use "cBlack" for black text on white background
+
+; For dark mode
+MyNotification.BackColor := "2C2C2E"                ; "2C2C2E" for dark mode background
+MyNotification.AddText("cWhite w230 Left", mytext)  ; "cWhite" for dark mode text
+
+; For light mode, comment out the above dark mode commands and uncomment below command -
+; MyNotification.AddText("w230 Left", mytext) ; light mode text (background unchanged)
+
 MyNotification.Show("x1650 y985 NoActivate")        ; NoActivate avoids deactivating the currently active window
 WinMove xAxis, yAxis,,, MyNotification
 If timer = 1
-    SetTimer () => EndMyNotif(), myduration ; 500ms ; new thread
+    SetTimer () => EndMyNotif(), Abs(myduration) * -1 ; 500ms ; new thread ; always negative number
 If timer = 0 {
-    Sleep myduration * -1
+    Sleep Abs(myduration)                           ; always positive number
     EndMyNotif()
     }
 }
@@ -189,6 +210,25 @@ If timer = 0 {
 
 EndMyNotif() {
 MyNotification.Destroy()
+}
+
+;------------------------------------------------------------------------------
+;  = AHK Dark Mode functions
+
+;    + ahkDarkMenu
+/* primary source: https://stackoverflow.com/a/58547831/894589
+   with modifications by
+     * lexikos https://www.autohotkey.com/boards/viewtopic.php?p=426482#p426482
+     * mcd https://www.autohotkey.com/boards/viewtopic.php?p=511756#p511756
+*/
+
+ahkDarkMenu() {
+    static uxtheme := DllCall("GetModuleHandle", "str", "uxtheme", "ptr")
+    static SetPreferredAppMode := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 135, "ptr")
+    static FlushMenuThemes := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 136, "ptr")
+
+    DllCall(SetPreferredAppMode, "int", 1) ; 0 = Default, 1 = AllowDark, 2 = ForceDark, 3 = ForceLight, 4=Max
+    DllCall(FlushMenuThemes)
 }
 
 ;------------------------------------------------------------------------------
@@ -202,13 +242,13 @@ MyNotification.Destroy()
 
 ClipChanged(DataType) {
 
-If DataType = 0 { ; 0 Clipboard is now empty
-    ; ToolTipFn("DataType: 0 - Clipboard is now empty", -1000) ; 1s
+If DataType = 0 {                                               ; 0 Clipboard is now empty
+    ; ToolTipFn("DataType: 0 - Clipboard is now empty", 1000)   ; 1s
     Exit
     }
 
-Else If DataType = 2 { ; 2 Clipboard contains something entirely non-text such as a picture
-    ToolTipFn("DataType: 2 - Non-text copied", -1000) ; 1s
+Else If DataType = 2 {                                  ; 2 Clipboard contains something entirely non-text such as a picture
+    ToolTipFn("DataType: 2 - Non-text copied", 1000)    ; 1s
     Exit
     }
 
@@ -227,7 +267,7 @@ Cliptemp := StrReplace(text,"`r`n","`n")        ; fix for SendInput sending Wind
 
 If RegExMatch(Cliptemp,"^\s+$") {               ; don't insert empty strings into clipArr
     If onStart != 1                             ; If NOT on startup/reload
-        ToolTipFn("[~ Only \s ~]", -2000)       ; 2s ; show alert instead
+        ToolTipFn("[~ Only \s ~]", 2000)        ; 2s ; show alert instead
     Exit
     }
 
@@ -235,7 +275,7 @@ Cliptemp := RegExReplace(Cliptemp,"^\s+|\s+$")  ; remove leading/trailing \s = [
 
 ; use Loop to check if Cliptemp is already in an array. If found, remove it and retrieve its `Index`
 Loop LimitClipArr {
-    If Cliptemp == ClipArr.Get(A_Index) {
+    If Cliptemp == ClipArr[A_Index] {
         ClipArr.RemoveAt(A_Index)
         FoundClip := A_Index
         Break
@@ -253,9 +293,9 @@ Else ClipArrToolTipFn()
 ; clipboard change alert tooltip
 
 ClipArrToolTipFn() {
-If StrLen(ClipArr.Get(1)) > 1000                                ; trim If more than 1000 characters
-    ToolTipFn(SubStr(ClipArr.Get(1), 1, 1000) "`n... and more") ; 500ms
-Else ToolTipFn(ClipArr.Get(1)) ; 500ms
+If StrLen(ClipArr[1]) > 1000                                ; trim If more than 1000 characters
+    ToolTipFn(SubStr(ClipArr[1], 1, 1000) "`n… and more")   ; 500ms
+Else ToolTipFn(ClipArr[1])                                  ; 500ms
 }
 
 ;--------
@@ -265,7 +305,7 @@ Else ToolTipFn(ClipArr.Get(1)) ; 500ms
 SaveClipArr(*) {
 Result := ""
 Loop ClipArr.Length
-    Result .= ClipArr.Get(A_Index) delim
+    Result .= ClipArr[A_Index] delim
 If FileExist(ClipArrFile)       ; check if file exists
     FileRecycle ClipArrFile     ; send old file to recycle bin
     ; old clipboard contents can be retrieved by restoring ClipArrFile from recycle bin
@@ -277,9 +317,8 @@ FileAppend Result, ClipArrFile  ; create new file and save current clipArr conte
 ;    + PasteVStrings
 
 PasteVStrings(number) {
-Loop number {
+Loop number
     Hotstring(":?*x:v" A_Index "+", PasteV)
-    }
 }
 
 /* use Loop to replace serialised hotstrings
@@ -294,8 +333,8 @@ PasteV(ThisHotkey)
 
 PasteV(hk) {
 RegExMatch(hk, "\d+", &SubPat)
-Try PasteThis(ClipArr.Get(SubPat[]))
-; Try Send ClipArr.Get(SubPat[]) ; alternative
+Try PasteThis(ClipArr[SubPat[]])
+; Try Send ClipArr[SubPat[]] ; alternative
 }
 
 ;--------
@@ -303,7 +342,7 @@ Try PasteThis(ClipArr.Get(SubPat[]))
 
 PasteCStrings(number) {
 Loop number {
-    If A_Index = 1  ; do not create c1+ hotstring, already assigned to "{Raw}" ClipArr.Get(1)
+    If A_Index = 1  ; do not create c1+ hotstring, already assigned to "{Raw}" ClipArr[1]
         Continue    ; = same as saying "skip"
     Hotstring(":?*x:c" A_Index "+", PasteC)
     }
@@ -327,7 +366,7 @@ PasteAll(SubPat[])
 
 PasteAll(hkey) {
 Loop hkey {
-    Try clipVar := ClipArr.Get(A_Index)
+    Try clipVar := ClipArr[A_Index]
     Catch IndexError
         Result .= "`n"
     Else Result .= clipVar "`n"
@@ -365,11 +404,6 @@ ClipMenu.Add("&m = "    ClipTrim(17)  ,FnName) ; number of spaces between charac
 ClipMenu.Add("&,    = " ClipTrim(18)  ,FnName) ; and can be changed to reflect your system font and display settings
 ClipMenu.Add("&.    = " ClipTrim(19)  ,FnName)
 ClipMenu.Add("&/   = "  ClipTrim(20)  ,FnName)
-/* ; alternative method to populate slots without shortcuts and without messing about with spaces
-Loop 20 {
-    ClipMenu.Add(A_Index " = " ClipTrim(A_Index), FnName)
-    }
-*/
 
 ; show pop-up menu
 ClipMenu.Show
@@ -379,7 +413,7 @@ ClipMenu.Show
 ;    + ClipTrim
 
 ClipTrim(number) {
-Try trimmed := SubStr(StrReplace(ClipArr.Get(number), "`n", A_Space), 1, 90) ; show first 90 characters, replace new line with Space
+Try trimmed := SubStr(StrReplace(ClipArr[number], "`n", A_Space), 1, 90) ; show first 90 characters, replace new line with Space
 Catch as e {
     ClipArr.InsertAt(number, "[~Err0r~]: " Type(e) " - " e.Message)
     Return "[~Err0r~]"
@@ -391,7 +425,7 @@ Return trimmed
 ;    + SendClipFn
 
 SendClipFn(item, position, ClipMenu) {
-PasteThis(ClipArr.Get(position))
+PasteThis(ClipArr[position])
 }
 
 ;------------------------------------------------------------------------------
@@ -411,18 +445,18 @@ Else {
         A_Clipboard := pasteText            ; copy pasteText to clipboard
         tmp_clip2 := A_Clipboard
         While tmp_clip2 !== pasteText {     ; validate clipboard
-            Sleep 50 ; 50ms
-            If A_Index > 5 { ; max 250ms
-                ToolTipFn(A_ThisHotkey ":: PasteThis Copying Failed?") ; 500ms
-                OnClipboardChange ClipChanged, 1 ; enable callback
+            Sleep 50                        ; 50ms
+            If A_Index > 5 {                ; max 250ms
+                ToolTipFn(A_ThisHotkey ":: PasteThis Copying Failed?")  ; 500ms
+                OnClipboardChange ClipChanged, 1                        ; enable callback
                 Exit
                 }
             }
         }
     Else tmp_clip := A_Clipboard
-    Send "^v"  ; paste
+    Send "^v"                                                   ; paste
     If tmp_clip !== pasteText
-        SetTimer () => RestoreClip(tmp_clip, tmp_clip2), -100 ; 100ms  ; new thread - don't wait for restoration
+        SetTimer () => RestoreClip(tmp_clip, tmp_clip2), -100   ; 100ms  ; new thread - don't wait for restoration
     }
 }
 
@@ -432,9 +466,9 @@ Else {
 RestoreClip(tmp_clip, tmp_clip2) {
 A_Clipboard := ClipboardAll(tmp_clip)   ; restore clipboard
 While tmp_clip2 == A_Clipboard {        ; validate clipboard
-    Sleep 50 ; 50ms
-    If A_Index > 5 { ; max 250ms
-        ToolTipFn(A_ThisHotkey ":: PasteThis Restoration Failed", -5000) ; 5s
+    Sleep 50                            ; 50ms
+    If A_Index > 5 {                    ; max 250ms
+        ToolTipFn(A_ThisHotkey ":: PasteThis Restoration Failed", 5000) ; 5s
         OnClipboardChange ClipChanged, 1
         Exit
         }
@@ -466,28 +500,32 @@ tmp_clip2       0           > 1     > 0
 
 ;    + ToolTipFn
 
-ToolTipFn(mytext, myduration := -500, xAxis?, yAxis?) { ; 500ms
+ToolTipFn(mytext, myduration := 500, xAxis?, yAxis?) { ; 500ms
 If not IsSet(WhichToolTip)
-    static WhichToolTip := 1
+    Static WhichToolTip := 1    ; 1
 Else {
-    ToolTip(,,, WhichToolTip) ; turn Off previous ToolTip
-    WhichToolTip++
+    ToolTip(,,, WhichToolTip)   ; turn Off previous ToolTip
+    WhichToolTip++              ; add 1 to variable
 }
 
-; reset WhichToolTip parameter If it exceeds 20
-If WhichToolTip > 20
-    WhichToolTip := 1
+; If WhichToolTip variable exceeds 20
+If WhichToolTip > 20            ; inbuilt limit of 20
+    WhichToolTip := 1           ; reset to 1
 
 ToolTip mytext, xAxis?, yAxis?, WhichToolTip
-SetTimer () => ToolTip(,,, WhichToolTip), myduration ; 500ms ; new thread
+SetTimer () => ToolTip(,,, WhichToolTip), Abs(myduration) * -1 ; 500ms ; new thread ; always negative number
 }
 
 ;------------------------------------------------------------------------------
-; Test
+; * Test
 
 :*:test++:: {
+
+; save current array contents to file
 SaveClipArr()
-; save current array contents to file ; If script is reloaded after test, restore array contents by restoring file from recycle bin
+; If script is reloaded after test, saved file will be deleted. In this case, restore array contents by
+; (a) Exiting this script (b) restoring deleted file from recycle bin (c) running this script again
+
 A_Clipboard := "a1"
 Global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
 ClipMenuFn(SendClipFn)  ; show menu - ClipMenu
@@ -554,7 +592,7 @@ v4.08 - 2024.10.11
  ★ add `Dark ToolTip` section to adapt `ToolTipFn` function for windows dark mode
  * improve `ToolTipFn` function by removing unnecessary commands, change variable `ToolTipNo` to `WhichToolTip` (to match AHK docs) and change it from `Global` to `static` variable
  - remove `ToolTipOff` function
- * change `myduration` argument in `MyNotificationGui` function to use negative numbers because negative Sleep is smaller error than forever cycling SetTimer AND to match `ToolTipFn`; consequently switch negative multiplier from SetTimer to Sleep 
+ * change `myduration` argument in `MyNotificationGui` function to use negative numbers because negative Sleep is smaller error than forever cycling SetTimer AND to match `ToolTipFn`; consequently switch negative multiplier from SetTimer to Sleep
  * change `ClipMenuFn` shortcut from `p++` to `c++` - more intuitive
  * change `c++` shortcut to `c1+` - more intuitive, old legacy and also match `PasteCStrings` function
  * improve `InsertInClipArr` by removing unnecessary preliminary comparison, preventing addition of empty strings to clipArr and adding conditional ToolTip
@@ -577,4 +615,11 @@ v4.10 - 2024.10.31
  * add missing `Else` commands to `ClipChanged` function
  * fix `ToolTipFn` - failed to assign 1 and 20 to `WhichToolTip` variable, and hence failure to turn Off some ToolTips
  * improve comments and small changes
+
+v4.11 - 2024.11.10
+ ★ add `ahkDarkMenu()` to enable dark mode for `Menu()`
+ - remove negative numbers for Sleep and SetTimer commands from user-defined functions by using `Abs()` command and pre-assigned sign
+ * replace `.Get` commands with `[Index]` when applicable because they are equivalent and "__Item is not called"
+ * rearrange/rename/update headings in TOC
+ * improve comments and other small changes
 */
