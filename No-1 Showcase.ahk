@@ -1,5 +1,5 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/No-1%20Showcase.ahk
-; Last updated 2024.11.10
+; Last updated 2024.11.11
 
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
 ; Search for below commands/functions by using control + F on the help webpage - https://www.autohotkey.com/docs/v2/lib/
@@ -15,10 +15,10 @@
 ;  = AHK Dark Mode
 ;  = Show/Hide OS files
 ;  = Customise Tray Icon
-;  = Capitalise first letter exclusion Group
+;  = Capitalise first letter opt-in Group
 ;  = Close With Esc/Q/W Group
 ;  = Horizontal Scrolling Group
-;  = Media Keys Group (disabled)
+;  = Media Keys Restored Group (disabled)
 ;  = Symbols In File Names Group
 ;  = WrapText variables
 ;  = WrapText Disabled Group
@@ -122,6 +122,8 @@
 ;    + SnipFromMenu
 ;    + PrintScreenFn
 ;    + ScreenshotFileOp
+;  = Check Window Focus/Control
+;    + CheckControlRegEx
 ;  = Windows File Explorer Fn
 ;    + GetFolderSize
 ;    + RBinQuery
@@ -160,7 +162,7 @@ KeyHistory 500 ; Max 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 No-1 Showcase v2.13"
+AHKname := "AHK v2 No-1 Showcase v2.14"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, 10000, 1550, 985, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -206,9 +208,9 @@ If FileExist(I_Icon)
     TraySetIcon I_Icon
 
 ;--------
-;  = Capitalise first letter exclusion Group
+;  = Capitalise first letter opt-in Group
 
-GroupAdd "CapitaliseFirstLetter", "ahk_class #32770"                                ; Save as dialogue
+GroupAdd "CapitaliseFirstLetter_optIn", "ahk_class Notepad++"                       ; Notepad++ text editor
 
 ;--------
 ;  = Close With Esc/Q/W Group
@@ -225,14 +227,19 @@ GroupAdd "HorizontalScroll1"    , "ahk_class ApplicationFrameWindow"            
 GroupAdd "HorizontalScroll1"    , "ahk_class MozillaWindowClass"                    ; Firefox
 GroupAdd "HorizontalScroll1"    , "ahk_class SALFRAME"                              ; LibreOffice
 
-/*
 ;--------
-;  = Media Keys Group (disabled)
-; uncomment to use, if media keys are remapped to navigation keys in "Remap Keys" section
+;  = Media Keys Restored Group (disabled)
+/* ; uncomment to use, if media keys are remapped to navigation keys in "Remap Keys" section
 
-GroupAdd "MediaKeys"            , "ahk_class MediaPlayerClassicW"                   ; MPC-HC
-GroupAdd "MediaKeys"            , "MPC-HC D3D Fullscreen"                           ; MPC-HC Full screen
-GroupAdd "MediaKeys"            , "ahk_class PotPlayer64"                           ; PotPlayer
+GroupAdd "MediaKeysRestored"    , "ahk_class MediaPlayerClassicW"                   ; MPC-HC
+GroupAdd "MediaKeysRestored"    , "MPC-HC D3D Fullscreen"                           ; MPC-HC Full screen
+GroupAdd "MediaKeysRestored"    , "ahk_class PotPlayer64"                           ; PotPlayer
+; ahk_class RegEdit_RegEdit                                                          ; Registry Editor ; by default because AutoHotkey requires UIAccess
+
+; To enable UIAccess for scripts by default,
+; Navigate to the `UiAccessCommandKeyValue` in "HKEY_CLASSES_ROOT\AutoHotkeyScript\Shell\uiAccess\Command"
+; copy it and paste it as (Default) value in "HKEY_CLASSES_ROOT\AutoHotkeyScript\Shell\Open\Command"
+; Source: https://blog.danskingdom.com/Prevent-Admin-apps-from-blocking-AutoHotkey-by-using-UI-Access/
 */
 
 ;--------
@@ -767,7 +774,7 @@ Else {
 If WinActive(" — Mozilla Firefox") ; If not new tab, then open new one
     Send "^t"
 Else Send "^l"  ; If new tab, focus address bar
-Sleep 500       ; wait for focus - change as per your system performance
+Sleep 250       ; 250ms ; wait for focus - change as per your system performance
 Send "{Raw}chrome://browser/content/places/places.xhtml`n" ; `n = {Enter}
 }
 
@@ -869,24 +876,27 @@ Else {
     ClassNN := ControlGetClassNN(ControlGetFocus("A"))
 
     ; If keyboard focus = file list
-    If ClassNN == "DirectUIHWND2"
+    If ClassNN ~= "DirectUIHWND" ; RegEx match
         path := ValidPath()
 
     ; If keyboard focus = address bar
     Else If ClassNN == "Microsoft.UI.Content.DesktopChildSiteBridge1" {
         path := ValidPath()
-        Send "{F6 2}{Down}{Home}" ; Return focus to file list
+        Send "{F6 2}{Down}{Home}"           ; Return focus to file list
+        CheckControlRegEx("DirectUIHWND")   ; ~= force focus File List
         }
 
     ; If keyboard focus = navigation pane
     Else If ClassNN == "SysTreeView321" {
-        ToolTipFn("Focus is in Navigation Pane! Operation Aborted!", 2000) ; 2s
+        ToolTipFn("Focus is in Navigation Pane! Operation Aborted!", 2000)  ; 2s
         Send "{F6}{Home}"                                                   ; Return focus to file list
+        CheckControlRegEx("DirectUIHWND")                                   ; ~= force focus File List
         Exit
         }
 
     ; keyboard focus = unknown.. search or dialogue box or something else?
     Else {
+        A_Clipboard := ClassNN
         ToolTipFn("Operation aborted because of unknown focus!`nClassNN: " ClassNN, 2000) ; 2s
         Exit
         }
@@ -905,8 +915,13 @@ Else {
 ;      * Extract from folder & delete
 
 ^+e:: {
-SourceFolder := CaptureFolderPath("`nSource Folder")            ; D:\Torrent\Complete\Movies
-DestinationFolder := RegExReplace(SourceFolder, "\\[^\\]+$")    ; D:\Torrent\Complete
+
+; extract folder path using clipboard
+SourceFolder := CaptureFolderPath("`nSource Folder")            ; e.g., D:\Movies
+
+; remove folder "Movies" and determine "D:\" is the destination
+DestinationFolder := RegExReplace(SourceFolder, "\\[^\\]+$")    ; Result → D:\
+
 If not DirExist(DestinationFolder) {
     MsgBox "Source: " SourceFolder "`nDestination: " DestinationFolder "`nDirectory does not exist!",, 262144 ; 262144 = Always-on-top
     Exit
@@ -992,28 +1007,38 @@ A_Clipboard := RegExReplace(files, "\.[\w]+$")              ; remove last ext
 ;  = Capitalise the first letter of a sentence
 ; modified from https://www.autohotkey.com/board/topic/132938-auto-capitalize-first-letter-of-sentence/?p=719739
 
-#HotIf not WinActive("ahk_group CapitaliseFirstLetter") ; exclude 'Save As' dialogue box
+#HotIf WinActive("ahk_group CapitaliseFirstLetter_optIn")
+; Below function is ENABLED in windows belonging to this group
 
-; Triggers       ; add or disable one or more as needed
 ; ~NumpadEnter:: ; disabled by default because of too many false positives
 ; ~Enter::       ; disabled - uncomment to use
 ~NumpadDot::
 ~.::
 ~!::
-~?:: {
+~?::
+; ~？:: ; Unicode U+003F QUESTION MARK
+; Triggers       ; add or disable one or more as needed
+{
 cfc1 := InputHook("L1 V C","{Space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 1st character, visible, case sensitive ; .a → .A
 cfc1.Start
 cfc1.Wait
 If cfc1.EndReason == "Match" {
-    If ThisHotkey == "~!" or ThisHotkey == "~?" ; If ! or ? is the trigger, then add a space b/w trigger and 1st character ; !a → ! A  and ?b → ? B
+    If ThisHotkey == "~." OR ThisHotkey == "~NumpadDot"
+    ; in case NumpadDot or . is the trigger, then don't capitalise coz typing the website address and file names is problematic ;  Example.exe → Example.exe (no change)
+        Send "{BS}" cfc1.Input
+    
+    ; Else If ThisHotkey == "~NumpadEnter" OR ThisHotkey == "~Enter"
+    ; in case NumpadEnter or Enter is the trigger, capitalise 1st character BUT don't add space, coz space is not necessary when creating a new paragraph
+    ; commented out because trigger is disabled
+    ;     Send "{BS}+" cfc1.Input
+    
+    Else { ; in case ! or ? is the trigger, then add a space and capitalise 1st character ; !a → ! A  and ?b → ? B
         Send "{BS} +" cfc1.Input
-    Else {
-        Send "{BS}+" cfc1.Input ; If Dot or NumpadDot is the trigger, don't add space, coz typing the website address is problematic
         ; SoundBeep 1500, 50 ; play a sound when successful - Frequency(a number between 37 and 32767), Duration in milliseconds
         ; SoundPlay "C:\Windows\Media\Windows Information Bar.wav" ; alternative to SoundBeep
         ; SoundPlay A_WinDir "\Media\Windows Balloon.wav"          ; alternative to SoundBeep
         }
-    Exit
+    Exit ; stop capture if match found
     }
 If cfc1.EndKey == "Space" { ; prevent cfc2 from firing for numbers or symbols. Example: 0.2ms is not changed to 0.2Ms
     cfc2 := InputHook("L1 V C","{Space}{LShift}{RShift}{CapsLock}", "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z") ; captures 2nd character, visible, case sensitive ; . a → . A
@@ -1131,7 +1156,7 @@ Still not working? Try other niche solutions mentioned here - https://superuser.
 ; uncomment to use, if media keys are remapped to navigation keys in "Remap Keys" section
 
 /*
-#HotIf WinActive("ahk_group MediaKeys")
+#HotIf WinActive("ahk_group MediaKeysRestored")
 
 ; restore default actions
 Media_Next::Media_Next
@@ -1423,13 +1448,12 @@ N°. 2 - source: https://www.autohotkey.com/boards/viewtopic.php?p=543680#p54368
 ExplorerRefresh() => PostMessage(WM_COMMAND := 0x111, Refresh := 41504,, HWND_BROADCAST := 0xFFFF)
 
 N°. 3 - source: https://www.autohotkey.com/boards/viewtopic.php?p=543680#p543680
-UpdateWindows()
-{
-    _ttm := A_TitleMatchMode
-    SetTitleMatchMode 'RegEx'
-    for window in WinGetList("ahk_class ExploreWClass|CabinetWClass|Progman")
-        PostMessage 0x111 , 41504 ,,, window
-    SetTitleMatchMode _ttm
+UpdateWindows() {
+_ttm := A_TitleMatchMode
+SetTitleMatchMode 'RegEx'
+for window in WinGetList("ahk_class ExploreWClass|CabinetWClass|Progman")
+    PostMessage 0x111 , 41504 ,,, window
+SetTitleMatchMode _ttm
 }
 
 N°. 4 - Source: https://www.autohotkey.com/board/topic/12342-showhide-hidden-files-and-folders/#entry79944
@@ -1476,13 +1500,16 @@ Send "{F4}"
 While ControlGetClassNN(ControlGetFocus("A")) !== "Microsoft.UI.Content.DesktopChildSiteBridge1" {
     Sleep 100
     If A_Index > 5 {                                        ; = Sleep 500ms ; wait until focus is on address bar
-        ToolTipFn("Failed to focus address bar", 1000)      ; 1s
+        ToolTipFn("Failed to focus address bar!", 2000)     ; 2s
         Return "err0r"
         }
     }
 If WinWait("PopupHost ahk_class Microsoft.UI.Content.PopupWindowSiteBridge",, 2) ; 2s - wait for drop down
     Return "Success"
-Else Return "err0r"
+Else {
+    ToolTipFn("Pop-up failed to appear!", 2000)     ; 2s
+    Return "err0r"
+    }
 }
 
 ;--------
@@ -2059,6 +2086,21 @@ FileMove MyPath, NewPath                ; rename
 ; Run 'mspaint.exe "' NewPath '"',,"Max"                                ; open in paint
 ; OpenFolder("C:\Users\" A_UserName "\Pictures\Screenshots\")           ; open screenshot folder in explorer
 }
+
+;------------------------------------------------------------------------------
+;  = Check Window Focus/Control
+
+;    + CheckControlRegEx
+
+CheckControlRegEx(ClassNN := "DirectUIHWND") {
+; default "DirectUIHWND2" = File List focus in File Explorer ; "DirectUIHWND3" = File List focus in file explorer changed by ExplorerPatcher.exe
+If not ControlGetClassNN(ControlGetFocus("A")) ~= ClassNN {
+    WinGetClientPos , , &OutWidth, &OutHeight
+    MouseMove OutWidth * 0.75, OutHeight * 0.75 ; move mouse to bottom right quadrant (usually empty)
+    Send "{Click}"
+    }
+}
+
 
 ;------------------------------------------------------------------------------
 ;  = Windows File Explorer Fn
@@ -2790,7 +2832,7 @@ v2.11 - 2024.10.15
  * improve comments
 
 v2.12 - 2024.10.31
- * remove `%A_ScriptDir%` from #include commands. It is already built in
+ - remove `%A_ScriptDir%` from #include commands. It is already built in
  * rename `EncText` to `WrapTextFn`, `WrapTextFromMenu` to `WrapTextMenuSelectionFn`
  * improve all `WrapText` functions by adding Global variables for easy customisation
  * fix `WrapTextFn` by adding `Loop` command, because incorrect removal of leading/trailing characters under the assumption of mixed wrap characters. Note: keep old RegExReplace command in case some users want this behaviour.
@@ -2810,15 +2852,23 @@ v2.13 - 2024.11.08
  ★ add new function `MsgBox_Custom` to create custom MsgBox and rename 1/2/3 built-in buttons as required
  * rebuild `GetKillTitles` function - add variable to limit size of MsgBox; add file list button If limit is exceeded and function `GetKillTitlesFileList` for it; improve displayed messages
  * rename function and variables within - `FolderSizeFn` to `SizeFn` ; `FolderSizeB` to `SizeB` and so on
- * remove "Size: " text additions in `SizeFn`. These can be added by calling function after returning results
+ - remove "Size: " text additions in `SizeFn`. These can be added by calling function after returning results
  * improve `Sort` commands by adding numerical sorting to match file sorting in windows file explorer as applicable
- * remove negative numbers for Sleep and SetTimer commands from user-defined functions by using `Abs()` command and pre-assigned sign
+ - remove negative numbers for Sleep and SetTimer commands from user-defined functions by using `Abs()` command and pre-assigned sign
  * improve MsgBox commands by changing options from string to numbers (math)
  * change shortcut to open Firefox Homepage from `^+h` to `!h`, and add explanation in comments
  * change "=" to "==" (again) wherever applicable to enable case sensitivity
  * improve `WindowsRefreshOrRun()` - comment out unnecessary `Sleep` command; rearrange/modify remaining commands
  * replace `!` in If commands with `not` to improve readability
  - remove unnecessary variable `errorTxt` from `ValidPath()`
- * rearrange/rename some function headings and update TOC
+ * rearrange/rename/update headings in TOC
+ * improve comments and other small changes
+
+v2.14 - 2024.11.11
+ * change the nature of `Capitalise first letter` section from opt-out to opt-in. Renamed group name from `CapitaliseFirstLetter` to `CapitaliseFirstLetter_optIn` and changed the example.
+ * change behaviour of capitalisation when dot/numdot is followed immediately by alphabet - stop inserting Space to allow for trigger-free typing of file extensions
+ * renamed group `MediaKeys` to `MediaKeysRestored` for clarity and added comment on UIAccess
+ * for users running explorerPatcher.exe, to prevent explorer shortcuts from breaking, change case sensitive matching to RegEx matching for ClassNN, and create new function `CheckControlRegEx`
+ * improve `FocusExplorerAddressBar()` to show tooltip on failure
  * improve comments and other small changes
 */
