@@ -1,9 +1,13 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/standalone/WallpaperPath.ahk
 ; Last updated 2024.11.20
 
-    /* CONTENTS v6.01 */
+    /* CONTENTS v6.02 */
 ; Hotkey
 ; User-defined functions
+;  = Clipboard function
+;    + CallClipWait
+;  = ToolTip function
+;    + ToolTipFn
 ;  = Extract wallpaper location from registry (pure AHK)
 ;    + WallpaperPath_v2
 ;    + WallpaperPath_v3
@@ -11,9 +15,6 @@
 ;  = Extract wallpaper location from registry (AHK + PowerShell)
 ;    + WallpaperPath_v5() - Output through clipboard
 ;    + WallpaperPath_v6() - Output through array without altering clipboard
-;  = CallClipWait
-;  = ToolTip function
-;    + ToolTipFn
 ;  = Run PowerShell commands through AHK
 ;    + RunPS(commands)
 ;  = Locate TranscodedWallpaper
@@ -25,15 +26,58 @@
 ;------------------------------------------------------------------------------
 ; Hotkey
 
+; #HotIf WinActive("ahk_class WorkerW ahk_exe explorer.exe")
+; commented out - enable shortcut on desktop only
+
 #W::{ ; Win + W
 MsgBox "WallpaperPath_v4`n" WallpaperPath_v4()
 }
 
+; #HotIf
+
 ;------------------------------------------------------------------------------
 ; User-defined functions
 
+;  = Clipboard function
+
+;    + CallClipWait
+
+CallClipWait(secs := 2, retrn := 0) {
+ToolTipFn("Waiting for clipboard", secs * 1000)        ; 2s
+If not ClipWait(secs) {
+    ToolTipFn(A_ThisHotkey ":: Clip Failed", 2000)     ; 2s
+    ; MyNotificationGui(A_ThisHotkey ":: Clip Failed", 2000) ; 2s ; alternative to tooltip
+    Exit
+    }
+
+If retrn = 1
+    Return A_Clipboard
+}
+
+;------------------------------------------------------------------------------
+;  = ToolTip function
+
+;    + ToolTipFn
+
+ToolTipFn(mytext, myduration := 500, xAxis?, yAxis?) { ; 500ms
+If not IsSet(WhichToolTip)
+    Static WhichToolTip := 1    ; 1
+Else {
+    ToolTip(,,, WhichToolTip)   ; turn Off previous ToolTip
+    WhichToolTip++              ; add 1 to variable
+}
+
+; If WhichToolTip variable exceeds 20
+If WhichToolTip > 20            ; inbuilt limit of 20
+    WhichToolTip := 1           ; reset to 1
+
+ToolTip mytext, xAxis?, yAxis?, WhichToolTip
+SetTimer () => ToolTip(,,, WhichToolTip), Abs(myduration) * -1 ; 500ms ; new thread ; always negative number
+}
+
+;------------------------------------------------------------------------------
 ;  = Extract wallpaper location from registry (pure AHK)
-; modified from v1 - https://gist.github.com/raveren/bac5196d2063665d2154#file-aio-ahk-L741
+; below code was modified from v1 - https://gist.github.com/raveren/bac5196d2063665d2154#file-aio-ahk-L741
 ; This source has code for multi-monitor setups that is not included here.
 ; Look for `openWallpaperUnderMouse()` and `getMonitorUnderMouse()` functions over there if you need it.
 
@@ -159,7 +203,7 @@ Loop regArr.Length {
 If FileExist(ConvString)
     Return ConvString           ; Return path to desktop wallpaper
 Else {
-    MsgBox key ":: WallpaperPath() is not valid!`nConverted String: " ConvString "`n`nTranscodedImageCache:`n" regBinary,, 262144 ; 262144 = Always-on-top
+    MsgBox key ":: WallpaperPath_v4() is not valid!`nConverted String: " ConvString "`n`nTranscodedImageCache:`n" regBinary,, 262144 ; 262144 = Always-on-top
     Exit
     }
 }
@@ -204,42 +248,6 @@ Return resultArr[resultArr.Length] ; show last line only
 }
 
 ;------------------------------------------------------------------------------
-;  = CallClipWait
-
-CallClipWait(secs := 2, retrn := 0) {
-ToolTipFn("Waiting for clipboard", secs * 1000)        ; 2s
-If not ClipWait(secs) {
-    ToolTipFn(A_ThisHotkey ":: Clip Failed", 2000)     ; 2s
-    ; MyNotificationGui(A_ThisHotkey ":: Clip Failed", 2000) ; 2s ; alternative to tooltip
-    Exit
-    }
-
-If retrn = 1
-    Return A_Clipboard
-}
-
-;------------------------------------------------------------------------------
-;  = ToolTip function
-
-;    + ToolTipFn
-
-ToolTipFn(mytext, myduration := 500, xAxis?, yAxis?) { ; 500ms
-If not IsSet(WhichToolTip)
-    Static WhichToolTip := 1    ; 1
-Else {
-    ToolTip(,,, WhichToolTip)   ; turn Off previous ToolTip
-    WhichToolTip++              ; add 1 to variable
-}
-
-; If WhichToolTip variable exceeds 20
-If WhichToolTip > 20            ; inbuilt limit of 20
-    WhichToolTip := 1           ; reset to 1
-
-ToolTip mytext, xAxis?, yAxis?, WhichToolTip
-SetTimer () => ToolTip(,,, WhichToolTip), Abs(myduration) * -1 ; 500ms ; new thread ; always negative number
-}
-
-;------------------------------------------------------------------------------
 ;  = Run PowerShell commands through AHK
 
 ;    + RunPS(commands)
@@ -277,4 +285,7 @@ v6.01 - 2024.11.20
  * add changelog
  * rearrange/rename/update headings in TOC
 
+v6.02 - 2024.11.20
+ * rearrange/rename/update headings in TOC
+ * improve comments and other small changes
 */
