@@ -1,5 +1,5 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/No-1%20Showcase.ahk
-; Last updated 2024.11.11
+; Last updated 2024.11.20
 
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
 ; Search for below commands/functions by using control + F on the help webpage - https://www.autohotkey.com/docs/v2/lib/
@@ -8,7 +8,7 @@
 ; comments can also be show like this - "/*" comment text "*/"
 ; and these two methods can be combined too :)
 
-; /* AHK v2 No-1 Showcase - CONTENTS */
+    /* AHK v2 No-1 Showcase - CONTENTS */
 ; Settings
 ; Auto-execute
 ;  = Set default state of Lock keys
@@ -26,6 +26,9 @@
 ; Hotkeys
 ;  = Check & Reload AHK
 ;  = Remap Keys
+;    + Disable Keys
+;    + Keyboard keys
+;    + Media keys (disabled)
 ;  = Customise CapsLock
 ;  = Move Mouse Pointer by pixel
 ;  = Close or Kill an app window
@@ -44,7 +47,9 @@
 ;  = Print Screen keys
 ; #HotIf Apps
 ;  = AHK Main Window
+;  = Calculator (classic)
 ;  = Firefox
+;  = KeePass
 ;  = Dark Mode - Window Spy
 ;  = Windows File Explorer
 ;    + Explorer main window
@@ -58,6 +63,7 @@
 ;      * Copy full path
 ;      * Copy file names without path
 ;      * Copy file names without extension and path
+;    + Locate desktop background
 ; #HotIf Groups
 ;  = Capitalise the first letter of a sentence
 ;  = Close With Esc/Q/W keys
@@ -105,7 +111,7 @@
 ;    + CallClipWait
 ;    + CallClipboard
 ;    + CallClipboardVar
-;  = ToolTip functions
+;  = ToolTip function
 ;    + ToolTipFn
 ;  = Wrap Text In Quotes or Symbols
 ;    + WrapTextMenuFn
@@ -137,11 +143,16 @@
 ;    + ValidPath
 ;    + DeleteEmptyFolder
 ;    + CaptureFolderPath
+;    + GetExplorerPath
+;    + WallpaperPath_v4
+;    + nxtBackground
 ;  = Check if file exists and create/append
 ;    + FileCreate_Or_Append
 ;  = Change MsgBox button text
 ;    + MsgBox_Custom
 ;    + MsgBox_ChangeButtonText
+;  = Calculator view (classic)
+;    + checkCalcView
 ;  = Control Panel Tools
 ;    + ControlPanelMenuFn
 ;    + ControlPanelSelect
@@ -162,7 +173,7 @@ KeyHistory 500 ; Max 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 No-1 Showcase v2.14"
+AHKname := "AHK v2 No-1 Showcase v2.15"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, 10000, 1550, 985, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -177,16 +188,23 @@ SetScrollLockState  "Off"   ; ScrollLock is off
 
 ;--------
 ;  = AHK Dark Mode
-; download .ahk files from the `Lib` folder in this repo
-; and save to disc at the same location as your script, inside a `Lib` folder
+; manually comment out below lines If dark mode is NOT enabled because "#Include cannot be executed conditionally"
 
-ahkDarkMenu()                                     ; enable dark theme for AHK menus
+; check windows registry to see If dark mode is enabled
+If not RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", 1) {
+    ; dark mode is enabled
+    ; Global isLightMode := 0                         ; store RegRead results in variable for repeated use
+    ahkDarkMenu()                                   ; enable dark theme for AHK menus
+    }
+; Else Global isLightMode := 1                        ; dark mode is NOT enabled
+
+; download .ahk files from the `Lib` folder in this repo
+; and save at the same under a `Lib` folder at the location of your .ahk script file
 
 #Include "Lib\Dark Mode - ToolTip.ahk"            ; 2024.10.15
 #Include "Lib\Dark Mode - MsgBox.ahk"             ; 2024.10.15
-; Dark Mode - Window Spy                          ; 2024.10.15
 
-; to disable dark mode, comment out above commands and
+; Dark Mode - Window Spy                          ; 2024.10.15
 ; check "MyNotification.AddText" and "MyNotification.BackColor" in `MyNotificationGui` function
 
 ;--------
@@ -268,8 +286,13 @@ Global WrapText_Leading9 := "“" , WrapText_Trailing9 := "”"      ; “” - 
 ;--------
 ;  = WrapText Disabled Group
 
-GroupAdd "NoWrapText"      , "ahk_exe mpc-hc.exe"                                   ; MPC-HC
-GroupAdd "NoWrapText"      , "ahk_class MSPaintApp"                                 ; MS Paint (classic)
+GroupAdd "WrapText_disabled"      , "ahk_exe mpc-hc.exe"                           ; MPC-HC
+
+GroupAdd "WrapText_disabled"      , "ahk_class CalcFrame"                          ; Calculator (classic)
+; Alt + number shortcuts are used to switch between Standard / Scientific / Programmer / Statistics calculators
+
+; GroupAdd "WrapText_disabled"      , "ahk_class MSPaintApp"                         ; MS Paint (classic)
+; commented out MSPaintApp from the group to enable wrapping text when inserting/editing text element (ClassNN: RICHEDIT50W1) - see `WrapTextFn` for more info
 
 ;--------
 ;  = End auto-execute
@@ -308,6 +331,8 @@ Reload
 ;------------------------------------------------------------------------------
 ;  = Remap Keys
 
+;    + Disable Keys
+
 ; Disable keys that you don't use or trigger accidentally too often or become annoying
 ; such keys are hardware specific - desktop vs. laptop, and may vary according to the region
 ; comment out the ones that don't work for you or don't apply to you
@@ -324,10 +349,12 @@ Insert::                    ; Insert mode
 NumpadIns:: {
 } ; disable keys - do nothing
 
-; Use Alt + Insert to toggle the 'Insert mode' and retain the key's function
-!Insert::Insert     ; Source: https://gist.github.com/endolith/823381
+;--------
+;    + Keyboard keys
 
-; Note: ^Insert = Copy(^c) as Windows default - this behaviour is not changed by the above
+; Use Alt + Insert to toggle the 'Insert mode' and retain the key's function
+; Note: ^Insert = Copy(^c) is Windows default behaviour and is not changed by this code
+!Insert::Insert     ; Source: https://gist.github.com/endolith/823381
 
 LWin & Tab::AltTab ; Left Win key works as left Alt key - disables task view
 
@@ -335,16 +362,19 @@ RAlt::!Space       ; Alt + Space brings up a window's title bar menu
 
 ^RCtrl::MButton    ; press Left & Right Ctrl button to simulate mouse Middle Click
 
-RCtrl & Up::     Send "{PgUp}"  ; Page up   - use "&" to create 2-key combo shortcut
-RCtrl & Down::   Send "{PgDn}"  ; Page down - use a variable number of spaces before Send command without affecting the command itself
-RControl & Left::Send "{Home}"  ; Home      - use alternate key name for RCtrl
->^Right::        Send "{End}"   ; End       - use >^ instead of Right Ctrl button and skip using "&"
+RCtrl & Up::        Send "{PgUp}"  ; Page up   - use "&" to create 2-key combo shortcut
+RCtrl & Down::      Send "{PgDn}"  ; Page down - use a variable number of spaces before Send command without affecting the command itself
+RControl & Left::   Send "{Home}"  ; Home      - use alternate key name for RCtrl
+>^Right::           Send "{End}"   ; End       - use >^ instead of Right Ctrl button and skip using "&"
 
 !m::WinMinimize "A"         ; Alt+ M = Minimize active window
 ; PostMessage 0x0112, 0xF020,,, "A" ; alternative, 0x0112 = WM_SYSCOMMAND, 0xF020 = SC_MINIMIZE
 
-/* ; remap media keys to navigation keys - disabled
-; uncomment to use and enable "Media Keys Group" If required
+/*
+;--------
+;    + Media keys (disabled)
+; remap media keys to navigation keys
+; uncomment to use and enable "MediaKeysRestored" if required
 
 Media_Play_Pause::PgUp
 Media_Stop::PgDn
@@ -567,7 +597,14 @@ Else {
     }
 Sleep 100 ; wait a bit after key release to prevent key release from waking up the monitor again
 ; Sleep 1000  ; simpler alternative to KeyWait commands
-SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
+SendMessage 0x0112, 0xF170, 2,, "Program Manager"
+    ; 0x0112 is WM_SYSCOMMAND, 0xF170 is SC_MONITORPOWER.
+    ; Use -1 in place of 2 to turn the monitor on.
+    ; Use 1 in place of 2 to activate the monitor's low-power mode.
+
+; further actions -
+; Send "{Media_Stop}"           ; stop playing all media
+; DllCall("LockWorkStation")    ; Lock Workstation - source: https://gist.github.com/raveren/bac5196d2063665d2154#file-aio-ahk-L741
 }
 
 ;--------
@@ -583,22 +620,22 @@ SendMessage 0x0112, 0xF170, 2,, "Program Manager"  ; 0x0112 is WM_SYSCOMMAND, 0x
 ;--------
 ;  = Wrap Text In Quotes or Symbols keys
 
-#HotIf not WinActive("ahk_group NoWrapText")
+#HotIf not WinActive("ahk_group WrapText_disabled")
 ; disables below hotkeys in apps that belonging to this group because they don't use it or have conflicts
 
 !q::WrapTextMenuFn() ; Alt + Q
 
 ; WrapText Keys - Alt + Number (from the number row)
-!1::WrapTextFn(WrapText_Leading1 , WrapText_Trailing1)      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
-!2::WrapTextFn(WrapText_Leading2 , WrapText_Trailing2)      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
-!3::WrapTextFn(WrapText_Leading3 , WrapText_Trailing3)      ; enclose in round brackets  ()
-!4::WrapTextFn(WrapText_Leading4 , WrapText_Trailing4)      ; enclose in square brackets []
-!5::WrapTextFn(WrapText_Leading5 , WrapText_Trailing5)      ; enclose in flower brackets {}
-!6::WrapTextFn(WrapText_Leading6 , WrapText_Trailing6)      ; enclose in accent/backtick ``
-!7::WrapTextFn(WrapText_Leading7 , WrapText_Trailing7)      ; enclose in percent sign %%
-!8::WrapTextFn(WrapText_Leading8 , WrapText_Trailing8)      ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
-!9::WrapTextFn(WrapText_Leading9 , WrapText_Trailing9)      ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
-!0::WrapTextFn( ""               , ""  )                    ; remove above quotes
+!1::WrapTextFn(WrapText_Leading1 , WrapText_Trailing1, 1)      ; enclose in single quotation '' - ' U+0027 : APOSTROPHE
+!2::WrapTextFn(WrapText_Leading2 , WrapText_Trailing2, 1)      ; enclose in double quotation "" - " U+0022 : QUOTATION MARK
+!3::WrapTextFn(WrapText_Leading3 , WrapText_Trailing3, 1)      ; enclose in round brackets  ()
+!4::WrapTextFn(WrapText_Leading4 , WrapText_Trailing4, 1)      ; enclose in square brackets []
+!5::WrapTextFn(WrapText_Leading5 , WrapText_Trailing5, 1)      ; enclose in flower brackets {}
+!6::WrapTextFn(WrapText_Leading6 , WrapText_Trailing6, 1)      ; enclose in accent/backtick ``
+!7::WrapTextFn(WrapText_Leading7 , WrapText_Trailing7, 1)      ; enclose in percent sign %%
+!8::WrapTextFn(WrapText_Leading8 , WrapText_Trailing8, 1)      ; enclose in ‘’ - ‘ U+2018 LEFT & ’ U+2019 RIGHT SINGLE QUOTATION MARK {single turned comma & comma quotation mark}
+!9::WrapTextFn(WrapText_Leading9 , WrapText_Trailing9, 1)      ; enclose in “” - “ U+201C LEFT & ” U+201D RIGHT DOUBLE QUOTATION MARK {double turned comma & comma quotation mark}
+!0::WrapTextFn( ""               , ""  , 1)                    ; remove above quotes
 
 #HotIf
 
@@ -670,8 +707,8 @@ SetPriority(*) {
 PrintScreenFn       ; take screenshot, save and rename
 }
 
+; #+r::           ; video snip shortcut, uncomment if desired
 ^PrintScreen::  ; Ctrl + Print Screen (key name = PrtSc, PrtScn or PrntScrn)
-; #+r::         ; video snip shortcut, uncomment if desired
 #+s:: {         ; Win + Shift + s
 SnipMenuFn
 }
@@ -686,7 +723,8 @@ SnipMenuFn
 ; because this is to enable below commands to apply on main windows of all running scrips irrespective of v1 or v2
 ; alternative to #HotIf WinActive(A_ScriptHwnd) applies only to the main window of current script
 
-^Tab:: { ; cycle through main window views
+^Tab:: { ; cycle through main window views like browser tabs
+
 winID := WinActive(".ahk - AutoHotkey v ahk_class AutoHotkey")
 Text := WinGetText()
 
@@ -756,7 +794,81 @@ Else {
 
 #HotIf
 
-;--------
+;------------------------------------------------------------------------------
+;  = Calculator (classic)
+
+#HotIf WinActive("ahk_class CalcFrame")
+
+!1:: ; Standard Calculator
+!2:: ; Scientific
+!3:: ; Programmer
+!4:: ; Statistics
+{
+; focus is on editing history and Alt + 3 is pressed
+If ControlGetClassNN(ControlGetFocus("A")) == "Edit1" AND ThisHotkey = "!3"
+    WrapTextFn(WrapText_Leading3 , WrapText_Trailing3) ; enclose in round brackets  ()
+Else ; switch calculator type and go to basic view
+    Send ThisHotkey "^{F4}"
+}
+
+
+; Toggle Date Calculation view
+^d:: {
+If checkCalcView() = 1
+    Send "^{F4}"    ; Ctrl + F4 = Basic view
+Else Send "^e"      ; Ctrl + E  = Date Calculation view
+}
+
+; Toggle Unit conversion view
+^u:: {
+If checkCalcView() = 2
+    Send "^{F4}"    ; Ctrl + F4 = Basic view
+Else Send "^u"      ; Ctrl + U  = Unit conversion view
+}
+
+^w::^F4     ; Go to Basic view
+
+^Tab:: {    ; cycle through calculator views like browser tabs
+
+CalcView := checkCalcView()
+
+If CalcView = 0             ; Basic view
+    Send "^u"               ; Ctrl + U  = Unit conversion view
+Else If CalcView = 1        ; Unit conversion view
+    Send "^e"               ; Ctrl + E  = Date Calculation view
+Else If CalcView = 2        ; Date Calculation view
+    MenuSelect , , "View", "Worksheets", "Mortgage"
+Else If CalcView = 3        ; Worksheets > Mortgage
+    MenuSelect , , "View", "Worksheets", "Vehicle lease"
+Else If CalcView = 4        ; Worksheets > Vehicle lease
+    MenuSelect , , "View", "Worksheets", "Fuel economy (mpg)"
+Else If CalcView = 5        ; Worksheets > Fuel economy (mpg)
+    MenuSelect , , "View", "Worksheets", "Fuel economy (L/100 km)"
+Else                        ; Worksheets > Fuel economy (L/100 km)
+    Send "^{F4}"            ; Ctrl + F4 = Basic view
+}
+
+^+Tab:: {
+
+CalcView := checkCalcView()
+
+If CalcView = 0             ; Basic view
+    MenuSelect , , "View", "Worksheets", "Fuel economy (L/100 km)"
+Else If CalcView = 1        ; Unit conversion view
+    Send "^{F4}"            ; Ctrl + F4 = Basic view
+Else If CalcView = 2        ; Date Calculation view
+    Send "^u"               ; Ctrl + U  = Unit conversion view
+Else If CalcView = 3        ; Worksheets > Mortgage
+    Send "^e"               ; Ctrl + E  = Date Calculation view
+Else If CalcView = 4        ; Worksheets > Vehicle lease
+    MenuSelect , , "View", "Worksheets", "Mortgage"
+Else If CalcView = 5        ; Worksheets > Fuel economy (mpg)
+    MenuSelect , , "View", "Worksheets", "Vehicle lease"
+Else                        ; Worksheets > Fuel economy (L/100 km)
+    MenuSelect , , "View", "Worksheets", "Fuel economy (mpg)"
+}
+
+#HotIf
 ;  = Firefox
 
 #HotIf WinActive("ahk_class MozillaWindowClass") ; main window ; excludes other dialogue boxes like "Save As" originating from ahk_exe firefox.exe
@@ -775,7 +887,8 @@ If WinActive(" — Mozilla Firefox") ; If not new tab, then open new one
     Send "^t"
 Else Send "^l"  ; If new tab, focus address bar
 Sleep 250       ; 250ms ; wait for focus - change as per your system performance
-Send "{Raw}chrome://browser/content/places/places.xhtml`n" ; `n = {Enter}
+Send "{Raw}chrome://browser/content/places/places.xhtml")
+Send "{Enter}"
 }
 
 ; Ctrl + Shift + Q = Exit (Disable default Firefox shortcut)
@@ -783,6 +896,15 @@ Send "{Raw}chrome://browser/content/places/places.xhtml`n" ; `n = {Enter}
 
 #HotIf
 
+
+;------------------------------------------------------------------------------
+;  = KeePass
+
+#HotIf WinActive("ahk_exe KeePass.exe")
+
+^n::^i ; not new database, new key entry
+
+#HotIf
 
 ;------------------------------------------------------------------------------
 ;  = Dark Mode - Window Spy
@@ -879,27 +1001,15 @@ Else {
     If ClassNN ~= "DirectUIHWND" ; RegEx match
         path := ValidPath()
 
-    ; If keyboard focus = address bar
-    Else If ClassNN == "Microsoft.UI.Content.DesktopChildSiteBridge1" {
-        path := ValidPath()
-        Send "{F6 2}{Down}{Home}"           ; Return focus to file list
-        CheckControlRegEx("DirectUIHWND")   ; ~= force focus File List
-        }
-
     ; If keyboard focus = navigation pane
     Else If ClassNN == "SysTreeView321" {
-        ToolTipFn("Focus is in Navigation Pane! Operation Aborted!", 2000)  ; 2s
+        ToolTipFn("Focus is in Navigation Pane! GetFolderSize Aborted!", 2000)  ; 2s
         Send "{F6}{Home}"                                                   ; Return focus to file list
         CheckControlRegEx("DirectUIHWND")                                   ; ~= force focus File List
         Exit
         }
 
-    ; keyboard focus = unknown.. search or dialogue box or something else?
-    Else {
-        A_Clipboard := ClassNN
-        ToolTipFn("Operation aborted because of unknown focus!`nClassNN: " ClassNN, 2000) ; 2s
-        Exit
-        }
+    Else path := [2, GetExplorerPath()] ; other ClassNN
 
     ; calculate folder size and display
     GetFolderSize(path[1], path[2])
@@ -1001,6 +1111,38 @@ A_Clipboard := RegExReplace(files, "\.[\w]+$")              ; remove last ext
 
 #HotIf
 
+;--------
+;    + Locate desktop background
+
+#HotIf WinActive("ahk_class WorkerW ahk_exe explorer.exe")
+
+#w:: { ; win + w
+path := WallpaperPath_v4()
+result := MsgBox_Custom(path, "Current wallpaper location", 256 + 262144, 3, "In Explorer?", "Next Pic?", "OK") ; = Yes / No / Cancel ; 256 Button2 default ; 262144 = Always-on-top
+
+; Actions
+If result == "Yes" ; Button1 renamed to "In Explorer?"
+    ; open path in windows file explorer and select file
+    Run 'explorer.exe /n,/e,/select, ' '"' path '"'
+
+Else If result == "No" { ; Button2 renamed to "Next Pic?"
+
+    ; ask slideshow to go to next wallpaper
+    nxtBackground()
+
+    ; delete old wallpaper
+    Try FileRecycle path
+    Catch as err { ; If error, open photo in default app
+        MsgBox A_ThisHotkey ":: Wallpaper deletion failed!`n" path "`n" Type(err) " - " err.What "`n" err.Message,, 262144 ; 262144 = Always-on-top
+        Try Run path
+        Catch as err ; If error, copy path to clipboard
+            MsgBox A_ThisHotkey ":: Wallpaper deletion failed!`n" path "`n" Type(err) " - " err.What "`n" err.Message,, 262144 ; 262144 = Always-on-top
+        }
+    }
+}
+
+#HotIf
+
 ;------------------------------------------------------------------------------
 ; #HotIf Groups
 
@@ -1026,12 +1168,12 @@ If cfc1.EndReason == "Match" {
     If ThisHotkey == "~." OR ThisHotkey == "~NumpadDot"
     ; in case NumpadDot or . is the trigger, then don't capitalise coz typing the website address and file names is problematic ;  Example.exe → Example.exe (no change)
         Send "{BS}" cfc1.Input
-    
+
     ; Else If ThisHotkey == "~NumpadEnter" OR ThisHotkey == "~Enter"
     ; in case NumpadEnter or Enter is the trigger, capitalise 1st character BUT don't add space, coz space is not necessary when creating a new paragraph
     ; commented out because trigger is disabled
     ;     Send "{BS}+" cfc1.Input
-    
+
     Else { ; in case ! or ? is the trigger, then add a space and capitalise 1st character ; !a → ! A  and ?b → ? B
         Send "{BS} +" cfc1.Input
         ; SoundBeep 1500, 50 ; play a sound when successful - Frequency(a number between 37 and 32767), Duration in milliseconds
@@ -1201,7 +1343,7 @@ Media_Play_Pause::Media_Play_Pause
 :*x:d++::       Send FormatTime(, "yyyy.MM.dd")             ; sends 2021.02.31
 :*x:date+::     Send FormatTime(, "dd.MM.yyyy")             ; sends 28.03.2020
 :*x:time+::     Send FormatTime(, "h:mm tt")                ; sends 6:48 PM
-:*x:datetime+:: Send FormatTime(, "dd/MM/yyyy h:mm tt")     ; sends 28/03/2020 6:46 PM
+:*x:datetime+:: Send FormatTime(, "dd.MM.yyyy h:mm tt")     ; sends 28.03.2020 6:46 PM
 
 ;------------------------------------------------------------------------------
 ;  = URL Encode/Decode
@@ -1370,13 +1512,13 @@ ahkDarkMenu() {
 ToggleOS(*) {
 ; alternative - Run ToggleSystemFiles.bat as administrator to toggle settings - https://superuser.com/a/1151851/391770
 If Status = 0 { ; enable if disabled
-    RegWrite "1", "REG_DWORD", "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
+    RegWrite "1", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     CheckRegWrite(Status)
     ToggleOSCheck
     SetTimer () => WindowsRefreshOrRun(), -100       ; 100ms ; new thread
     }
 Else { ; disable if enabled
-    RegWrite "0", "REG_DWORD", "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
+    RegWrite "0", "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden"
     CheckRegWrite(Status)
     ToggleOSCheck
     SetTimer () => WindowsRefreshOrRun(), -100       ; 100ms ; new thread
@@ -1387,7 +1529,7 @@ Else { ; disable if enabled
 ;    + CheckRegWrite
 
 CheckRegWrite(value) { ; check if RegWrite was success
-Global Status := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+Global Status := RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
 If value == Status {
     MsgBox "ToggleOS Failed",, 262144 ; 262144 = Always-on-top
     ; ToolTipFn("ToggleOS Failed", 1000) ; 1s, use tooltip and exit as an alternative to MsgBox
@@ -1400,7 +1542,7 @@ If value == Status {
 
 ToggleOSCheck() { ; tray tick mark
 If not IsSet(Status)
-    Global Status := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
+    Global Status := RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSuperHidden")
 If Status = 0
     A_TrayMenu.UnCheck "&Toggle OS files"
 Else A_TrayMenu.Check "&Toggle OS files"
@@ -1466,8 +1608,13 @@ PostMessage 0x111, 41504
 ;    + OpenFolder
 
 OpenFolder(path) {
-If WinExist("ahk_class CabinetWClass") {            ; if explorer is open
+If hwnd := WinExist("ahk_class CabinetWClass") {            ; if explorer is open
     WinActivate
+
+    ; if paths are equal, no further action is needed
+    If path = GetExplorerPath(hwnd)
+        Return
+
     If WinWaitActive(,, 2) {                        ; 2s = Sleep 2000, but sends next command as soon as activated, instead of waiting for the full 2000ms period
 
         ; wait for cursor focus
@@ -1477,15 +1624,13 @@ If WinExist("ahk_class CabinetWClass") {            ; if explorer is open
             }
 
         ; check to see if existing path is not equal to new path
-        Else If path !== CallClipboardVar(2, 1) {   ; 2s, Return
+        Else {
             Send "{Raw}" path
             WinWaitClose(,, 2)                      ; 2s - wait for drop down to disappear, then Send Enter ; WinWait commands used to prevent drop down display appearing after Enter - explorer bug
-            Send "{Enter}{F6 2}"
+            Send "{Enter}{F6 2}"                    ; focus file list
             }
-
-        ; if paths are equal, no further change is necessary, refocus on file list
-        Else Send "{F6 2}"
         }
+    Else Run 'explore "' path '"',,"Max"
     }
 ; if explorer is not open
 Else Run 'explore "' path '"',,"Max"
@@ -1658,19 +1803,22 @@ If Len <= 20    ; and select text only if text ≤ 20 characters (change limit a
 
 ;    + CallClipWait
 
-CallClipWait(secs) {
+CallClipWait(secs := 2, retrn := 0) {
 ToolTipFn("Waiting for clipboard", secs * 1000)        ; 2s
 If not ClipWait(secs) {
     ToolTipFn(A_ThisHotkey ":: Clip Failed", 2000)     ; 2s
     ; MyNotificationGui(A_ThisHotkey ":: Clip Failed", 2000) ; 2s ; alternative to tooltip
     Exit
     }
+
+If retrn = 1
+    Return A_Clipboard
 }
 
 ;--------
 ;    + CallClipboard
 
-CallClipboard(secs, retrn := 0) {
+CallClipboard(secs := 2, retrn := 0) {
 ToolTipFn("Waiting for clipboard", secs * 1000)     ; 2s
 Global clipSave := ClipboardAll()                   ; Global = Return clipSave
 A_Clipboard := ""
@@ -1687,7 +1835,7 @@ If not ClipWait(secs) {
 ;--------
 ;    + CallClipboardVar
 
-CallClipboardVar(secs, retrn := 0) {        ; copied text is sent to variable, clipboard is restored
+CallClipboardVar(secs := 2, retrn := 0) {   ; copied text is sent to variable, clipboard is restored
 If CallClipboard(secs, retrn) == "err0r"    ; ClipChanged is turned on
     Return "err0r"
 Else {
@@ -1698,7 +1846,7 @@ Else {
 }
 
 ;------------------------------------------------------------------------------
-;  = ToolTip functions
+;  = ToolTip function
 
 ;    + ToolTipFn
 
@@ -1770,7 +1918,16 @@ Else                                                        ; position = 10
 ;--------
 ;    + WrapTextFn
 
-WrapTextFn(q,p) {
+WrapTextFn(q, p, direct := 0) {
+
+; enable wrapping text when WrapTextFn is directly triggered in MSPaintApp when inserting/editing text element (ClassNN: RICHEDIT50W1)
+; If not, then just Send the triggered hotkey
+If direct = 1 AND WinActive("ahk_class MSPaintApp") AND ControlGetClassNN(ControlGetFocus("A")) !== "RICHEDIT50W1" {
+    Send A_ThisHotkey
+    Exit
+    }
+; Else proceed with wrapping text
+
 CallClipboard(2)                                        ; 2s, Exit
 TextString := StrReplace(A_Clipboard, "`r")             ; remove \r for StrLen
 TextStringInitial := TextString                         ; save initial string for later
@@ -1979,11 +2136,9 @@ If WinWaitClose("Snipping Tool Overlay ahk_exe SnippingTool.exe",, 15) and (A_Pr
     Else Run "mspaint.exe",,"Max"
 
     If WinWait("ahk_class MSPaintApp",, 3) { ; 3s
-        Sleep 500 ; 500ms
-        PostMessage 0x111, 57637,,, "ahk_class MSPaintApp"  ; 0x111 = Paste
-        ; Send "^v"                                         ; alternative to PostMessage
-        ; ControlSend "^v",, "ahk_class MSPaintApp"         ; alternative to Send / PostMessage
-        PostMessage 0x111, 620,,, "ahk_class MSPaintApp"    ; activate "Select" tool
+        Sleep 500                                           ; 500ms
+        Send "^v"                                           ; paste image from clipboard
+        ; ControlSend "^v",, "ahk_class MSPaintApp"           ; alternative to Send
         }
  */
     }
@@ -1992,7 +2147,7 @@ Else If A_PriorKey == "Escape"
 Else ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - 15s timeout", 2000) ; 2s
 }
 
-/* For older versions of screen snippingtool, below code may work
+/* For older versions of Snipping tool, below code may work
 
 SnipFromMenu(ItemName, ItemPos, MyMenu) {
 Send "{PrintScreen}"
@@ -2015,34 +2170,12 @@ If WinWaitClose(,, 15) and (A_PriorKey != "Escape") { ; 15s
 
     If WinWait("ahk_class MSPaintApp",, 3) ; 3s
         ; modified from https://www.autohotkey.com/boards/viewtopic.php?p=360163#p360163
-        PostMessage 0x111, 57637,,, "ahk_class MSPaintApp" ; 0x111 = Paste
-        ; Send "^v"                                 ; alternative to PostMessage
-        ; ControlSend "^v",, "ahk_class MSPaintApp" ; alternative to Send / PostMessage
+        Send "^v"                                           ; paste image from clipboard
+        ; ControlSend "^v",, "ahk_class MSPaintApp"         ; alternative to Send
     }
 Else ToolTipFn(A_ThisHotkey ":: Screen Snipping aborted - 15s timeout / Esc", 2000) ; 2s
 }
 
-;--------
-; use PostMessage to select tool -
-Free-Form       621
-Select          620
-Eraser          637
-Fill            623
-Pick            639
-Magnifier       638
-Pencil          636
-Brush           640
-AirBrush        627
-Text            622
-Line            624
-Curve           628
-Rectangle       641
-Polygon         632
-Ellipse         643
-Rounded_Rect    634
-
-PostMessage 0x111, 620,,, "ahk_pid " <Process ID> ; alternative to "ahk_class MSPaintApp"
-paint settings in registry → HKCU\Software\Microsoft\Windows\CurrentVersion\Applets\Paint\
 */
 
 ;--------
@@ -2050,7 +2183,7 @@ paint settings in registry → HKCU\Software\Microsoft\Windows\CurrentVersion\Ap
 
 PrintScreenFn(*) {
 ; save screenshot number in variable 'serial'
-serial := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer", "ScreenshotIndex", "1")
+serial := RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer", "ScreenshotIndex", "1")
 
 ; send Windows + Print Screen
 Send "#{PrintScreen}"
@@ -2182,7 +2315,7 @@ If driveLetters == "" {
     Exit
     }
 
-SID             := userSID()
+SID := userSID()
 
 ; list of folders/files visible in windows file explorer
 visibleArr := RBinVisible(driveLetters) ; returns [visibleSummary, visibleRBFCount, visibleTotalSizeB]
@@ -2291,11 +2424,12 @@ Return [RBSummary, TotalRBFCount, TotalSizeB, hiddenFileList]
 userSID() {
     If IsSet(SID)
         Return SID
+    ; Else ; proceed
 
-    Loop Reg "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList", "R KV" {
+    Loop Reg "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList", "R KV" {
         If (A_LoopRegName == "ProfileImagePath") {
             If InStr(RegRead(), A_UserName) {
-                static SID := StrReplace(A_LoopRegKey, "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\")
+                Static SID := StrReplace(A_LoopRegKey, "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\")
                 Return SID
                 }
             }
@@ -2449,6 +2583,78 @@ If not DirExist(clipped) {
 Else Return clipped
 }
 
+;--------
+;    + GetExplorerPath
+; source: https://old.reddit.com/r/AutoHotkey/comments/10fmk4h/get_path_of_active_explorer_tab/kuplyts/
+
+GetExplorerPath(hwnd := WinExist("A")) {
+Try activeTab := ControlGetHwnd("ShellTabWindowClass1", hwnd)
+Catch as err {
+    ToolTipFn(A_ThisHotkey ":: Failed to get GetExplorerPath(hwnd) -`n" err.Message, 2000) ; 2s
+    return false
+    }
+For w in ComObject("Shell.Application").Windows {
+    If (w.hwnd == hwnd) {
+        Static IID_IShellBrowser := "{000214E2-0000-0000-C000-000000000046}"
+        shellBrowser := ComObjQuery(w, IID_IShellBrowser, IID_IShellBrowser)
+        ComCall(3, shellBrowser, "uint*", &thisTab := 0)
+        If thisTab == activeTab
+            Return w.Document.Folder.Self.Path
+        }
+    }
+ToolTipFn(A_ThisHotkey ":: Failed to get GetExplorerPath(w.hwnd) match!", 2000) ; 2s
+Exit
+}
+
+;--------
+;    + WallpaperPath_v4
+; for more iterations of this function, visit this standalone script - https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/WallpaperPath.ahk
+
+WallpaperPath_v4(key := A_ThisHotkey) {
+
+; Read the binary value from the registry
+regBinary := RegRead("HKEY_CURRENT_USER\Control Panel\Desktop", "TranscodedImageCache") ; 1600 characters
+; alternative: regBinary := RegRead("HKEY_CURRENT_USER\Control Panel\Desktop", "TranscodedImageCache_000")
+
+; remove first 48 characters and create array
+regArr := StrSplit(SubStr(regBinary, 49))
+
+; variable that stores path
+ConvString := ""
+
+Loop regArr.Length {
+    If Mod(A_Index, 4) != 0 ; generate `char` every 4th Loop, when mod() = 0 (division remainder)
+        Continue            ; skip rest of the Loop if A_Index is 1 2 3 (not 4) 5 6 7 (not 8) 9…
+    Else                    ; in Loop 4, 8… reposition characters as Chr("0x" [3] [4] [1] [2]), Chr("0x" [7] [8] [5] [6])… and so on
+        char := Chr("0x" regArr[A_Index - 1] regArr[A_Index] regArr[A_Index - 3] regArr[A_Index - 2])
+
+    If char = ""            ; char := Chr("0x" 0 0 0 0) consecutive zeroes results in empty string
+        Break               ; End Loop
+    Else ConvString .= char ; add generated string to path
+    }
+If FileExist(ConvString)
+    Return ConvString           ; Return path to desktop wallpaper
+Else {
+    MsgBox key ":: WallpaperPath_v4() is not valid!`nConverted String: " ConvString "`n`nTranscodedImageCache:`n" regBinary,, 262144 ; 262144 = Always-on-top
+    Exit
+    }
+}
+
+;--------
+;    + nxtBackground
+; modified from https://www.autohotkey.com/boards/viewtopic.php?p=581885&sid=c79061ab577091808edda54ee99ed52e#p581885
+
+nxtBackground() {
+Try {
+    pDesktopWallpaper := ComObject("{C2CF3110-460E-4fc1-B9D0-8A1C0C9CC4BD}", "{B92B56A9-8B55-4E14-9A89-0199BBB6F93B}")
+    ComCall(16, pDesktopWallpaper, "Ptr", 0, "UInt", 0)
+    ; ObjRelease(pDesktopWallpaper) ; causes error: ValueError - Parameter #1 of ObjRelease is invalid.
+    pDesktopWallpaper := ""
+    }
+Catch as err
+    ToolTipFn(A_ThisHotkey ":: nxtBackground failed!`n" Type(err) " - " err.What "`n" err.Message, 2000) ; 2s
+}
+
 ;------------------------------------------------------------------------------
 ;  = Check if file exists and create/append
 
@@ -2456,16 +2662,16 @@ Else Return clipped
 ; modified from AutoHotkey.chm::/docs/lib/FileOpen.htm#ExWriteRead
 
 FileCreate_Or_Append(FilePath, FileContent) {
-If FileExist(FilePath) {    ; If file exists, replace existing contents with FileContent
-        Try FileObj := FileOpen(FilePath, "w", "UTF-8")
+If FileExist(FilePath) {                                ; If file exists
+        Try FileObj := FileOpen(FilePath, "w", "UTF-8") ; overwrite file contents
         Catch as Err {
-            MsgBox FilePath "`nCan't open for writing.`n`n" Type(Err) ": " Err.Message
-            return
+            MsgBox FilePath "`nCan't open file for writing.`n`n" Type(Err) ": " Err.Message
+            Return
             }
         FileObj.Write(FileContent)
         FileObj.Close()
         }
-    Else FileAppend FileContent, FilePath ; create new file
+    Else FileAppend FileContent, FilePath, "`n UTF-8" ; create new file
 }
 
 ;------------------------------------------------------------------------------
@@ -2498,11 +2704,11 @@ Return MsgBox(MsgText, RandomMsg, msgOption)
 MsgBox_ChangeButtonText(RandomMsg := 0, MsgTitle := A_ScriptName, nButtons := 1, bName1 := "OK", bName2?, bName3?) {
 err0r := ""
 If RandomMsg = 0 {
-    If WinWait(MsgTitle " ahk_class #32770",, 2)
+    If WinWait(MsgTitle " ahk_class #32770",, 2)        ; 2s
         SetButtonNames()
     Else err0r .= ":: MsgBox_ChangeButtonText failed! MsgTitle - " MsgTitle ": Timed out!"
     }
-Else If WinWait(RandomMsg " ahk_class #32770",, 2) { ; 2s
+Else If WinWait(RandomMsg " ahk_class #32770",, 2) {    ; 2s
     WinSetTitle MsgTitle
     SetButtonNames()
     }
@@ -2521,6 +2727,34 @@ Else Return
     If isSet(bName3)
         ControlSetText bName3, "Button3"
     }
+}
+
+;------------------------------------------------------------------------------
+;  = Calculator view (classic)
+
+;    + checkCalcView
+
+checkCalcView() {
+
+DetectHiddenText False
+WinText := WinGetText("ahk_class CalcFrame")
+DetectHiddenText True
+
+If InStr(WinText, "Select the type of unit you want to convert")
+    CalcView := 1       ; Unit conversion view
+Else If InStr(WinText, "Select the date calculation you want")
+    CalcView := 2       ; Date Calculation view
+Else If InStr(WinText, "Down payment") OR InStr(WinText, "Purchase price")
+    CalcView := 3       ; Worksheets > Mortgage
+Else If InStr(WinText, "Lease value") OR InStr(WinText, "Residual value")
+    CalcView := 4       ; Worksheets > Vehicle lease
+Else If InStr(WinText, "Fuel ") AND not RegExMatch(WinText, "liters|kilometers")
+    CalcView := 5       ; Worksheets > Fuel economy (mpg)
+Else If InStr(WinText, "Fuel ") AND not RegExMatch(WinText, "gallons|miles")
+    CalcView := 6       ; Worksheets > Fuel economy (L/100 km)
+Else CalcView := 0      ; Basic view
+
+Return CalcView
 }
 
 ;------------------------------------------------------------------------------
@@ -2870,5 +3104,23 @@ v2.14 - 2024.11.11
  * renamed group `MediaKeys` to `MediaKeysRestored` for clarity and added comment on UIAccess
  * for users running explorerPatcher.exe, to prevent explorer shortcuts from breaking, change case sensitive matching to RegEx matching for ClassNN, and create new function `CheckControlRegEx`
  * improve `FocusExplorerAddressBar()` to show tooltip on failure
+ * improve comments and other small changes
+
+v2.15 - 2024.11.20
+ ★ add `Calculator (classic)` section to #HotIf Apps; along with `checkCalcView` function
+ ★ add `KeePass` section to #HotIf Apps
+ ★ add "Locate desktop background" shortcut Win + W to `Windows File Explorer` section of #HotIf Apps; along with associated `WallpaperPath_v4` and `nxtBackground` functions
+ * replace some mediocre code in "Show folder/file size in ToolTip" section and `OpenFolder` function with `GetExplorerPath` function for faster performance
+ * improve `AHK Dark Mode` section by adding registry check before running `ahkDarkMenu`
+ * rename "ahk_group NoWrapText" to "ahk_group WrapText_disabled" to maintain consistency
+ * commented out `MSPaintApp` from "ahk_group WrapText_disabled" and change `WrapTextFn` to enable wrapping text when inserting/editing text element (ClassNN: RICHEDIT50W1) in classic paint
+ * replace `MSPaintApp` with new example `ahk_class CalcFrame` for "ahk_group WrapText_disabled"
+ * replace `/` (forward slash) with `.` (fullstop) in `datetime+` hotstring, inline with similar hotstrings in "Format Date / Time" section
+ * replace `HKCU` with `HKEY_CURRENT_USER` and `HKLM` with `HKEY_LOCAL_MACHINE` wherever applicable
+ * improve `CallClipWait` function to return clipboard if successful
+ * improve "Clipboard functions" by adding default value (2 seconds) to `secs` variable
+ * fix `SnipFromMenu` function by replacing non-functional `PostMessage` command with `Send`
+ ! enabled "UTF-8" encoding for `FileAppend` command, instead of the previous "CP0" (system default ANSI) encoding. Might cause error messages if you are using the `FileCreate_Or_Append` function outside this script
+ * rearrange/rename/update headings in TOC
  * improve comments and other small changes
 */
