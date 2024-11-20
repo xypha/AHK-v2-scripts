@@ -1,5 +1,9 @@
-/* CONTENTS */
-;  = Hotkey
+; https://github.com/xypha/AHK-v2-scripts/edit/main/standalone/WallpaperPath.ahk
+; Last updated 2024.11.20
+
+    /* CONTENTS v6.01 */
+; Hotkey
+; User-defined functions
 ;  = Extract wallpaper location from registry (pure AHK)
 ;    + WallpaperPath_v2
 ;    + WallpaperPath_v3
@@ -13,18 +17,21 @@
 ;  = Run PowerShell commands through AHK
 ;    + RunPS(commands)
 ;  = Locate TranscodedWallpaper
+; ChangeLog
 
 #Requires AutoHotkey v2.0
 #SingleInstance force
 
 ;------------------------------------------------------------------------------
-;  = Hotkey
+; Hotkey
 
 #W::{ ; Win + W
 MsgBox "WallpaperPath_v4`n" WallpaperPath_v4()
 }
 
 ;------------------------------------------------------------------------------
+; User-defined functions
+
 ;  = Extract wallpaper location from registry (pure AHK)
 ; modified from v1 - https://gist.github.com/raveren/bac5196d2063665d2154#file-aio-ahk-L741
 ; This source has code for multi-monitor setups that is not included here.
@@ -37,6 +44,7 @@ MsgBox "WallpaperPath_v4`n" WallpaperPath_v4()
 D:\Wallpapers\LIFEstyle_News_MiXture_Images_1467__067.jpg
 */
 
+;--------
 ;    + WallpaperPath_v2
 
 WallpaperPath_v2() {
@@ -260,3 +268,13 @@ Return StrGet(wszWallpaper, "UTF-16")
 }
 
 ; Output - Wallpaper: C:\Users\USERNAME\AppData\Roaming\Microsoft\Windows\Themes\TranscodedWallpaper
+
+;------------------------------------------------------------------------------
+; ChangeLog
+
+/*
+v6.01 - 2024.11.20
+ * add changelog
+ * rearrange/rename/update headings in TOC
+
+*/
