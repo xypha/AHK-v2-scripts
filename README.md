@@ -3,21 +3,14 @@ To Do:
 * add Print Screen section
 * add 'Close With Esc/Q/W'
   * Telegram
-* Hit `CTRL + Q` to minimise Telegram Desktop to the tray, instead of quitting.
+* Hit `Ctrl + Q` to minimise Telegram Desktop to the tray, instead of quitting.
 * add URL Encode/Decode
 * update all section based on changed code
 
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/README.md
-; Last updated 2024.10.11
--->
+; Last updated 2024.11.29
 
-# AHK v2 scripts  
-
-  Here are some [AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts written in AHK v2.  
-  The script showcase contains a mix of custom shortcut keys and text replacement intended to perform useful tasks, execute commonly used commands and run several small functions.  
-
-  Suggestions for improving the script code are welcome.  
-
+; disabled
 ## Script No. 0 Template
 
   [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/standalone/Template.ahk) to template script.  
@@ -28,10 +21,20 @@ To Do:
   Create a personalised alert that allows you to customise it's `text, duration and position`.  
   This alert is coded in AHK v2 and utilises the built-in `Gui()` function to display the alert. It is intended to replace the depreciated `Progress` command from AHK v1.  
 
-## Script No. 1 Showcase
 
-  [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/No-1%20Showcase.ahk) to all-in-one script.  
-  <sub>Last updated - 2024.10.11</sub>
+-->
+
+# AHK v2 scripts  
+
+  Here are some [AutoHotkey](https://github.com/Lexikos/AutoHotkey_L/) scripts written in AHK v2.  
+  The script showcase contains a mix of custom shortcut keys and text replacement intended to perform useful tasks, execute commonly used commands and run several small functions.  
+
+  Suggestions for improving the script code are welcome.  
+
+## \Showcase.ahk
+
+  [Link](https://github.com/xypha/AHK-v2-scripts/blob/main/Showcase.ahk) to all-in-one script.  
+  <sub>Last updated - 2024.11.29</sub>
 
 ### Contents
 
@@ -66,11 +69,11 @@ To Do:
   </details>
 
 -----------------
-#### **Customise Tray Icon**
+#### **Tray Icon**
   
-  View code that changes the script's tray icon, which also changes the default icon in a script's error windows, msg boxes and GUI title icon.  
+  View code that changes the script's tray icon. This automatically also changes the default icon in a script's error windows, msg boxes and GUI title icon.  
   
-  To demonstrate the use of an external icon file for this purpose, a few icon files are included in the [/icons](/icons) folder.  
+  To demonstrate the use of an external icon file for this purpose, a few icon files are included in the [/icons/Tray/](/icons/Tray/) folder.  
   
 -----------------
 #### **Check & Reload AHK**
@@ -109,7 +112,7 @@ To Do:
   </details> 
 
 -----------------
-#### **Move Mouse Pointer by pixel**
+#### **Move Mouse Pointer pixel by pixel**
   
   <details>
   <summary><sup>Show/Hide</sup></summary>
@@ -131,7 +134,7 @@ To Do:
   
   View three methods to close or kill an app or window -
   
-  * Send `WinClose` command with `Alt + Right Click` - closes any app or window instantly without having to navigate to the 'Close' button in the title bar. This simulates the default `Alt + F4` behaviour (in most apps) or the `CTRL + W / Q` action (available in some apps).  
+  * Send `WinClose` command with `Alt + Right Click` - closes any app or window instantly without having to navigate to the 'Close' button in the title bar. This simulates the default `Alt + F4` behaviour (in most apps) or the `Ctrl + W / Q` action (available in some apps).  
 
   Annoyed by an unresponsive window? Instead of opening Task Manager, try this first -  
   * Send `WinKill` command with `Ctrl + Alt + F4` - kill the unresponsive window forcefully by terminating its process.  
@@ -150,7 +153,7 @@ To Do:
   <summary><sup>Show/Hide</sup></summary>
   
   Here is a handy way to work with multiple windows on your PC.  
-  * Use mouse keys `CTRL + Shift + Wheel Up/Down` to increase/decrease the transparency of an app or window. Transparency values range from `1` (invisible) to `255`(opaque) and mouse keys increase/decrease transparency value by 20 (customisable - see variable `Trans +` and `Trans -`).  
+  * Use mouse keys `Ctrl + Shift + Wheel Up/Down` to increase/decrease the transparency of an app or window. Transparency values range from `1` (invisible) to `255`(opaque) and mouse keys increase/decrease transparency value by 20 (customisable - see variable `Trans +` and `Trans -`).  
   * Quickly set the transparency of an app or window to pre-defined levels in two key presses - Hit `F8` and select an option `1 to 5` from the pop-up menu.
 
   ![Adjust Window Transparency](https://github.com/xypha/AHK-v2-scripts/assets/12472214/317d7536-fa83-456f-93ee-cfdd3ce1fd8b)
@@ -166,7 +169,7 @@ To Do:
   Do you find yourself opening the Recycle Bin multiple times?  
   Do you want to avoid minimising all windows to go to the desktop or scrolling the navigation pane to find the Recycle Bin icon?  
   
-  Here is a single shortcut `CTRL + Delete` that will allow you to do the following -  
+  Here is a single shortcut `Ctrl + Delete` that will allow you to do the following -  
   * Open the Recycle Bin when Explorer is not open, or  
   * Navigate to the Recycle Bin when Explorer is open, or  
   * Bring the Recycle Bin Explorer window in the background to the foreground, or  
@@ -179,7 +182,7 @@ To Do:
 -----------------
 #### **Display Off shortcut**
   
-  Use a keyboard shortcut `CTRL + Esc` to turn off your monitor.
+  Use a keyboard shortcut `Ctrl + Esc` to turn off your monitor.
 
 -----------------
 #### **Add Control Panel Tools to a Menu**
@@ -262,14 +265,14 @@ To Do:
   
   Create keyboard shortcuts and text replacement commands tailored to specific windows or apps using the `#HotIf` command. This section of the script includes useful examples of shortcuts for [Firefox](https://www.mozilla.org/en-US/firefox/new/), [Telegram](https://desktop.telegram.org/) and Windows Explorer.  
   * Firefox
-    * Hit `CTRL + Shift + O` to open library / bookmark manager.  
-    * Don't want to accidentally exit the browser with the `CTRL + Shift + Q` shortcut? Disable it.  
+    * Hit `Ctrl + Shift + O` to open library / bookmark manager.  
+    * Don't want to accidentally exit the browser with the `Ctrl + Shift + Q` shortcut? Disable it.  
   * Windows Explorer
-    * Change function of `F1` (opens [Help](https://go.microsoft.com/fwlink/?LinkId=2171119) in Edge Browser) to `F2` (rename command).  
-    * Hit `CTRL + Shift + A` to unselect file(s)/folder(s). Conveniently map the opposite of the default behaviour of `CTRL + A` (select all) to a similar shortcut.  
-    * Copy the full path of one or more folder/file(s) to the clipboard using the shortcut `CTRL + Shift + C`.  
+    * Change action of `F1` (opens [Help](https://go.microsoft.com/fwlink/?LinkId=2171119) in Edge Browser) to `F2` (rename command).  
+    * Hit `Ctrl + Shift + A` to unselect file(s)/folder(s). Conveniently map the opposite of the default behaviour of `Ctrl + A` (select all) to a similar shortcut.  
+    * Copy the full path of one or more folder/file(s) to the clipboard using the shortcut `Ctrl + Shift + C`.  
     * Copy folder/file name(s) without their path to the clipboard using the shortcut `ALT + N`.  
-    * Copy file name(s) without their extension and path to the clipboard using the shortcut `CTRL + ALT + N`.  
+    * Copy file name(s) without their extension and path to the clipboard using the shortcut `Ctrl + ALT + N`.  
   
   </details>
 
@@ -307,30 +310,30 @@ To Do:
   The alert uses the `GUI()` function and allows you to customise the notification's `text, duration and position`.  
   Alternatively, a similar use of `ToolTip` is also included.
 
-
-## Script No. 2 MultiClip
+-----------------
+#### MultiClip
   
-  [Link](https://github.com/xypha/AHK-v2-scripts/edit/main/No-2%20MultiClip.ahk) to script.  
-  <sub>Last updated - 2024.10.11</sub>  
+  [Link](https://github.com/xypha/AHK-v2-scripts/edit/main/standalone/MultiClip.ahk) to standalone script.  
+  <sub>Last updated - 2024.11.29</sub>  
 
   This script was created as a rudimentary alternative to PhraseExpress's [clipboard management](https://www.phraseexpress.com/doc/features/clipboard-manager/) feature with inspiration from several v1 scripts.  
 
   The script does the following -  
- * Clipboard array (`ClipArr`) contains 20 slots that automatically save text[^1] when Windows Clipboard is used. The number of slots is customisable to any number (see variable `LimitClipArr`).  
- * Hitting `^x` (`CTRL + X` / Cut) or `^c` (`CTRL + C` / Copy) triggers AHK's `OnClipboardChange` and saves text to a slot in `ClipArr`.  
+ * Clipboard array (`ClipArr`) contains 25 slots that automatically save text[^1] when Windows Clipboard is used. The number of slots is customisable to any number (see variable `LimitClipArr`).  
+ * Hitting `^x` (`Ctrl + X` / Cut) or `^c` (`Ctrl + C` / Copy) triggers script's `OnClipboardChange` function and saves text to a slot in `ClipArr`.  
  * Hitting `^x` or `^c` a second time moves previously saved text to the next slot and copies the newly selected text to the first slot.  
- * This behaviour continues until the 20 slots are filled. After which, when new text is added to `ClipArr` on the 21st occasion or later, the oldest copied text (now in the 20th slot) is lost.  
+ * This behaviour continues until the 25 slots are filled, after which, when new text is added to `ClipArr` on the 26th occasion or later, the oldest copied text (now in the 25th slot) is lost.  
  * To view text saved in any of the slots, type `c++` to bring up a pop-up menu. Use any one of the shortcuts[^2] to retrieve text from the corresponding slot.  
- * Retrieve text directly from a slot using hotstring `v{slot-number}+`. For example, from the test array[^3], typing `v2+` retrieves `b2` and `v20+` retrieves `t20`.  
- * Retrieve text from multiple slots using hotstring `c{slot-numbers}+`. For example, from the test array, typing `c2+` retrieves text from slots 1 & 2 (`a1-b2`) and `c10+` retrieves text from slots 1 to 10 (`a1-b2-c3-d4-e5-f6-g7-h8-i9-j10`).  
+ * Retrieve text directly from a slot using hotstring `v{slot-number}+`. For example, from the test array[^3], typing `v2+` retrieves `Slot 2 Shortcut 2` and `v25+` retrieves `Slot 25 Shortcut g`.  
+ * Retrieve text from multiple slots using hotstring `c{slot-numbers}+`. For example, from the test array, typing `c2+` retrieves text from slots 1 & 2 and `c10+` retrieves text from slots 1 through 10.  
  * `ClipArr` slots persist between restarts, unlike Windows Clipboard. Slot contents are saved to a file upon script exit and loaded back from the file when the script starts.   
  * Old script contents can be retrieved by restoring `ClipArrFile.txt` from Recycle Bin.
 
-  MultiClip pop-up menu `c++` with test array -  
+  <!-- MultiClip pop-up menu `c++` with test array -  
   
-  ![MultiClip pop-up menu `c++` with test array](https://github.com/xypha/AHK-v2-scripts/assets/12472214/32329607-bf4e-436b-b115-ce1919ab6bc1)
+  ![MultiClip pop-up menu `c++` with test array](https://github.com/xypha/AHK-v2-scripts/assets/12472214/32329607-bf4e-436b-b115-ce1919ab6bc1) -->
  
 
-  [^1]: Saves **_only_** text - this includes anything from the clipboard that can be expressed as text, such as filenames (with full path) when files/folders are copied from a Windows File Explorer window via `CTRL + C` or `CTRL + X`. See Script No-1 Showcase for examples that show you how to copy the full path with or without file extension and path.  
-  [^2]: Shortcuts correspond to the number/alphabet/symbol before `=`. Shortcuts are usually underlined and consist of numbers from Numpad or number row and keys from the bottom row of the QWERTY keyboard. Customise the shortcuts by altering the character _after_ `&` in lines containing `ClipMenu.Add`.  
-  [^3]: Test array with 20 slots containing alphanumerical text `ClipArr := ["a1", "b2", "c3", "d4", "e5", "f6", "g7", "h8", "i9", "j10", "k11", "l12", "m13", "n14", "o15", "p16", "q17", "r18", "s19", "t20"]`.  
+  [^1]: Saves **_only_** text - this includes anything from the clipboard that can be expressed as text, such as filenames (with full path) when files/folders are copied from a Windows File Explorer window via `Ctrl + C` or `Ctrl + X`. See script `\Showcase.ahk` for examples that show you how to copy the full path with or without file extension and path.  
+  [^2]: Shortcuts correspond to the number/alphabet/symbol before `→`. Shortcuts are usually underlined and consist of numbers from number row, and letters from the rows below it in a QUERTY keyboard. Customise the shortcut characters and their order by altering the characters in `ClipShortcuts` variable as needed.  
+  [^3]: Test array with 25 slots containing alphanumerical text `ClipArr := ["Slot 1 Shortcut 1", "Slot 2 Shortcut 2", "Slot 3 Shortcut 3", "Slot 4 Shortcut 4", "Slot 5 Shortcut 5", "Slot 6 Shortcut 6", "Slot 7 Shortcut 7", "Slot 8 Shortcut 8", "Slot 9 Shortcut 9", "Slot 10 Shortcut 0", "Slot 11 Shortcut Q", "Slot 12 Shortcut w", "Slot 13 Shortcut e", "Slot 14 Shortcut r", "Slot 15 Shortcut t", "Slot 16 Shortcut Y", "Slot 17 Shortcut u", "Slot 18 Shortcut i", "Slot 19 Shortcut o", "Slot 20 Shortcut P", "Slot 21 Shortcut a", "Slot 22 Shortcut s", "Slot 23 Shortcut d", "Slot 24 Shortcut f", "Slot 25 Shortcut G"]`.  
