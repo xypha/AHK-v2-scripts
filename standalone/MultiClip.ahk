@@ -1,30 +1,33 @@
-; https://github.com/xypha/AHK-v2-scripts/edit/main/No-2%20MultiClip.ahk
-; Last updated 2024.11.10
+; https://github.com/xypha/AHK-v2-scripts/edit/main/standalone/MultiClip.ahk
+; Last updated 2024.11.29
+; This is (mostly) feature complete. There won't be any major changes henceforth.
+; For a more feature rich and frankly awesome ahk clipboard manager, visit https://github.com/mikeyww/mwClipboard/ 
 
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
-; Search for below commands/functions by using control + F on the help webpage - https://www.autohotkey.com/docs/v2/lib/
+; Search for commands/functions used in this script by using Ctrl + F on the AutoHotkey help webpage - https://www.autohotkey.com/docs/v2/lib/
 
-; comments begin with semi-colon ";" at start of line or space+; " ;" in middle of line
-; comments can also be show like this - "/*" comment text "*/"
+; comments begin with semi-colon ";" at start of line or space or after code in middle of line
+; comments can also be enclosed by `/* */`, like this - /* comment text */
 ; and these two methods can be combined too :)
 
-; /* AHK v2 No-2 MultiClip - CONTENTS */
+;   /* AHK v2 MultiClip - CONTENTS */
 ; Settings
 ; Auto-execute
 ;  = AHK Dark Mode
 ;  = Initialise ClipArr
 ;  = Initialise ClipArr hotstrings
-;  = Customise Tray Icon
+;  = Tray Icon
 ;  = End auto-execute
 ; Hotkeys
 ;  = Check & Reload AHK
 ; Hotstrings
 ;  = ClipArr keys
+;  = ClipArr testing
 ; User-defined functions
 ;  = MyNotification
 ;    + MyNotificationGui
 ;    + EndMyNotif
-;  = AHK Dark Mode functions
+;  = AHK Dark Mode Fn
 ;    + ahkDarkMenu
 ;  = MultiClip ClipArr
 ;    + ClipChanged
@@ -39,11 +42,10 @@
 ;    + SendClipFn
 ;  = Paste instead of Send
 ;    + PasteThis
+;    + Paste_via_clipboard
 ;    + RestoreClip
-;  = ToolTip functions
+;  = ToolTip function
 ;    + ToolTipFn
-; * Test
-; ChangeLog
 
 ;------------------------------------------------------------------------------
 ; Settings
@@ -57,30 +59,37 @@ KeyHistory 500 ; Max 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 No-2 MultiClip v4.11"
+AHKname := "AHK v2 No-2 MultiClip v4.12"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, 10000, 1550, 945, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;--------
 ;  = AHK Dark Mode
-; download .ahk files from the `Lib` folder in this repo
-; and save to disc at the same location as your script, inside a `Lib` folder
 
-ahkDarkMenu()                                     ; enable dark theme for AHK menus
+; check windows registry to see if dark mode is enabled
+If not RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", 1) {
+    ; dark mode is enabled
+    ; Global isLightMode := 0                         ; store RegRead results in variable for repeated use
+    ahkDarkMenu()                                   ; enable dark theme for AHK menus
+    }
+; Else Global isLightMode := 1                        ; dark mode is NOT enabled
+
+; download .ahk files from the `Lib` folder in this repo
+; and save at the same under a `Lib` folder at the location of your .ahk script file
 
 #Include "Lib\Dark Mode - ToolTip.ahk"            ; 2024.10.15
 #Include "Lib\Dark Mode - MsgBox.ahk"             ; 2024.10.15
-; Dark Mode - Window Spy                          ; 2024.10.15
 
-; to disable dark mode, comment out above commands and
-; check "MyNotification.AddText" and "MyNotification.BackColor" in `MyNotificationGui` function
+; Dark Mode - Window Spy                          ; 2024.10.15
+; manually comment out above lines if dark mode is NOT enabled because "#Include cannot be executed conditionally"
+; disable dark mode commands "MyNotification.AddText" and "MyNotification.BackColor" in `MyNotificationGui` function
 
 ;--------
 ;  = Initialise ClipArr
 
-Global LimitClipArr := 20
-; Limit the number of slots to 20 ; customise limit to your needs
+Global LimitClipArr := 25
+; Limit the number of slots to 25 to match Win + V clipboard history slots ; customise limit to your needs
 ; Note:     Higher the number, higher the resource usage and slower the performance/response
 ; WARNING:  Removing the variable entirely may cause infinite loop / app hang
 
@@ -90,18 +99,42 @@ Global ClipArrFile := A_MyDocuments "\ClipArrFile.txt"
 ; txt file used instead of ini because 'values longer than 65,535 characters are likely to yield inconsistent results' when using IniRead, IniWrite commands
 
 Global delim := "~•~"
-; use a unique string because if an array-slot contains this delimiter by accident, saving and loading array from file will cause errors
-; Recommendation: 3 or more characters, preferably symbols with one or more Unicode characters that are difficult to type on standard keyboard
 ; ~ U+007E TILDE
 ; • U+2022 BULLET : black small circle
+; use a unique string because if an array-slot contains this delimiter by accident, saving and loading array from file will cause errors
+; Recommendation: 3 or more characters, preferably symbols with one or more Unicode characters that are difficult to type on standard keyboard. For suggestions, look here - https://stackoverflow.com/questions/492090/least-used-delimiter-character-in-normal-text-ascii-128
 
 Global ClipArr := [] ; set Global variable and assign empty array
 
-; Load array from file - inspired by https://www.autohotkey.com/boards/viewtopic.php?p=341809#p341809
-If FileExist(ClipArrFile) ; check if file exists
-    ClipArr := StrSplit(FileRead(ClipArrFile), delim)
-Else ; load default values on start - 20 slots containing alphanumerical text
-    ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
+; Load array from file if file exists - inspired by https://www.autohotkey.com/boards/viewtopic.php?p=341809#p341809
+; `Try` command is used to prevent AutoHotkey from throwing error msg in case file is absent or not in correct path
+Try ClipArr := StrSplit(FileRead(ClipArrFile, "UTF-8"), delim, , LimitClipArr)
+Catch ; or Else load default values on start - 25 slots containing alphanumerical text
+    ClipArr := ["Slot 1 Shortcut 1",
+                "Slot 2 Shortcut 2",
+                "Slot 3 Shortcut 3",
+                "Slot 4 Shortcut 4",
+                "Slot 5 Shortcut 5",
+                "Slot 6 Shortcut 6",
+                "Slot 7 Shortcut 7",
+                "Slot 8 Shortcut 8",
+                "Slot 9 Shortcut 9",
+                "Slot 10 Shortcut 0",
+                "Slot 11 Shortcut Q",
+                "Slot 12 Shortcut w",
+                "Slot 13 Shortcut e",
+                "Slot 14 Shortcut r",
+                "Slot 15 Shortcut t",
+                "Slot 16 Shortcut Y",
+                "Slot 17 Shortcut u",
+                "Slot 18 Shortcut i",
+                "Slot 19 Shortcut o",
+                "Slot 20 Shortcut P",
+                "Slot 21 Shortcut a",
+                "Slot 22 Shortcut s",
+                "Slot 23 Shortcut d",
+                "Slot 24 Shortcut f",
+                "Slot 25 Shortcut G"]
 
 ; run function whenever clipboard is changed such as when Ctrl + x (Cut) or Ctrl + c (Copy) is pressed
 ; or when clipboard is altered by other apps/programs
@@ -117,17 +150,19 @@ OnExit SaveClipArr
 ;--------
 ;  = Initialise ClipArr hotstrings
 
-PasteVStrings(20)   ; User-defined function creates serial hotstrings
-PasteCStrings(20)
+PasteVStrings(LimitClipArr)   ; User-defined function creates serial hotstrings
+PasteCStrings(LimitClipArr)
 
 ;--------
-;  = Customise Tray Icon
+;  = Tray Icon
 
-I_Icon := A_ScriptDir "\icons\2-512.ico"
+path_to_TrayIcon := A_ScriptDir "\icons\Tray\2-512.ico"
 ; Icon source: https://www.iconsdb.com/caribbean-blue-icons/2-icon.html     ; CC License, see credits.md
 ; I like to number scripts 1, 2, 3... and link the scripts to Numpad shortcuts for easy editing -- see section on "Check & Reload AHK" below
-If FileExist(I_Icon)
-    TraySetIcon I_Icon
+
+Try TraySetIcon path_to_TrayIcon
+Catch as err
+    SetTimer () => MsgBox("TraySetIcon failed!`n" err.Message "`nPath: " path_to_TrayIcon,, 262144), -100 ; 100ms ; new thread ; 262144 = Always-on-top
 
 ;--------
 ;  = End auto-execute
@@ -159,7 +194,7 @@ If WinWait(A_ScriptFullPath " - AutoHotkey v" A_AhkVersion,, 3) ; 3s timeout ; w
 }
 
 ^!Numpad2:: {                                       ; Ctrl + Alt + Numpad2 keys pressed together
-MyNotificationGui("Updating " AHKname,,, 945, 0)    ; 500ms ; use Sleep coz reload cancels timers
+MyNotificationGui("Updating " AHKname,,, 945, 0)    ; 500ms ; use Sleep because reload cancels timers
 Reload
 }
 
@@ -175,6 +210,53 @@ Reload
 :?*x:c0+::PasteC(10) ; same as c10+
 
 :?*x:c++::ClipMenuFn(SendClipFn) ; show ClipMenu
+
+;--------
+;  = ClipArr testing
+
+; test MultiClip function
+:*:testclip+:: {
+
+; save current array contents to file
+SaveClipArr()
+    ; If script is reloaded after test, saved file will be deleted. In this case, restore array contents by
+    ; (a) Exiting this script (b) restoring deleted file from recycle bin (c) running this script again
+
+A_Clipboard := "Slot 1 Shortcut 1"
+Global ClipArr := ["Slot 1 Shortcut 1",
+                "Slot 2 Shortcut 2",
+                "Slot 3 Shortcut 3",
+                "Slot 4 Shortcut 4",
+                "Slot 5 Shortcut 5",
+                "Slot 6 Shortcut 6",
+                "Slot 7 Shortcut 7",
+                "Slot 8 Shortcut 8",
+                "Slot 9 Shortcut 9",
+                "Slot 10 Shortcut 0",
+                "Slot 11 Shortcut Q",
+                "Slot 12 Shortcut w",
+                "Slot 13 Shortcut e",
+                "Slot 14 Shortcut r",
+                "Slot 15 Shortcut t",
+                "Slot 16 Shortcut Y",
+                "Slot 17 Shortcut u",
+                "Slot 18 Shortcut i",
+                "Slot 19 Shortcut o",
+                "Slot 20 Shortcut P",
+                "Slot 21 Shortcut a",
+                "Slot 22 Shortcut s",
+                "Slot 23 Shortcut d",
+                "Slot 24 Shortcut f",
+                "Slot 25 Shortcut G"]
+ClipMenuFn(SendClipFn)  ; show menu - ClipMenu
+}
+
+; restore old ClipArr contents from file after testing or from previous file when needed
+:*x:restoreclip+:: {
+Global ClipArr := ""
+ClipArr := StrSplit(FileRead(ClipArrFile, "UTF-8"), delim, , LimitClipArr)  ; restore from file
+ClipMenuFn(SendClipFn)                                                      ; show menu - ClipMenu
+}
 
 ;------------------------------------------------------------------------------
 ; User-defined functions
@@ -213,7 +295,7 @@ MyNotification.Destroy()
 }
 
 ;------------------------------------------------------------------------------
-;  = AHK Dark Mode functions
+;  = AHK Dark Mode Fn
 
 ;    + ahkDarkMenu
 /* primary source: https://stackoverflow.com/a/58547831/894589
@@ -223,9 +305,9 @@ MyNotification.Destroy()
 */
 
 ahkDarkMenu() {
-    static uxtheme := DllCall("GetModuleHandle", "str", "uxtheme", "ptr")
-    static SetPreferredAppMode := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 135, "ptr")
-    static FlushMenuThemes := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 136, "ptr")
+    Static uxtheme := DllCall("GetModuleHandle", "str", "uxtheme", "ptr")
+    Static SetPreferredAppMode := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 135, "ptr")
+    Static FlushMenuThemes := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 136, "ptr")
 
     DllCall(SetPreferredAppMode, "int", 1) ; 0 = Default, 1 = AllowDark, 2 = ForceDark, 3 = ForceLight, 4=Max
     DllCall(FlushMenuThemes)
@@ -304,13 +386,18 @@ Else ToolTipFn(ClipArr[1])                                  ; 500ms
 
 SaveClipArr(*) {
 Result := ""
-Loop ClipArr.Length
+
+; save current ClipArr contents to variable
+Loop (ClipArr.Length > LimitClipArr ? LimitClipArr : ClipArr.Length)
     Result .= ClipArr[A_Index] delim
-If FileExist(ClipArrFile)       ; check if file exists
-    FileRecycle ClipArrFile     ; send old file to recycle bin
+
+; remove trailing delim to prevent ClipArr.Length from exceeding LimitClipArr on restoration of ClipArr
+Result := SubStr(Result, 1, StrLen(delim) * -1)
+
+Try FileRecycle ClipArrFile                     ; send old file to recycle bin if one exists
     ; old clipboard contents can be retrieved by restoring ClipArrFile from recycle bin
     ; alternatively, use `FileDelete` command to delete permanently
-FileAppend Result, ClipArrFile  ; create new file and save current clipArr contents
+FileAppend Result, ClipArrFile, "`n UTF-8"      ; create new file and save current clipArr contents
 }
 
 ;--------
@@ -380,40 +467,89 @@ PasteThis(RegExReplace(Result,"^\n+|\n+$")) ; remove leading/trailing LF
 ;    + ClipMenuFn
 
 ClipMenuFn(FnName) {
+
+; create array to store shortcuts
+ClipShortcuts := StrSplit("1234567890QwertYuioPasdfG")
+
+/* ; shortcuts for 25 slots consist of numbers from number row, and letters from the rows below it in a QUERTY keyboard
+; Customise the shortcut characters and their order by altering the characters in `ClipShortcuts` variable as needed
+Slot 1 Shortcut 1 ; number row
+Slot 2 Shortcut 2
+Slot 3 Shortcut 3
+Slot 4 Shortcut 4
+Slot 5 Shortcut 5
+Slot 6 Shortcut 6
+Slot 7 Shortcut 7
+Slot 8 Shortcut 8
+Slot 9 Shortcut 9
+Slot 10 Shortcut 0
+Slot 11 Shortcut Q ; 1st letter row
+Slot 12 Shortcut w
+Slot 13 Shortcut e
+Slot 14 Shortcut r
+Slot 15 Shortcut t
+Slot 16 Shortcut Y
+Slot 17 Shortcut u
+Slot 18 Shortcut i
+Slot 19 Shortcut o
+Slot 20 Shortcut P
+Slot 21 Shortcut a ; 2nd letter row
+Slot 22 Shortcut s
+Slot 23 Shortcut d
+Slot 24 Shortcut f
+Slot 25 Shortcut G
+; QYPG are capitals because selection underline causes confusion with other letters like o or v
+; pressing shift + letter is not necessary because shortcuts are NOT case-sensitive
+*/
+
 Global ClipMenu := Menu()
 ClipMenu.Delete
 
+LoopNo := ClipArr.Length > LimitClipArr ? LimitClipArr : ClipArr.Length
+
 ; populate slots
-ClipMenu.Add("&1  = "   ClipTrim(1)   ,FnName) ; Customise the shortcuts by altering the character after `&` in lines containing `ClipMenu.Add`
-ClipMenu.Add("&2  = "   ClipTrim(2)   ,FnName) ; Explantation:
-ClipMenu.Add("&3  = "   ClipTrim(3)   ,FnName) ; When the menu is displayed, a character preceded by an ampersand (&) can be selected by pressing the corresponding key on the keyboard.
-ClipMenu.Add("&4  = "   ClipTrim(4)   ,FnName) ; To display a literal ampersand, specify two consecutive ampersands as in this example: "Save && Exit"
-ClipMenu.Add("&5  = "   ClipTrim(5)   ,FnName)
-ClipMenu.Add("&6  = "   ClipTrim(6)   ,FnName) ; Shortcuts correspond to the number/alphabet/symbol before `=`
-ClipMenu.Add("&7  = "   ClipTrim(7)   ,FnName) ; Shortcuts are usually underlined, and consist of
-ClipMenu.Add("&8  = "   ClipTrim(8)   ,FnName) ; numbers from Numpad or number row, and keys from the bottom row of QUERTY keyboard
-ClipMenu.Add("&9  = "   ClipTrim(9)   ,FnName)
-ClipMenu.Add("&0  = "   ClipTrim(10)  ,FnName)
-ClipMenu.Add("&z  = "   ClipTrim(11)  ,FnName)
-ClipMenu.Add("&x  = "   ClipTrim(12)  ,FnName)
-ClipMenu.Add("&c  = "   ClipTrim(13)  ,FnName)
-ClipMenu.Add("&v  = "   ClipTrim(14)  ,FnName)
-ClipMenu.Add("&b  = "   ClipTrim(15)  ,FnName)
-ClipMenu.Add("&n  = "   ClipTrim(16)  ,FnName)
-ClipMenu.Add("&m = "    ClipTrim(17)  ,FnName) ; number of spaces between characters varies to improve readability in pop-up menu
-ClipMenu.Add("&,    = " ClipTrim(18)  ,FnName) ; and can be changed to reflect your system font and display settings
-ClipMenu.Add("&.    = " ClipTrim(19)  ,FnName)
-ClipMenu.Add("&/   = "  ClipTrim(20)  ,FnName)
+Loop LoopNo {
+    ClipMenu.Add("&" ClipShortcuts[A_Index] "  → " ClipTrim(A_Index), FnName)
+    ; When the menu is displayed, a slot can be selected by pressing the key corresponding to the character preceded by the ampersand (&)
+    ; These selection shortcuts correspond to the number/alphabet/symbol before `→` and are obtained from ClipShortcuts array
+    ; When the menu is displayed, shortcuts are usually underlined, but sometimes don't appear when some symbols are used
+    }
+
+; Set icons for each menu item
+Loop LoopNo {
+    Try ClipMenu.SetIcon(A_Index "&", A_ScriptDir "\Icons\ClipMenu\" A_Index "-20.jpg", , 20)
+    ; Icon Source: Calendar by Kalash - CC BY 4.0 - https://icon-icons.com/pack/Calendar/4173
+    ; Icons were cropped using https://bulkimagecrop.com/ ; and converted to jpg and resized using mspaint (classic)
+    ; `Try` command is used to prevent AutoHotkey from throwing error msgs in case icon files are absent or not in correct path.
+    ; WARNING: Using icons in menu may slow performance.
+    ; A slight delay between menu request and display may be noticeably present on some systems (especially in low-end ones like mine; probably to resize/rescale icons).
+    ; This is normal and expected. Comment out the `ClipMenu.SetIcon` line if this is not acceptable.
+    ; Default size is 16. Increased to 20 because icon numbers are not clear. Please let me know if you find icons that look better with `ahkDarkMenu` by creating an Issue
+    Catch {
+        icon_error := "Yes"
+        Break
+        }
+    }
+
+If isSet(icon_error)
+    ClipMenu.Add("&// SetIcon command failed! // Path: " A_ScriptDir "\Icons\ClipMenu\", ClipMenu_icon_error)
 
 ; show pop-up menu
 ClipMenu.Show
 }
 
 ;--------
+;    + ClipMenu_icon_error
+
+ClipMenu_icon_error(ItemName, ItemPos, MyMenu) {
+MsgBox ItemName "`nCheck path to see if icon files exist and correctly named.`nIf not, visit https://github.com/xypha/AHK-v2-scripts/blob/main/icons/ClipMenu/",, 262144 ; 262144 = Always-on-top
+}
+
+;--------
 ;    + ClipTrim
 
 ClipTrim(number) {
-Try trimmed := SubStr(StrReplace(ClipArr[number], "`n", A_Space), 1, 90) ; show first 90 characters, replace new line with Space
+Try trimmed := SubStr(StrReplace(ClipArr[number], "`r`n", A_Space), 1, 90) ; show first 90 characters, replace new line with Space
 Catch as e {
     ClipArr.InsertAt(number, "[~Err0r~]: " Type(e) " - " e.Message)
     Return "[~Err0r~]"
@@ -438,26 +574,31 @@ PasteThis(ClipArr[position])
 PasteThis(pasteText) {
 If StrLen(pasteText) <= 15  ; 15; If short text, Send keystrokes instead of paste
     SendText pasteText      ; text mode to prevent unintended key press when text contains '^+!#{}'
-Else {
-    If A_Clipboard !== pasteText {
-        tmp_clip := ClipboardAll()          ; preserve Clipboard
-        OnClipboardChange ClipChanged, 0    ; disable callback
-        A_Clipboard := pasteText            ; copy pasteText to clipboard
-        tmp_clip2 := A_Clipboard
-        While tmp_clip2 !== pasteText {     ; validate clipboard
-            Sleep 50                        ; 50ms
-            If A_Index > 5 {                ; max 250ms
-                ToolTipFn(A_ThisHotkey ":: PasteThis Copying Failed?")  ; 500ms
-                OnClipboardChange ClipChanged, 1                        ; enable callback
-                Exit
-                }
+Else Paste_via_clipboard(pasteText)
+}
+
+;--------
+;    + Paste_via_clipboard
+
+Paste_via_clipboard(pasteText) {
+If A_Clipboard !== pasteText {
+    tmp_clip := ClipboardAll()          ; preserve Clipboard
+    OnClipboardChange ClipChanged, 0    ; disable callback
+    A_Clipboard := pasteText            ; copy pasteText to clipboard
+    tmp_clip2 := A_Clipboard
+    While tmp_clip2 !== pasteText {     ; validate clipboard
+        Sleep 50                        ; 50ms
+        If A_Index > 5 {                ; max 250ms
+            ToolTipFn(A_ThisHotkey ":: PasteThis tmp_clip copying Failed?")     ; 500ms
+            OnClipboardChange ClipChanged, 1                                    ; enable callback
+            Exit
             }
         }
-    Else tmp_clip := A_Clipboard
-    Send "^v"                                                   ; paste
-    If tmp_clip !== pasteText
-        SetTimer () => RestoreClip(tmp_clip, tmp_clip2), -100   ; 100ms  ; new thread - don't wait for restoration
     }
+Else tmp_clip := A_Clipboard
+Send "^v"                                                   ; paste
+If tmp_clip !== pasteText
+    SetTimer () => RestoreClip(tmp_clip, tmp_clip2), -100   ; 100ms  ; new thread - don't wait for restoration
 }
 
 ;--------
@@ -468,7 +609,7 @@ A_Clipboard := ClipboardAll(tmp_clip)   ; restore clipboard
 While tmp_clip2 == A_Clipboard {        ; validate clipboard
     Sleep 50                            ; 50ms
     If A_Index > 5 {                    ; max 250ms
-        ToolTipFn(A_ThisHotkey ":: PasteThis Restoration Failed", 5000) ; 5s
+        ToolTipFn(A_ThisHotkey ":: RestoreClip restoration failed!", 5000) ; 5s
         OnClipboardChange ClipChanged, 1
         Exit
         }
@@ -478,25 +619,8 @@ tmp_clip2 := ""
 OnClipboardChange ClipChanged, 1
 }
 
-/* Example - PasteThis("1") - if ClipboardAll is NOT text
-
-ClipboardAll()  2i      > 1     > 2i
-A_Clipboard     2i      > 1     > 2i
-pasteText       1
-tmp_clip        0   > 2i             > 0
-tmp_clip2       0           > 1      > 0
-
-Example - PasteThis("1") - if ClipboardAll is SAME text
-
-ClipboardAll()  2       > 1     > 2
-A_Clipboard     2       > 1     > 2
-pasteText       2
-tmp_clip        0   > 2             > 0
-tmp_clip2       0           > 1     > 0
-*/
-
 ;------------------------------------------------------------------------------
-;  = ToolTip functions
+;  = ToolTip function
 
 ;    + ToolTipFn
 
@@ -516,110 +640,4 @@ ToolTip mytext, xAxis?, yAxis?, WhichToolTip
 SetTimer () => ToolTip(,,, WhichToolTip), Abs(myduration) * -1 ; 500ms ; new thread ; always negative number
 }
 
-;------------------------------------------------------------------------------
-; * Test
-
-:*:test++:: {
-
-; save current array contents to file
-SaveClipArr()
-; If script is reloaded after test, saved file will be deleted. In this case, restore array contents by
-; (a) Exiting this script (b) restoring deleted file from recycle bin (c) running this script again
-
-A_Clipboard := "a1"
-Global ClipArr := ["a1","b2","c3","d4","e5","f6","g7","h8","i9","j10","k11","l12","m13","n14","o15","p16","q17","r18","s19","t20"]
-ClipMenuFn(SendClipFn)  ; show menu - ClipMenu
-}
-
-;------------------------------------------------------------------------------
-; ChangeLog
-
-/*
-v4.00 - 2024.01.27
- + add variable `AHKname` to easily update script name and version in template and standalone scripts
- + add changelog
- * improve comments
-
-v4.01 - 2024.01.27
- - remove version from file name
- + add alternative method to populate slots in ClipMenu
- - remove unnecessary variable `ClipTrim` from `ClipTrimFunc`
- + add `FileExist` command to `SaveClipArr` to prevent error on first exit
-
-v4.02 - 2024.01.29
- * rename MyNotificationFunc to MyNotificationGui
- * improve ListLines WinWait command by using variables
- * rename Tool_TipFunc to ToolTipFunc
- - remove unnecessary variable hkey in PasteV function
- - remove unnecessary variable result in PasteAll function
- * improve RegEx in PasteAll function
- * rename ClipTrimFunc to ClipTrim
- - remove unnecessary parentheses in If commands
- + add PasteAndSend and SendAndPaste functions
- * some minor changes
- * improve comments and update headings
-
-v4.03 - 2024.01.30
- * rename function names with `Func` in the name to `Fn` because `Func` is a class
-
-v4.04 - 2024.02.01
- * improve comments
-
-v4.05 - 2024.02.05
- + add defaults to 'MyNotificationGui' parameters
- - remove default values from all 'MyNotificationGui' func calls
- + add defaults to 'ToolTipFn' parameters
- - remove default values from all 'ToolTipFn' func calls
- - remove unnecessary quotation marks "" for 'MyNotificationGui' and 'ToolTipFn' parameters
- * improve 'PasteThis' - use 'Send' command if 'pasteText' is less than 16 characters
- * improve comments
- * improve changelog - use "fix" instead of "correct/update", use "+" for new additions and "-" for removals, "★" for new functions/sections instead of "*"
-
-v4.06 - 2024.02.20
- * improve comments
-
-v4.07 - 2024.03.15
- * change "!=" to "!==" wherever applicable to enable case sensitivity
- * change MyNotificationGui colour scheme to white text on dark background (dark mode)
- * improve clipboard change alert tooltip by removing unnecessary clipboard call and increasing character limit from 600 to 1000
- * replace < 16 with <= 15 in "PasteThis"
- * improve "ToolTipFn" by adding 'xAxis?, yAxis?' optional parameters
- * improve comments, spelling and small changes
- * change changelog order for easier access
-
-v4.08 - 2024.10.11
- * rename file by replacing `#` with `No-` to avoid GitHub conflict with issue numbering
- ★ add `Dark ToolTip` section to adapt `ToolTipFn` function for windows dark mode
- * improve `ToolTipFn` function by removing unnecessary commands, change variable `ToolTipNo` to `WhichToolTip` (to match AHK docs) and change it from `Global` to `static` variable
- - remove `ToolTipOff` function
- * change `myduration` argument in `MyNotificationGui` function to use negative numbers because negative Sleep is smaller error than forever cycling SetTimer AND to match `ToolTipFn`; consequently switch negative multiplier from SetTimer to Sleep
- * change `ClipMenuFn` shortcut from `p++` to `c++` - more intuitive
- * change `c++` shortcut to `c1+` - more intuitive, old legacy and also match `PasteCStrings` function
- * improve `InsertInClipArr` by removing unnecessary preliminary comparison, preventing addition of empty strings to clipArr and adding conditional ToolTip
- + move Clipchange ToolTip to new function `ClipArrToolTipFn` to improve handling
- * improve `ClipTrim` to show errors and insert error message in ClipArr
- * use text mode with `Send` in `PasteThis` function
- - remove `PasteAndSend` and `SendAndPaste` functions - redundant and ListLines confusion
- * rearrange/rename some function headings and update TOC
- * improve comments and small changes
-
-v4.09 - 2024.10.15
- * rename `Dark ToolTip` section to `AHK Dark Mode` - to include all lib scripts pertaining to dark mode AHK v2
- * change dark mode ToolTip lib file from `ToolTipOptions.ahk` to `SystemThemeAwareToolTip.ahk`
- ★ add `Dark_MsgBox.ahk` and `Dark_WindowSpy` to lib and rename/modify for easier include and tracking
- * improve comments
-
-v4.10 - 2024.10.31
- * correct positioning of `AHK Dark Mode` section as per TOC
- * remove `%A_ScriptDir%` from #include commands. It is already built in
- * add missing `Else` commands to `ClipChanged` function
- * fix `ToolTipFn` - failed to assign 1 and 20 to `WhichToolTip` variable, and hence failure to turn Off some ToolTips
- * improve comments and small changes
-
-v4.11 - 2024.11.10
- ★ add `ahkDarkMenu()` to enable dark mode for `Menu()`
- - remove negative numbers for Sleep and SetTimer commands from user-defined functions by using `Abs()` command and pre-assigned sign
- * replace `.Get` commands with `[Index]` when applicable because they are equivalent and "__Item is not called"
- * rearrange/rename/update headings in TOC
- * improve comments and other small changes
-*/
+; End of script code
