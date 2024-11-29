@@ -32,7 +32,7 @@
 ;    + Keyboard keys
 ;    + Media keys (disabled)
 ;  = Customise CapsLock
-;  = Move Mouse Pointer by pixel
+;  = Move Mouse Pointer pixel by pixel
 ;  = Close or Kill an app window
 ;    + WinClose with !RButton
 ;    + WinKill with ^!F4
@@ -196,7 +196,7 @@ KeyHistory 500 ; Max 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 Showcase v2.15"
+AHKname := "AHK v2 Showcase v2.17"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, 10000, 1550, 985, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -522,7 +522,7 @@ If GetKeyState("CapsLock", "T") {
 }
 
 ;------------------------------------------------------------------------------
-;  = Move Mouse Pointer by pixel
+;  = Move Mouse Pointer pixel by pixel
 ; Modified from http://www.computoredge.com/AutoHotkey/Downloads/MousePrecise.ahk
 
 #Numpad1::MouseMove -1,  1, 0, "R"    ; Win + Numpad1 (SC04F) move down left    ↓←
@@ -1027,11 +1027,14 @@ Send key "{Enter}"         ; Run bookmarklet
 
 ; close incremental search if focused when using below shortcuts
 ^g::            ; Ctrl + G                          = open Go To dialogue box
-*^s::           ; Ctrl + s / Ctrl + Shift + s       = save / save all
-^w::            ; Ctrl + w                          = close tab
-*^h::           ; Ctrl + H                          = open Find-Replace dialogue box
+^s::            ; Ctrl + S                          = save / save all
+^+s::           ; Ctrl + Shift + S                  = save / save all
+^w::            ; Ctrl + W                          = close tab
+^h::            ; Ctrl + H                          = open Find-Replace dialogue box
+^+h::           ; Ctrl + Shift + H                  = open Open from file history…
 ^+f::           ; Ctrl + Shift + F                  = open Find dialogue box - updated 2024.11.07 -
-*^Tab::         ; Ctrl + Tab / Ctrl + Shift + Tab   = switch tab forwards/backwards
+^Tab::          ; Ctrl + Tab                        = switch tab forwards
+^+Tab::         ; Ctrl + Shift + Tab                = switch tab backwards
 {
 CloseIncrSearch(ThisHotkey)
 }
@@ -1040,8 +1043,8 @@ CloseIncrSearch(key) {
 DetectHiddenText False  ; only check visible text
 If WinActive("ahk_class Notepad++", "Find:") and ControlGetClassNN(ControlGetFocus("A")) !== "Scintilla1" {
 ; If incremental search is present (i.e. "Find:" text is visible) and has keyboard focus
-    Send "^a"       ; CTRL + A ; select all text typed in search field     ~~ comment out if not needed
-    Send "^c"       ; CTRL + C ; copy search term to clipboard             ~~ comment out if not needed
+    Send "^a"       ; Ctrl + A ; select all text typed in search field     ~~ comment out if not needed
+    Send "^c"       ; Ctrl + C ; copy search term to clipboard             ~~ comment out if not needed
     Send "{Esc}"    ; close Incremental Search
     Sleep 100       ; wait for closure/focus main window                   ~~ comment out if not needed
     }
@@ -1049,7 +1052,7 @@ DetectHiddenText True                                   ; restore default
 key := RegExReplace(key, "([a-zA-Z]{2,})" , "{$1}")     ; add {} around words like Tab, Up…
 Send StrReplace(key, "*")                               ; Send "hotkey" after removing wildcard modifier
 ; Sleep 100       ; wait for dialogue to open and focus           ~~ uncomment if ^v needed
-; Send "^v"       ; CTRL + V ; paste search term from clipboard   ~~ uncomment if needed
+; Send "^v"       ; Ctrl + V ; paste search term from clipboard   ~~ uncomment if needed
 }
 
 #HotIf
@@ -1145,7 +1148,8 @@ A_Clipboard := StrReplace(CallClipboardVar(2), "`r`n", "`s") ; 2s, Exit ; copy c
 
 ;    + Explorer main window
 
-F1::F2 ; disable opening help in MS edge
+F1::F2 ; rename instead of accidental opening help in MS edge
+F3::F2 ; rename instead of accidental focus on search, use default Ctrl + F to focus on search instead
 
 ; changing the focus to the next file when the currently focused file is deleted
 ~NumpadDel::    ; use ~ to not block key's native function
