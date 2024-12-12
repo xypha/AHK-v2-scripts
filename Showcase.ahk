@@ -1,5 +1,5 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/Showcase.ahk
-; Last updated 2024.11.29
+; Last updated 2024.12.11
 
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
 ; Search for commands/functions used in this script by using Ctrl + F on the AutoHotkey help webpage - https://www.autohotkey.com/docs/v2/lib/
@@ -142,6 +142,9 @@
 ;  = URL Encode/Decode
 ;    + UrlDecode
 ;    + UrlEncode
+;  = MouseMove Fn
+;    + MouseMove_screenCenter
+;    + MouseMove_clientCenter
 ;  = Kill All Instances Of An App
 ;    + GetKillTitles
 ;    + GetKillTitlesFileList
@@ -163,6 +166,7 @@
 ;    + SizeFn
 ;    + ValidExplorerPath
 ;    + DeleteEmptyFolder
+;    + ExtractExplorerFolder
 ;    + CaptureFolderPath
 ;    + GetExplorerPath
 ;    + WallpaperPath_v4
@@ -196,7 +200,7 @@ KeyHistory 500 ; Max 500
 ; Auto-execute
 ; This section should always be at the top of your script
 
-AHKname := "AHK v2 Showcase v2.17"
+AHKname := "AHK v2 Showcase v2.18"
 
 ; Show notification with parameters - text; duration in milliseconds; position on screen: xAxis, yAxis; timeout by - timer (1) or sleep (0)
 MyNotificationGui("Loading " AHKname, 10000, 1550, 985, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
@@ -525,17 +529,17 @@ If GetKeyState("CapsLock", "T") {
 ;  = Move Mouse Pointer pixel by pixel
 ; Modified from http://www.computoredge.com/AutoHotkey/Downloads/MousePrecise.ahk
 
-#Numpad1::MouseMove -1,  1, 0, "R"    ; Win + Numpad1 (SC04F) move down left    ↓←
-#Numpad2::MouseMove  0,  1, 0, "R"    ; Win + Numpad2 (SC050) move down         ↓
-#Numpad3::MouseMove  1,  1, 0, "R"    ; Win + Numpad3 (SC051) move down right   ↓→
-#Numpad4::MouseMove -1,  0, 0, "R"    ; Win + Numpad4 (SC04B) move left         ←
-#Numpad5::MouseMove 960,540           ; Win + Numpad5 (SC04C) move center mouse • (1920×1080 display)
-#Numpad6::MouseMove  1,  0, 0, "R"    ; Win + Numpad6 (SC04D) move right        →
-#Numpad7::MouseMove -1, -1, 0, "R"    ; Win + Numpad7 (SC047) move up left      ↑←
-#Numpad8::MouseMove  0, -1, 0, "R"    ; Win + Numpad8 (SC048) move up           ↑
-#Numpad9::MouseMove  1, -1, 0, "R"    ; Win + Numpad9 (SC049) move up right     ↑→
+#Numpad1::MouseMove -1,  1, 0, "R"      ; Win + Numpad1 (SC04F) move down left    ↓←
+#Numpad2::MouseMove  0,  1, 0, "R"      ; Win + Numpad2 (SC050) move down         ↓
+#Numpad3::MouseMove  1,  1, 0, "R"      ; Win + Numpad3 (SC051) move down right   ↓→
+#Numpad4::MouseMove -1,  0, 0, "R"      ; Win + Numpad4 (SC04B) move left         ←
+#Numpad5::MouseMove_screenCenter()      ; Win + Numpad5 (SC04C) move center mouse • ; alternative - MouseMove_clientCenter()
+#Numpad6::MouseMove  1,  0, 0, "R"      ; Win + Numpad6 (SC04D) move right        →
+#Numpad7::MouseMove -1, -1, 0, "R"      ; Win + Numpad7 (SC047) move up left      ↑←
+#Numpad8::MouseMove  0, -1, 0, "R"      ; Win + Numpad8 (SC048) move up           ↑
+#Numpad9::MouseMove  1, -1, 0, "R"      ; Win + Numpad9 (SC049) move up right     ↑→
 
-^#m::MouseMove 960,540 ; Test mouse position
+^#m::MouseMove 960,540 ; Test mouse position - screen centre in 1920 × 1080 display
 
 ;------------------------------------------------------------------------------
 ;  = Close or Kill an app window
@@ -553,14 +557,14 @@ MouseGetPos ,, &id
 ; The window does not have to be active to be detected. Hidden windows cannot be detected
 ; WinID := WinExist("A")  ; alternative - but 'Active' window might not always be the intended target
 
-winClass := WinGetClass("ahk_id " id)                    ; Retrieves the specified window's class name
+winClass := WinGetClass(id)                    ; Retrieves the specified window's class name
 If (winClass !== "Shell_TrayWnd"                         ; exclude windows taskbar
  || winClass !== "TopLevelWindowForOverflowXamlIsland"   ; System tray overflow window
  || winClass !== "Windows.UI.Core.CoreWindow"            ; Notification Center
 ;|| winClass !== "insert your app's window class"        ; uncomment to add more apps
     )
-    WinClose("ahk_id " id)  ; sends a WM_CLOSE message to the target window
-    ; PostMessage 0x0112, 0xF060,,, "ahk_id " id ; alternative - same as pressing Alt+F4 or clicking a window's close button in its title bar
+    WinClose(id)  ; sends a WM_CLOSE message to the target window
+    ; PostMessage 0x0112, 0xF060,,, id ; alternative - same as pressing Alt+F4 or clicking a window's close button in its title bar
 }
 
 ;--------
@@ -573,7 +577,7 @@ If (winClass !== "Shell_TrayWnd"                         ; exclude windows taskb
 /* ; alternative
 ^!F4:: {
 MouseGetPos ,, &id
-ProcessClose WinGetProcessName("ahk_id " id)
+ProcessClose WinGetProcessName(id)
 }
 */
 
@@ -749,15 +753,23 @@ Send SubStr(clipped,2) SubStr(clipped,1,1) "{Left}"
 
 !t:: {                          ; Alt + t
 Title_When_On_Top := "! "       ; change title "! " as required
-t := WinGetTitle("A")
-ExStyle := WinGetExStyle(t)
-If (ExStyle & 0x8) {            ; 0x8 is WS_EX_TOPMOST
-    WinSetAlwaysOnTop 0, t      ; Turn OFF and remove Title_When_On_Top
-    WinSetTitle StrReplace(t, Title_When_On_Top), t
+HWND := WinGetID("A")
+t := WinGetTitle(HWND)
+
+ExStyle := WinGetExStyle(HWND)
+If (ExStyle & 0x8) {                ; 0x8 is WS_EX_TOPMOST
+    WinSetAlwaysOnTop 0, HWND       ; Turn OFF always on top
+    If t != ""
+        ; change title only if title is not empty, because some windows don't have a title/title bar
+        ; i.e., don't perform WinSetTitle for windows such as 'ahk_class #32770 ahk_exe SndVol.exe'
+        ; remove Title_When_On_Top from window title
+        WinSetTitle StrReplace(t, Title_When_On_Top), HWND
     }
 Else {
-    WinSetAlwaysOnTop 1, t      ; Turn ON and add Title_When_On_Top
-    WinSetTitle Title_When_On_Top t, t
+    WinSetAlwaysOnTop 1, HWND      ; Turn ON always on top
+    If t != ""
+        ; add Title_When_On_Top to window title
+        WinSetTitle Title_When_On_Top t, HWND
     }
 }
 
@@ -988,9 +1000,11 @@ Send "{Enter}"
 ; Check my bookmarklet repo - https://github.com/xypha/Bookmarklets
 ^m:: { ; Ctrl + m
 If WinActive("Preferences - Invidious")
-    MarkletFn("invpref")        ; keyword to `Set Invidious preferences in two clicks`
+    MarkletFn("invpref")        ; keyword for `Set Invidious preferences in two clicks`
 Else If WinActive(" IMDb")
-    MarkletFn("imdblink")       ; keyword to `Open IMDb trailer in a new tab`
+    MarkletFn("imdblink")       ; keyword for `Open IMDb trailer in a new tab`
+Else If WinActive(".pdf")
+    MarkletFn("pdfdark")        ; keyword for "PDF dark"
 Else Send ThisHotkey
 }
 
@@ -1245,50 +1259,43 @@ Else {
     Else path := [2, GetExplorerPath()] ; other ClassNN
 
     ; calculate folder size and display
-    GetExplorerSize(path[1], path[2])
+    result := GetExplorerSize(path[1], path[2]) ; Return [SizeB, errorDetails, pathContent, files]
+    
+    ; check size and display tooltip
+    If result[1] = 0 and result[2] != ""                    ; SizeB zero and errorDetails present
+        ToolTipFn(result[2], 5000)                          ; 5s ; show errorDetails
+    Else If result[1] = 0                                   ; SizeB zero and no errors
+        ToolTipFn(result[3] "`nEmpty Folder/File", 3000)    ; 3s ; show pathContent
+    Else                                                    ; show pathContent SizeB errorDetails
+        ToolTipFn(result[3] "`nSize: " SizeFn(result[1]) "`n" result[2], 3000) ; 3s
     }
 }
 
 ;--------
 ;      * Delete Empty Folder
 
-^+d::DeleteEmptyFolder(CaptureFolderPath())
+^+d:: { ; Ctrl + Shift + D
+msgText := DeleteEmptyFolder(CaptureFolderPath())
+MsgBox Trim(msgText, "`n`t`s`r"),, 262144 ; 262144 = Always-on-top
+}
 
 ;--------
 ;      * Extract from folder & delete
 
 ^+e:: {
 
-; extract folder path using clipboard
-SourceFolder := CaptureFolderPath("`nSource Folder")            ; e.g., D:\Movies
+; store msgs for later display
+msgText := ""
 
-; remove folder "Movies" and determine "D:\" is the destination
-DestinationFolder := RegExReplace(SourceFolder, "\\[^\\]+$")    ; Result → D:\
+; get and store SourceFolder paths in variable
+clipped := CallClipboardVar(2, 1)
 
-If not DirExist(DestinationFolder) {
-    MsgBox "Source: " SourceFolder "`nDestination: " DestinationFolder "`nDirectory does not exist!",, 262144 ; 262144 = Always-on-top
-    Exit
-    }
+; Run extraction function
+Loop Parse clipped, "`n", "`r"
+    msgText .= ExtractExplorerFolder(A_LoopField)
 
-; move files
-Try FileMove SourceFolder "\*.*", DestinationFolder
-Catch as Err
-    ErrorMsg := "FileMove`nSource: " SourceFolder "`nDestination: " DestinationFolder "`nErrors: " Err.Extra
-
-; move folders
-Loop Files, SourceFolder "\*.*", "D" {
-    Try DirMove A_LoopFilePath, DestinationFolder "\" A_LoopFileName
-    Catch {
-        If IsSet(ErrorMsg)
-            ErrorMsg .= "`nDirMove Error #" A_Index ": " A_LoopFilePath
-        Else ErrorMsg := "DirMove Error #" A_Index ": " A_LoopFilePath
-        }
-    }
-
-; show error or delete empty folder
-If IsSet(ErrorMsg)
-    MsgBox ErrorMsg,, 262144 ; 262144 = Always-on-top
-Else DeleteEmptyFolder(SourceFolder)
+; show msgs after extraction
+MsgBox Trim(msgText, "`n`t`s`r"),, 262144 ; 262144 = Always-on-top
 }
 
 ;--------
@@ -1581,7 +1588,10 @@ Media_Play_Pause::Media_Play_Pause
 
 :?*x:c0+::PasteC(10) ; same as c10+
 
-:?*x:c++::ClipMenuFn(SendClipFn) ; show ClipMenu
+; !v::                    ; Alt + v
+:?*x:c++:: {            ; c++
+ClipMenuFn(SendClipFn)  ; show ClipMenu
+}
 
 ;--------
 ;  = ClipArr testing
@@ -2154,7 +2164,7 @@ Loop LoopNo {
 
 ; Set icons for each menu item
 Loop LoopNo {
-    Try ClipMenu.SetIcon(A_Index "&", A_ScriptDir "\Icons\ClipMenu\" A_Index "-20.jpg", , 20)
+    Try ClipMenu.SetIcon(A_Index "&", A_ScriptDir "\icons\ClipMenu\" A_Index "-20.jpg", , 20)
     ; Icon Source: Calendar by Kalash - CC BY 4.0 - https://icon-icons.com/pack/Calendar/4173
     ; Icons were cropped using https://bulkimagecrop.com/ ; and converted to jpg and resized using mspaint (classic)
     ; `Try` command is used to prevent AutoHotkey from throwing error msgs in case icon files are absent or not in correct path.
@@ -2169,7 +2179,7 @@ Loop LoopNo {
     }
 
 If isSet(icon_error)
-    ClipMenu.Add("&// SetIcon command failed! // Path: " A_ScriptDir "\Icons\ClipMenu\", ClipMenu_icon_error)
+    ClipMenu.Add("&// SetIcon command failed! // Path: " A_ScriptDir "\icons\ClipMenu\", ClipMenu_icon_error)
 
 ; show pop-up menu
 ClipMenu.Show
@@ -2262,7 +2272,7 @@ OnClipboardChange ClipChanged, 1
 ;    + GetTrans
 
 GetTrans(id) {
-Trans := WinGetTransparent("ahk_id " id)
+Trans := WinGetTransparent(id)
 If not Trans
     Trans := 255
 Return Trans
@@ -2273,9 +2283,9 @@ Return Trans
 
 SetTransByWheel(Transparency, id) {
 If Transparency == "Off"
-    WinSetTransparent 255, "ahk_id " id
+    WinSetTransparent 255, id
     ; Set transparency to 255 before using Off - might avoid window redrawing problems such as a black background. If the window still fails to be redrawn correctly, try WinRedraw, WinMove or WinHide + WinShow for a possible workaround.
-WinSetTransparent Transparency, "ahk_id " id
+WinSetTransparent Transparency, id
 ToolTipFn("Transparency: " Transparency) ; 500ms
 }
 
@@ -2302,9 +2312,9 @@ SetTransMenu.Show
 
 SetTransByMenu(item, position, SetTransMenu) {
 Transparency := Trim(SubStr(item, 4, 3))
-WinSetTransparent Transparency, "ahk_id " WinID
+WinSetTransparent Transparency, WinID
 If Transparency = 255 {
-    WinSetTransparent "Off", "ahk_id " WinID ; Specifying Off - may improve performance and reduce usage of system resources
+    WinSetTransparent "Off", WinID ; Specifying Off - may improve performance and reduce usage of system resources
     }
 ToolTipFn("Transparency: " Trim(SubStr(item, 4)), 2000) ; 2s
 }
@@ -2643,6 +2653,25 @@ Else {
 }
 
 ;------------------------------------------------------------------------------
+;  = MouseMove Fn
+
+;    + MouseMove_screenCenter
+
+MouseMove_screenCenter() {
+CoordMode "Mouse", "Screen"
+MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2
+CoordMode "Mouse", "Client"
+}
+
+;--------
+;    + MouseMove_clientCenter
+
+MouseMove_clientCenter(HWND := "A") {
+WinGetClientPos , , &OutWidth, &OutHeight, HWND
+MouseMove OutWidth / 2, OutHeight / 2
+}
+
+;------------------------------------------------------------------------------
 ;  = Kill All Instances Of An App
 
 ;    + GetKillTitles
@@ -2707,7 +2736,7 @@ SnipFromMenu(ItemName, ItemPos, MyMenu) {
 Send "{PrintScreen}"
 If WinWaitActive("Snipping Tool Overlay ahk_exe SnippingTool.exe",, 3) { ; 3s
     Sleep 250
-    MouseMove A_ScreenWidth/2, 40 ; client 973, 38
+    MouseMove A_ScreenWidth / 2, 40 ; client 973, 38
     MouseClick
     If WinWait("PopupHost ahk_exe SnippingTool.exe",, 3) { ; 3s
         Sleep 250
@@ -2848,11 +2877,12 @@ SizeB := 0
 errorDetails := ""
 folderName := ""
 fileName := ""
+files := ""
 
 If pathType = 1 {   ; multiple lines ; InStr(pathContent, "`n")
     Loop Parse pathContent, "`n", "`r" {
         If DirExist(A_LoopField) {          ; is folder
-            Loop Files A_LoopField "\*.*", "R"
+            Loop Files A_LoopField "\*", "R"
                 SizeB += A_LoopFileSize
             folderName .= A_LoopField "`n"
             }
@@ -2865,29 +2895,26 @@ If pathType = 1 {   ; multiple lines ; InStr(pathContent, "`n")
 
     ; display folders first in pathContent
     If folderName == ""
-        pathContent := Trim(Sort(fileName, "N"), "`n")
+        pathContent := Trim(Sort(fileName, "N"), "`n`t`s`r")
     Else If fileName == ""
-        pathContent := Trim(Sort(folderName, "N"), "`n")
-    Else pathContent := Trim(Sort(folderName, "N"), "`n") "`n" Trim(Sort(fileName, "N"), "`n")
+        pathContent := Trim(Sort(folderName, "N"), "`n`t`s`r")
+    Else pathContent := Trim(Sort(folderName, "N"), "`n`t`s`r") "`n" Trim(Sort(fileName, "N"), "`n`t`s`r")
 
     ; limit string to 1000 characters
     If StrLen(pathContent) > 1500 {
         RegExMatch(pathContent, "[\s\S]{1,1500}`n", &output)
-        pathContent := output.0 "… and more!"
+        pathContent := output[0] "… and more!"
         }
     }
-Else If pathType = 2 { ;          ; single line - folder ; DirExist(pathContent)
-    Loop Files pathContent "\*.*", "R"
+Else If pathType = 2 { ;                        ; single line - folder ; DirExist(pathContent)
+    Loop Files pathContent "\*", "R" {
         SizeB += A_LoopFileSize
+        files .= A_LoopFileFullPath " (" SizeFn(A_LoopFileSize) ")`n"
+        }
     }
-Else SizeB += FileGetSize(pathContent, "B")    ; single line - file ; FileExist(pathContent)
+Else SizeB += FileGetSize(pathContent, "B")     ; single line - file ; FileExist(pathContent)
 
-; check size and display tooltip
-If SizeB = 0 and errorDetails != ""   ; size zero and error present
-    ToolTipFn(errorDetails, 5000)          ; 5s ; show error
-Else If SizeB = 0                     ; size zero and no errors
-    ToolTipFn(pathContent "`nEmpty Folder/File", 3000) ; 3s
-Else ToolTipFn(pathContent "`nSize: " SizeFn(SizeB) "`n`n" errorDetails, 3000) ; 3s
+Return [SizeB, errorDetails, pathContent, Trim(Sort(files, "N"), "`n`t`s`r")]
 }
 
 ;--------
@@ -3003,7 +3030,7 @@ Loop StrLen(driveLetters) {
     RBFCount    := 0        ; Recycle Bin File count
     SizeB       := 0        ; size in bytes
     DriveL      := SubStr(driveLetters, A_Index, 1)
-    Loop Files DriveL ":\$Recycle.Bin\" SID "\*.*", "R" {
+    Loop Files DriveL ":\$Recycle.Bin\" SID "\*", "R" {
         RBFCount++
         SizeB += A_LoopFileSize
         If not InStr(visibleSummary, A_LoopFileFullPath) ; exclude file name if already in visibleSummary
@@ -3016,7 +3043,7 @@ Loop StrLen(driveLetters) {
     TotalSizeB += SizeB
     }
 
-hiddenFileList := Trim(Sort(FileNames, "N"), "`n")
+hiddenFileList := Trim(Sort(FileNames, "N"), "`n`t`s`r")
 Return [RBSummary, TotalRBFCount, TotalSizeB, hiddenFileList]
 }
 
@@ -3154,19 +3181,58 @@ Else {
 ;    + DeleteEmptyFolder
 
 DeleteEmptyFolder(WhichFolder) {
-FolderSizeB := 0
-contents := ""
-Loop Files WhichFolder "\*.*", "R" {
-    FolderSizeB += A_LoopFileSize
-    contents .= A_LoopFileFullPath "`n"
+
+If not DirExist(WhichFolder)
+    Return "DeleteEmptyFolder() aborted! Folder does not exist!`n" WhichFolder "`n"
+
+result := GetExplorerSize(2, WhichFolder) ; Returns [SizeB, errorDetails, pathContent, files]
+
+If result[1] = 0 {                  ; If SizeB is zero
+    Try FileRecycle WhichFolder     ; delete empty folder, recursive
+    Catch as err
+        Return "DeleteEmptyFolder() - FileRecycle failed!`n" WhichFolder "(0 bytes)`n"
+    Return "DeleteEmptyFolder() - Successful!`n" WhichFolder "`n"
     }
-If contents == ""
-    contents := "Nil"
-If FolderSizeB = 0 {            ; If zero size
-    FileRecycle WhichFolder     ; delete empty folder, recursive
-    ToolTipFn(WhichFolder "`nEmpty folder deleted!", 1000) ; 1s
+Else ; Return folder with SizeB and files
+    Return "DeleteEmptyFolder() aborted!`n" WhichFolder " (" SizeFn(result[1]) ")`nContents:`n" result[4] "`n"
+}
+
+;--------
+;    + ExtractExplorerFolder
+
+ExtractExplorerFolder(SourceFolder) {
+; example for SourceFolder "D:\Movies\"
+SourceFolder := RegExReplace(SourceFolder, "\\$") ; remove trailing "\", Result → D:\Movies
+
+If not DirExist(SourceFolder)
+    Return "Not a valid SourceFolder: " SourceFolder "`n"
+    
+; remove folder "Movies" and set "D:\" as the destination
+DestinationFolder := RegExReplace(SourceFolder, "\\[^\\]+$")    ; Result → D:\
+
+If not DirExist(DestinationFolder)
+    Return "Not a valid DestinationFolder!`n`tSource: " SourceFolder "`n`tDestination: " DestinationFolder "`n"
+
+extraction_errors := ""
+
+; move files
+Try FileMove SourceFolder "\*", DestinationFolder
+Catch as err
+    extraction_errors .= "`tFileMove Error! Number: " err.Extra "`n`tSource: " SourceFolder "`n`tDestination: " DestinationFolder "`n"
+
+; move folders
+Loop Files, SourceFolder "\*", "D" {
+    Try DirMove A_LoopFilePath, DestinationFolder "\" A_LoopFileName
+    Catch as err
+        extraction_errors .= "`tDirMove Error - Index #" A_Index ": " A_LoopFilePath "`n`tError: " Type(err) " - " err.What "`n`t" err.Message "`n"
     }
-Else ToolTipFn(WhichFolder . SizeFn(FolderSizeB) "`n`nContents:`n" contents, 5000) ; 5s
+
+If extraction_errors != "" {
+    result := GetExplorerSize(2, SourceFolder) ; Returns [SizeB, errorDetails, pathContent, files]
+    Return "SourceFolder not deleted! (" SizeFn(result[1]) ")`nCheck below errors -`n" extraction_errors "Contents -`n" result[4] "`n"
+    }
+    
+Else Return DeleteEmptyFolder(SourceFolder)
 }
 
 ;--------
