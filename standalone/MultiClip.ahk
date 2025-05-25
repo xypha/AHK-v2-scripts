@@ -1,7 +1,10 @@
 ; https://github.com/xypha/AHK-v2-scripts/edit/main/standalone/MultiClip.ahk
-; Last updated 2024.11.29
+; Last updated 2024.12.25
+
 ; This is (mostly) feature complete. There won't be any major changes henceforth.
-; For a more feature rich and frankly awesome ahk clipboard manager, visit https://github.com/mikeyww/mwClipboard/ 
+; updates and fixes will first appear on showcase script - https://github.com/xypha/AHK-v2-scripts/blob/main/Showcase.ahk
+
+; For a actively developed, more feature rich and frankly awesome ahk clipboard manager, visit https://github.com/mikeyww/mwClipboard/ 
 
 ; Visit AutoHotkey (AHK) version 2 (v2) help for information - https://www.autohotkey.com/docs/v2/
 ; Search for commands/functions used in this script by using Ctrl + F on the AutoHotkey help webpage - https://www.autohotkey.com/docs/v2/lib/
@@ -13,39 +16,48 @@
 ;   /* AHK v2 MultiClip - CONTENTS */
 ; Settings
 ; Auto-execute
+;  = Set Global variables
+;    + MenuShortcuts
+;    + Path to Menu() icons
 ;  = AHK Dark Mode
-;  = Initialise ClipArr
-;  = Initialise ClipArr hotstrings
+;  = Initialise MultiClip
+;  = Initialise hotstrings
 ;  = Tray Icon
 ;  = End auto-execute
 ; Hotkeys
 ;  = Check & Reload AHK
-; Hotstrings
-;  = ClipArr keys
-;  = ClipArr testing
+; Hotstrings - Actions
+;  = MultiClip Hotstrings
+;  = MultiClip testing
 ; User-defined functions
 ;  = MyNotification
 ;    + MyNotificationGui
 ;    + EndMyNotif
+;  = Catch error Fn
+;    + CatchError_Details
+;    + CatchError_Show
 ;  = AHK Dark Mode Fn
 ;    + ahkDarkMenu
-;  = MultiClip ClipArr
+;  = MultiClip Fn
 ;    + ClipChanged
 ;    + InsertInClipArr
-;    + ClipArr ToolTipFn
 ;    + SaveClipArr
-;    + PasteVStrings
-;    + PasteCStrings
-;  = MultiClip ClipMenu
-;    + ClipMenuFn
-;    + ClipTrim
-;    + SendClipFn
+;    + MultiClip_PasteVStrings
+;    + MultiClip_PasteCStrings
+;    + MultiClip_PasteAll
+;    + MultiClipMenuFn
+;    + MultiClipCheck
+;    + MultiClipSend
 ;  = Paste instead of Send
 ;    + PasteThis
 ;    + Paste_via_clipboard
-;    + RestoreClip
+;    + RestoreClipboard
 ;  = ToolTip function
 ;    + ToolTipFn
+;  = Trim String Fn
+;    + StrLenLineimit
+;  = File create, overwrite, append
+;    + FileCreate_Overwrite
 
 ;------------------------------------------------------------------------------
 ; Settings
@@ -65,6 +77,57 @@ AHKname := "AHK v2 No-2 MultiClip v4.12"
 MyNotificationGui("Loading " AHKname, 10000, 1550, 945, 1) ; 10000ms = 10 seconds, position bottom right corner (x-axis 1550 y-axis 985) on 1920×1080 display resolution; use timer
 
 ;--------
+;  = Set Global variables
+
+loadingErrors := ""
+
+;--------
+;    + MenuShortcuts
+
+; create array to store shortcuts
+Global MenuShortcuts := StrSplit("1234567890QwertYuioPasdfG")
+
+/* ; shortcuts for each menu item consist of numbers from number row, and letters from the rows below it in a QUERTY keyboard
+; Customise the shortcut characters and their order by altering the characters in `MenuShortcuts` variable as needed
+menu item 1 Shortcut 1 ; number row
+menu item 2 Shortcut 2
+menu item 3 Shortcut 3
+menu item 4 Shortcut 4
+menu item 5 Shortcut 5
+menu item 6 Shortcut 6
+menu item 7 Shortcut 7
+menu item 8 Shortcut 8
+menu item 9 Shortcut 9
+menu item 10 Shortcut 0
+menu item 11 Shortcut Q ; 1st letter row
+menu item 12 Shortcut w
+menu item 13 Shortcut e
+menu item 14 Shortcut r
+menu item 15 Shortcut t
+menu item 16 Shortcut Y
+menu item 17 Shortcut u
+menu item 18 Shortcut i
+menu item 19 Shortcut o
+menu item 20 Shortcut P
+menu item 21 Shortcut a ; 2nd letter row
+menu item 22 Shortcut s
+menu item 23 Shortcut d
+menu item 24 Shortcut f
+menu item 25 Shortcut G
+; QYPG are capitals because selection underline causes confusion with other letters like o or v
+; pressing shift + letter is not necessary because shortcuts are NOT case-sensitive
+*/
+
+;--------
+;    + Path to Menu() icons
+
+; Icon Source: Calendar by Kalash - CC BY 4.0 - https://icon-icons.com/pack/Calendar/4173
+; Icons were cropped using https://bulkimagecrop.com/ ; and converted to jpg and resized using mspaint (classic)
+; To download and save the icons in below path, visit
+; https://github.com/xypha/AHK-v2-scripts/blob/main/icons/Menu/
+
+Global Menu_icon_path := A_ScriptDir "\icons\Menu\"
+;--------
 ;  = AHK Dark Mode
 
 ; check windows registry to see if dark mode is enabled
@@ -78,15 +141,14 @@ If not RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Them
 ; download .ahk files from the `Lib` folder in this repo
 ; and save at the same under a `Lib` folder at the location of your .ahk script file
 
-#Include "Lib\Dark Mode - ToolTip.ahk"            ; 2024.10.15
-#Include "Lib\Dark Mode - MsgBox.ahk"             ; 2024.10.15
-
-; Dark Mode - Window Spy                          ; 2024.10.15
+#Include <Dark Mode - ToolTip>                      ; 2024.12.23
+#Include <Dark Mode - MsgBox>                       ; 2024.12.23
+; Dark Mode - Window Spy                              ; 2024.12.23
 ; manually comment out above lines if dark mode is NOT enabled because "#Include cannot be executed conditionally"
 ; disable dark mode commands "MyNotification.AddText" and "MyNotification.BackColor" in `MyNotificationGui` function
 
 ;--------
-;  = Initialise ClipArr
+;  = Initialise MultiClip
 
 Global LimitClipArr := 25
 ; Limit the number of slots to 25 to match Win + V clipboard history slots ; customise limit to your needs
@@ -98,9 +160,10 @@ Global ClipArrFile := A_MyDocuments "\ClipArrFile.txt"
 ; A_MyDocuments is the full path and name of the current user's "My Documents" folder. Usually corresponds to "C:\Users\<UserName>\Documents" (the final backslash is not included in the variable)
 ; txt file used instead of ini because 'values longer than 65,535 characters are likely to yield inconsistent results' when using IniRead, IniWrite commands
 
-Global delim := "~•~"
-; ~ U+007E TILDE
-; • U+2022 BULLET : black small circle
+Global delim := Chr(0x007E) Chr(0x2022) Chr(0x007E)
+; replace characters with Chr() command to prevent ClipArr StrSplit() error when delimiter itself is copied to clipboard
+; 0x007E → ~ U+007E TILDE
+; 0x2022 → • U+2022 BULLET : black small circle
 ; use a unique string because if an array-slot contains this delimiter by accident, saving and loading array from file will cause errors
 ; Recommendation: 3 or more characters, preferably symbols with one or more Unicode characters that are difficult to type on standard keyboard. For suggestions, look here - https://stackoverflow.com/questions/492090/least-used-delimiter-character-in-normal-text-ascii-128
 
@@ -108,17 +171,17 @@ Global ClipArr := [] ; set Global variable and assign empty array
 
 ; Load array from file if file exists - inspired by https://www.autohotkey.com/boards/viewtopic.php?p=341809#p341809
 ; `Try` command is used to prevent AutoHotkey from throwing error msg in case file is absent or not in correct path
-Try ClipArr := StrSplit(FileRead(ClipArrFile, "UTF-8"), delim, , LimitClipArr)
-Catch ; or Else load default values on start - 25 slots containing alphanumerical text
-    ClipArr := ["Slot 1 Shortcut 1",
-                "Slot 2 Shortcut 2",
-                "Slot 3 Shortcut 3",
-                "Slot 4 Shortcut 4",
-                "Slot 5 Shortcut 5",
-                "Slot 6 Shortcut 6",
-                "Slot 7 Shortcut 7",
-                "Slot 8 Shortcut 8",
-                "Slot 9 Shortcut 9",
+Try ClipArr := StrSplit(FileRead(ClipArrFile, "`n UTF-8"), delim, , LimitClipArr)
+Catch ; If error, load default values on start - 25 slots containing alphanumerical text
+    ClipArr := ["Slot 1 Shortcut 1" ,
+                "Slot 2 Shortcut 2" ,
+                "Slot 3 Shortcut 3" ,
+                "Slot 4 Shortcut 4" ,
+                "Slot 5 Shortcut 5" ,
+                "Slot 6 Shortcut 6" ,
+                "Slot 7 Shortcut 7" ,
+                "Slot 8 Shortcut 8" ,
+                "Slot 9 Shortcut 9" ,
                 "Slot 10 Shortcut 0",
                 "Slot 11 Shortcut Q",
                 "Slot 12 Shortcut w",
@@ -136,6 +199,11 @@ Catch ; or Else load default values on start - 25 slots containing alphanumerica
                 "Slot 24 Shortcut f",
                 "Slot 25 Shortcut G"]
 
+Catch as err
+    loadingErrors .= CatchError_Details(err, "ClipArr[] default values set!") "`n`n"
+
+Else MultiClipCheck()
+
 ; run function whenever clipboard is changed such as when Ctrl + x (Cut) or Ctrl + c (Copy) is pressed
 ; or when clipboard is altered by other apps/programs
 OnClipboardChange ClipChanged
@@ -148,10 +216,10 @@ InsertInClipArr(A_Clipboard, 1) ; onstart = 1
 OnExit SaveClipArr
 
 ;--------
-;  = Initialise ClipArr hotstrings
+;  = Initialise hotstrings
 
-PasteVStrings(LimitClipArr)   ; User-defined function creates serial hotstrings
-PasteCStrings(LimitClipArr)
+MultiClip_PasteVStrings(LimitClipArr)   ; User-defined function creates serial hotstrings
+MultiClip_PasteCStrings(LimitClipArr)
 
 ;--------
 ;  = Tray Icon
@@ -162,13 +230,20 @@ path_to_TrayIcon := A_ScriptDir "\icons\Tray\2-512.ico"
 
 Try TraySetIcon path_to_TrayIcon
 Catch as err
-    SetTimer () => MsgBox("TraySetIcon failed!`n" err.Message "`nPath: " path_to_TrayIcon,, 262144), -100 ; 100ms ; new thread ; 262144 = Always-on-top
+    loadingErrors .= CatchError_Details(err, "Path - " path_to_TrayIcon) "`n`n"
 
 ;--------
 ;  = End auto-execute
 
-SetTimer () => EndMyNotif(), -1000  ; 1s ; new thread ; Reset notification timer to 1s after code in auto-execute section has finished running
-Return                              ; Ends auto-execute
+; Reset notification timer to 1s after code in auto-execute section has finished running
+SetTimer () => EndMyNotif(), -1000                      ; 1s ; new thread
+
+; show errors in MsgBox if any
+If loadingErrors != ""
+    SetTimer () => CatchError_Show(loadingErrors), -100 ; 100ms ; new thread
+
+; End auto-execute
+Return
 
 ; Below code can be placed anywhere in your script
 
@@ -199,20 +274,23 @@ Reload
 }
 
 ;------------------------------------------------------------------------------
-; Hotstrings
+; Hotstrings - Actions
 
-;  = ClipArr keys
+;  = MultiClip Hotstrings
 
-:?*x:v0+::PasteV(10) ; same as v10+ ; pastes value in slot #10 in ClipArr ; default value "j10"
+:?*x:v0+::MultiClip_PasteV(10)      ; same as v10+ ; pastes value in slot #10 in ClipArr ; default value "j10"
 
-:?*x:c1+::Send "{Raw}" ClipArr[1] ; Send first entry in raw mode, useful when Ctrl + V is disabled such as on banking sites
+:?*x:c1+::Send "{Raw}" ClipArr[1]   ; Send first entry in raw mode, useful when Ctrl + V is disabled such as on banking sites
 
-:?*x:c0+::PasteC(10) ; same as c10+
+:?*x:c0+::MultiClip_PasteC(10)      ; same as c10+
 
-:?*x:c++::ClipMenuFn(SendClipFn) ; show ClipMenu
+; !v::                                ; Alt + v
+:?*x:c++:: {                        ; c++
+MultiClipMenuFn(MultiClipSend)      ; show MultiClipMenu
+}
 
 ;--------
-;  = ClipArr testing
+;  = MultiClip testing
 
 ; test MultiClip function
 :*:testclip+:: {
@@ -248,14 +326,18 @@ Global ClipArr := ["Slot 1 Shortcut 1",
                 "Slot 23 Shortcut d",
                 "Slot 24 Shortcut f",
                 "Slot 25 Shortcut G"]
-ClipMenuFn(SendClipFn)  ; show menu - ClipMenu
+MultiClipMenuFn(MultiClipSend)  ; show menu - MultiClipMenu
 }
 
 ; restore old ClipArr contents from file after testing or from previous file when needed
 :*x:restoreclip+:: {
+
+; enable local default delimiter if restoring ClipArr after changing Global default delimiter
+; delim := Chr(0x007E) Chr(0x2022) Chr(0x007E)
+
 Global ClipArr := ""
-ClipArr := StrSplit(FileRead(ClipArrFile, "UTF-8"), delim, , LimitClipArr)  ; restore from file
-ClipMenuFn(SendClipFn)                                                      ; show menu - ClipMenu
+ClipArr := StrSplit(FileRead(ClipArrFile, "`n UTF-8"), delim, , LimitClipArr)   ; restore from file
+MultiClipMenuFn(MultiClipSend)                                                  ; show menu - MultiClipMenu
 }
 
 ;------------------------------------------------------------------------------
@@ -294,6 +376,65 @@ EndMyNotif() {
 MyNotification.Destroy()
 }
 
+
+
+;------------------------------------------------------------------------------
+;  = Catch error Fn
+
+;    + CatchError_Details
+
+CatchError_Details(err, info := "", errorType := Type(err)) {
+If A_ThisHotkey
+    Details := A_ThisHotkey ":: "
+Else Details := "No hotkey/hotstring :: "
+
+Details .=  err.What                                            "`n"
+        .   "Type: " errorType  " @ Line: " err.Line            "`n"
+
+If info
+    Details .=  "User Info: " info                              "`n"
+
+; add info from [err]
+
+If A_LastError != 0
+    Details .=  "OSError"   OSError(A_LastError).Message        "`n"
+If err.Message
+    Details .=  "Message: " err.Message                         "`n"
+If err.Extra
+    Details .=  "Extra: "   err.Extra                           "`n"
+
+; add info from AHK help file
+
+If err.What = "FileRead" {
+    If errorType = "OSError"
+        Details .=  "Help Info: opening or reading the file"                            "`n"
+    Else If errorType = "MemoryError"
+        Details .=  "Help Info: file > 4 GB / unable to allocate enough memory"         "`n"
+    Else  ; Error or other?
+        Details .=  "Help Info: unknown - check help file"                              "`n"
+    }
+
+Else Details .=  "Help Info: not in CatchError_Details() - check help file"             "`n"
+
+Return Details
+}
+
+;--------
+;    + CatchError_Show
+
+CatchError_Show(Details) {
+msgText := StrLenLineimit(Details, 50, 30)    ; line length 50 characters and # of lines 30
+
+If msgText != Details {
+    fileName := "CatchError_Details" FormatTime( , "yyyy-MM-dd @ HH：mm：ss") ".txt"
+    FileCreate_Overwrite(A_ScriptDir "\" fileName, Details)
+    Run A_ScriptDir "\" fileName
+    msgText .= "`n" "Check " fileName " for full details."
+    }
+
+MsgBox( Trim(msgText, "`n`t`s`r"), A_ScriptName "Error!", 16 + 262144) ; 16 = Icon Hand (stop/error) ; 262144 = Always-on-top
+}
+
 ;------------------------------------------------------------------------------
 ;  = AHK Dark Mode Fn
 
@@ -305,16 +446,16 @@ MyNotification.Destroy()
 */
 
 ahkDarkMenu() {
-    Static uxtheme := DllCall("GetModuleHandle", "str", "uxtheme", "ptr")
-    Static SetPreferredAppMode := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 135, "ptr")
-    Static FlushMenuThemes := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 136, "ptr")
+Static uxtheme := DllCall("GetModuleHandle", "str", "uxtheme", "ptr")
+Static SetPreferredAppMode := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 135, "ptr")
+Static FlushMenuThemes := DllCall("GetProcAddress", "ptr", uxtheme, "ptr", 136, "ptr")
 
-    DllCall(SetPreferredAppMode, "int", 1) ; 0 = Default, 1 = AllowDark, 2 = ForceDark, 3 = ForceLight, 4=Max
-    DllCall(FlushMenuThemes)
+DllCall(SetPreferredAppMode, "int", 1) ; 0 = Default, 1 = AllowDark, 2 = ForceDark, 3 = ForceLight, 4=Max
+DllCall(FlushMenuThemes)
 }
 
 ;------------------------------------------------------------------------------
-;  = MultiClip ClipArr
+;  = MultiClip Fn
 ; Sources - https://www.autohotkey.com/boards/viewtopic.php?p=326827#p326827
 ; and MultiClip v1 - https://www.autohotkey.com/boards/viewtopic.php?p=332658#p332658
 ; MultiClip v1 used or modified AHK v1 code from https://autohotkey.com/board/topic/4567-clipstep-step-through-multiple-clipboards-using-ctrl-x-c-v/
@@ -345,43 +486,36 @@ Else InsertInClipArr(A_Clipboard)
 
 InsertInClipArr(text, onStart := 0) {
 
-Cliptemp := StrReplace(text,"`r`n","`n")        ; fix for SendInput sending Windows line-breaks
+ClipTemp := StrReplace(text, "`r`n", "`n")          ; fix for SendInput sending Windows line-breaks
 
-If RegExMatch(Cliptemp,"^\s+$") {               ; don't insert empty strings into clipArr
-    If onStart != 1                             ; If NOT on startup/reload
-        ToolTipFn("[~ Only \s ~]", 2000)        ; 2s ; show alert instead
+If RegExMatch(ClipTemp,"^\s+$") {                   ; don't insert empty strings into clipArr
+    If onStart != 1                                 ; If NOT on startup/reload
+        ToolTipFn("[~ Only \s ~]", 2000)            ; 2s ; show alert instead
     Exit
     }
 
-Cliptemp := RegExReplace(Cliptemp,"^\s+|\s+$")  ; remove leading/trailing \s = [\r\n\t\f\v ]
+ClipTemp := Trim(ClipTemp, "`n`t`s`r")
+; RegExReplace(ClipTemp,"^\s*|\s*$")                  ; remove leading/trailing \s = [\r\n\t\f\v ]
 
-; use Loop to check if Cliptemp is already in an array. If found, remove it and retrieve its `Index`
+; use Loop to check if ClipTemp is already in an array. If found, remove it and retrieve its `Index`
 Loop LimitClipArr {
-    If Cliptemp == ClipArr[A_Index] {
+    If ClipTemp == ClipArr[A_Index] {
         ClipArr.RemoveAt(A_Index)
         FoundClip := A_Index
         Break
         }
     }
-ClipArr.InsertAt(1, Cliptemp)   ; insert current clipboard contents in the first slot
-ClipArr.Length := LimitClipArr  ; reset number of slots to previously defined limit
-If IsSet(FoundClip) and onStart = 1 and FoundClip = 1
+ClipArr.InsertAt(1, ClipTemp)                           ; insert current clipboard contents in the first slot
+ClipArr.Length := LimitClipArr                          ; reset number of slots to previously defined limit
+If IsSet(FoundClip) && onStart = 1 && FoundClip = 1
     Return
-Else ClipArrToolTipFn()
-}
-
-;--------
-;    + ClipArr ToolTipFn
-; clipboard change alert tooltip
-
-ClipArrToolTipFn() {
-If StrLen(ClipArr[1]) > 1000                                ; trim If more than 1000 characters
-    ToolTipFn(SubStr(ClipArr[1], 1, 1000) "`n… and more")   ; 500ms
-Else ToolTipFn(ClipArr[1])                                  ; 500ms
+Else ToolTipFn(StrLenLineimit(ClipArr[1]), 1000)        ; 1s
 }
 
 ;--------
 ;    + SaveClipArr
+
+; OnExit MyCallback(ExitReason, ExitCode)
 ; use * because OnExit Callback accepts two parameters
 
 SaveClipArr(*) {
@@ -394,130 +528,79 @@ Loop (ClipArr.Length > LimitClipArr ? LimitClipArr : ClipArr.Length)
 ; remove trailing delim to prevent ClipArr.Length from exceeding LimitClipArr on restoration of ClipArr
 Result := SubStr(Result, 1, StrLen(delim) * -1)
 
-Try FileRecycle ClipArrFile                     ; send old file to recycle bin if one exists
-    ; old clipboard contents can be retrieved by restoring ClipArrFile from recycle bin
-    ; alternatively, use `FileDelete` command to delete permanently
-FileAppend Result, ClipArrFile, "`n UTF-8"      ; create new file and save current clipArr contents
+Try FileRecycle ClipArrFile                         ; send old file to recycle bin if one exists
+; Catch ; useless as script terminates if the user chooses Exit from the tray menu or main menu, or the script is asked to terminate as a result of Reload or #SingleInstance
+FileAppend Result, ClipArrFile, "`n UTF-8"     ; create new file and save current clipArr contents
 }
 
 ;--------
-;    + PasteVStrings
+;    + MultiClip_PasteVStrings
 
-PasteVStrings(number) {
+MultiClip_PasteVStrings(number) {
 Loop number
-    Hotstring(":?*x:v" A_Index "+", PasteV)
+    Hotstring(":?*x:v" A_Index "+", MultiClip_PasteV)
 }
 
-/* use Loop to replace serialised hotstrings
-:?*:v1+::
-.
-.
-.
-:?*:v20+:: {
-PasteV(ThisHotkey)
-}
-*/
-
-PasteV(hk) {
+MultiClip_PasteV(hk) { ; MyCallback(HotstringName := ThisHotkey)
 RegExMatch(hk, "\d+", &SubPat)
-Try PasteThis(ClipArr[SubPat[]])
+PasteThis( ClipArr[SubPat[]] )
 ; Try Send ClipArr[SubPat[]] ; alternative
 }
 
 ;--------
-;    + PasteCStrings
+;    + MultiClip_PasteCStrings
 
-PasteCStrings(number) {
+MultiClip_PasteCStrings(number) {
 Loop number {
     If A_Index = 1  ; do not create c1+ hotstring, already assigned to "{Raw}" ClipArr[1]
         Continue    ; = same as saying "skip"
-    Hotstring(":?*x:c" A_Index "+", PasteC)
+    Hotstring(":?*x:c" A_Index "+", MultiClip_PasteC)
     }
 }
 
-/* use Loop to replace serialised hotstrings
-:?*:c0+:: ; same as c10
-:?*:c2+::
-.
-.
-.
-:?*:c20+:: {
-PasteC(ThisHotkey)
-}
-*/
-
-PasteC(hk) {
+MultiClip_PasteC(hk) { ; MyCallback(HotstringName := ThisHotkey)
 RegExMatch(hk, "\d+", &SubPat)
-PasteAll(SubPat[])
+MultiClip_PasteAll(SubPat[])
 }
 
-PasteAll(hkey) {
-Loop hkey {
-    Try clipVar := ClipArr[A_Index]
-    Catch IndexError
-        Result .= "`n"
-    Else Result .= clipVar "`n"
-    }
-PasteThis(RegExReplace(Result,"^\n+|\n+$")) ; remove leading/trailing LF
+;--------
+;    + MultiClip_PasteAll
+
+MultiClip_PasteAll(hkey := ClipArr.Length) {
+results := ""
+
+Loop hkey
+    results .= ClipArr[A_Index] "`n"
+
+PasteThis( RTrim(results, "`n`t`s`r") ) ; remove trailing LF
 }
 
-;------------------------------------------------------------------------------
-;  = MultiClip ClipMenu
+;--------
+;    + MultiClipMenuFn
 
-;    + ClipMenuFn
+MultiClipMenuFn(FnName) {
 
-ClipMenuFn(FnName) {
-
-; create array to store shortcuts
-ClipShortcuts := StrSplit("1234567890QwertYuioPasdfG")
-
-/* ; shortcuts for 25 slots consist of numbers from number row, and letters from the rows below it in a QUERTY keyboard
-; Customise the shortcut characters and their order by altering the characters in `ClipShortcuts` variable as needed
-Slot 1 Shortcut 1 ; number row
-Slot 2 Shortcut 2
-Slot 3 Shortcut 3
-Slot 4 Shortcut 4
-Slot 5 Shortcut 5
-Slot 6 Shortcut 6
-Slot 7 Shortcut 7
-Slot 8 Shortcut 8
-Slot 9 Shortcut 9
-Slot 10 Shortcut 0
-Slot 11 Shortcut Q ; 1st letter row
-Slot 12 Shortcut w
-Slot 13 Shortcut e
-Slot 14 Shortcut r
-Slot 15 Shortcut t
-Slot 16 Shortcut Y
-Slot 17 Shortcut u
-Slot 18 Shortcut i
-Slot 19 Shortcut o
-Slot 20 Shortcut P
-Slot 21 Shortcut a ; 2nd letter row
-Slot 22 Shortcut s
-Slot 23 Shortcut d
-Slot 24 Shortcut f
-Slot 25 Shortcut G
-; QYPG are capitals because selection underline causes confusion with other letters like o or v
-; pressing shift + letter is not necessary because shortcuts are NOT case-sensitive
-*/
-
-Global ClipMenu := Menu()
-ClipMenu.Delete
+Global MultiClipMenu := Menu()
+MultiClipMenu.Delete()
 
 LoopNo := ClipArr.Length > LimitClipArr ? LimitClipArr : ClipArr.Length
 
-; populate slots
+; add menu items
 Loop LoopNo {
-    ClipMenu.Add("&" ClipShortcuts[A_Index] "  → " ClipTrim(A_Index), FnName)
+
+    ; replace new line with U+23CE ⏎ RETURN SYMBOL ; retain only first 100 characters
+    clipTrim := SubStr( StrReplace(ClipArr[A_Index], "`n", " " Chr(0x23CE) " ") , 1, 100)
+
+    MultiClipMenu.Add("&" MenuShortcuts[A_Index] "  → " clipTrim, FnName)
     ; When the menu is displayed, a slot can be selected by pressing the key corresponding to the character preceded by the ampersand (&)
     ; These selection shortcuts correspond to the number/alphabet/symbol before `→` and are obtained from ClipShortcuts array
     ; When the menu is displayed, shortcuts are usually underlined, but sometimes don't appear when some symbols are used
     }
 
-; Set icons for each menu item
+; add menu icons if menu icons exist
 Loop LoopNo {
-    Try ClipMenu.SetIcon(A_Index "&", A_ScriptDir "\Icons\ClipMenu\" A_Index "-20.jpg", , 20)
+
+    Try MultiClipMenu.SetIcon(A_Index "&", Menu_icon_path A_Index "-20.jpg", , 20)
     ; Icon Source: Calendar by Kalash - CC BY 4.0 - https://icon-icons.com/pack/Calendar/4173
     ; Icons were cropped using https://bulkimagecrop.com/ ; and converted to jpg and resized using mspaint (classic)
     ; `Try` command is used to prevent AutoHotkey from throwing error msgs in case icon files are absent or not in correct path.
@@ -525,43 +608,45 @@ Loop LoopNo {
     ; A slight delay between menu request and display may be noticeably present on some systems (especially in low-end ones like mine; probably to resize/rescale icons).
     ; This is normal and expected. Comment out the `ClipMenu.SetIcon` line if this is not acceptable.
     ; Default size is 16. Increased to 20 because icon numbers are not clear. Please let me know if you find icons that look better with `ahkDarkMenu` by creating an Issue
-    Catch {
-        icon_error := "Yes"
+    
+    Catch as err {     ; If error, add menu item indicating that menu icons are missing
+        MultiClipMenu.Add("&/  → Menu icons are missing! Press / to check icon path", Menu_icon_error)
         Break
         }
     }
 
-If isSet(icon_error)
-    ClipMenu.Add("&// SetIcon command failed! // Path: " A_ScriptDir "\Icons\ClipMenu\", ClipMenu_icon_error)
-
 ; show pop-up menu
-ClipMenu.Show
+MultiClipMenu.Show
 }
 
 ;--------
-;    + ClipMenu_icon_error
+;    + MultiClipCheck
 
-ClipMenu_icon_error(ItemName, ItemPos, MyMenu) {
-MsgBox ItemName "`nCheck path to see if icon files exist and correctly named.`nIf not, visit https://github.com/xypha/AHK-v2-scripts/blob/main/icons/ClipMenu/",, 262144 ; 262144 = Always-on-top
+MultiClipCheck() {
+Loop ClipArr.Length
+    If not ClipArr.Has(A_Index) ; if the index is NOT valid or has NO value at that position
+        ClipArr[A_Index] := "Slot " A_Index " had no value!"    ; add default
 }
 
 ;--------
-;    + ClipTrim
+;    + MultiClipSend
 
-ClipTrim(number) {
-Try trimmed := SubStr(StrReplace(ClipArr[number], "`r`n", A_Space), 1, 90) ; show first 90 characters, replace new line with Space
-Catch as e {
-    ClipArr.InsertAt(number, "[~Err0r~]: " Type(e) " - " e.Message)
-    Return "[~Err0r~]"
-    }
-Return trimmed
+MultiClipSend(ItemName, ItemPos, MyMenu) {
+PasteThis(ClipArr[ItemPos])
 }
 
-;--------
-;    + SendClipFn
+;------------------------------------------------------------------------------
+;  = Menu icon error alert
 
-SendClipFn(item, position, ClipMenu) {
-PasteThis(ClipArr[position])
+;    + Menu_icon_error
+
+Menu_icon_error(ItemName, ItemPos, MyMenu) {
+text := "Menu icons were not loaded for: " MyMenu                           "`n"
+     .  "Icons should be saved in below path -"                             "`n"
+     .   Menu_icon_path                                                     "`n`n"
+     .  "Check path to see if icon files exist and are correctly named."    "`n"
+     .  "If not, visit https://github.com/xypha/AHK-v2-scripts/blob/main/icons/Menu/"
+MsgBox text,, 262144 ; 262144 = Always-on-top
 }
 
 ;------------------------------------------------------------------------------
@@ -572,7 +657,7 @@ PasteThis(ClipArr[position])
 ;    + PasteThis
 
 PasteThis(pasteText) {
-If StrLen(pasteText) <= 15  ; 15; If short text, Send keystrokes instead of paste
+If StrLen(pasteText) <= 15  ; 15 ; If short text, Send keystrokes instead of paste
     SendText pasteText      ; text mode to prevent unintended key press when text contains '^+!#{}'
 Else Paste_via_clipboard(pasteText)
 }
@@ -589,7 +674,7 @@ If A_Clipboard !== pasteText {
     While tmp_clip2 !== pasteText {     ; validate clipboard
         Sleep 50                        ; 50ms
         If A_Index > 5 {                ; max 250ms
-            ToolTipFn(A_ThisHotkey ":: PasteThis tmp_clip copying Failed?")     ; 500ms
+            ToolTipFn(A_ThisHotkey ":: Paste_via_clipboard() tmp_clip copying Failed?")     ; 500ms
             OnClipboardChange ClipChanged, 1                                    ; enable callback
             Exit
             }
@@ -598,18 +683,18 @@ If A_Clipboard !== pasteText {
 Else tmp_clip := A_Clipboard
 Send "^v"                                                   ; paste
 If tmp_clip !== pasteText
-    SetTimer () => RestoreClip(tmp_clip, tmp_clip2), -100   ; 100ms  ; new thread - don't wait for restoration
+    SetTimer () => RestoreClipboard(tmp_clip, tmp_clip2), -100   ; 100ms  ; new thread - don't wait for restoration
 }
 
 ;--------
-;    + RestoreClip
+;    + RestoreClipboard
 
-RestoreClip(tmp_clip, tmp_clip2) {
+RestoreClipboard(tmp_clip, tmp_clip2) {
 A_Clipboard := ClipboardAll(tmp_clip)   ; restore clipboard
 While tmp_clip2 == A_Clipboard {        ; validate clipboard
     Sleep 50                            ; 50ms
     If A_Index > 5 {                    ; max 250ms
-        ToolTipFn(A_ThisHotkey ":: RestoreClip restoration failed!", 5000) ; 5s
+        ToolTipFn(A_ThisHotkey ":: RestoreClipboard() failed!", 5000) ; 5s
         OnClipboardChange ClipChanged, 1
         Exit
         }
@@ -636,8 +721,63 @@ Else {
 If WhichToolTip > 20            ; inbuilt limit of 20
     WhichToolTip := 1           ; reset to 1
 
-ToolTip mytext, xAxis?, yAxis?, WhichToolTip
+ToolTip(mytext, xAxis?, yAxis?, WhichToolTip)
 SetTimer () => ToolTip(,,, WhichToolTip), Abs(myduration) * -1 ; 500ms ; new thread ; always negative number
+}
+
+;------------------------------------------------------------------------------
+;  = Trim String Fn
+
+;    + StrLenLineimit
+; limit each line length to 100 characters and total number of lines to 30
+
+StrLenLineimit(string, LenLimit := 100, LineLimit := 30) {
+oArr := StrSplit(string, "`n", "`r")
+
+; trim number of lines
+If oArr.Length > LineLimit {
+    oArr.Length := LineLimit - 1
+    oArr.InsertAt(LineLimit, "… and more!")
+    }
+
+; trim line length
+output := ""
+Loop oArr.Length {
+    If StrLen(oArr[A_Index]) > LenLimit {
+        ; If SubStr(oArr[A_Index], LenLimit - 1, 1) == " "
+        ;     output .= SubStr(oArr[A_Index], 1, LenLimit - 1) "…"
+        ; Else
+            output .= SubStr(oArr[A_Index], 1, LenLimit - 2) " …"
+        }
+    Else output .= oArr[A_Index]
+    If A_Index != oArr.Length
+        output .= "`n"
+    }
+
+Return output
+}
+
+;------------------------------------------------------------------------------
+;  = File create, overwrite, append
+
+;    + FileCreate_Overwrite
+; modified from AutoHotkey.chm::/docs/lib/FileOpen.htm#ExWriteRead
+
+FileCreate_Overwrite(FilePath, FileContent) {
+If FileExist(FilePath) {                                    ; If file exists
+
+        Try FileObj := FileOpen(FilePath, 1 + 4 , "UTF-8")  ; overwrite file contents
+        ; 1 = Write: Creates a new file, overwriting any existing file
+        ; 4 = Replace `r`n with `n when reading and `n with `r`n when writing
+
+        Catch as err
+            SetTimer () => CatchError_Show( CatchError_Details(err, "FileCreate_Overwrite() Can't open file for writing") ), -100 ; 100ms ; new thread
+        Else {
+            FileObj.Write(FileContent)
+            FileObj.Close()
+            }
+        }
+    Else FileAppend FileContent, FilePath, "`n UTF-8" ; create new file
 }
 
 ; End of script code

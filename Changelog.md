@@ -1,11 +1,18 @@
 # Repo
 
+### 2025.05.25
+
+Files
+ * add files to `\Lib\` folder - `TextConverter.ahk`, `KeyHistoryWindow.ahk`, `MouseHistoryWindow.ahk`
+ * moved menu icons from `\icons\ClipMenu\` to `\icons\Menu\` because icons will be used for all `Menu()` calls, and not just for MultiClip (formerly, ClipMenu)
+ * add tray icons for 4, 5 and 6 to `\icons\Tray\`
+
 ### 2024.11.29
 
 Files
- * moved tray icons from `\icons\` to `\Icons\Tray\`
- * added `ClipMenu` icons to `\Icons\ClipMenu\` and their original/modified files to `\Icons\Calendar by Kalash\`
- * renamed `\No-2 MultiClip.ahk` to `\Standalone\MultiClip.ahk`. It is feature complete, incorporated into the `\Showcase.ahk` script and hence moved to `\Standalone\` folder.
+ * moved tray icons from `\icons\` to `\icons\Tray\`
+ * added `ClipMenu` icons to `\icons\ClipMenu\` and their original/modified files to `\icons\Calendar by Kalash\`
+ * renamed `\No-2 MultiClip.ahk` to `\standalone\MultiClip.ahk`. It is feature complete, incorporated into the `\Showcase.ahk` script and hence moved to `\standalone\` folder.
  * renamed `\No-1 Showcase.ahk` to `\Showcase.ahk` since it is now the only main script.
  * created `\Changelog.md` to store all changelogs, instead of individual changelogs within script files
 
@@ -13,6 +20,70 @@ Credits.md
  * updated with information about `ClipMenu` icons and improved formatting
 
 # \Showcase.ahk
+
+### v3.00 - 2025.05.25
+ + add variable `loadingErrors` to store error msgs occurring during auto-execute when script is started/reloaded and variable `errorDetails` when needed; and commands that shows these errors when loading is finished
+ + add examples for hotkeys and hotstrings to launch programs, and add corresponding useful scripts to `\Lib` folder
+ + add `Base64 Encode/Decode` hotstrings and corresponding functions
+ + add `Accented Vowels` hotstrings and corresponding function `TextCorrection_menuFn`
+ + add global variables `MenuShortcuts` and `MenuIcons_path` to improve functions calling on `Menu()`
+ + add global variable `Send_LenLimit` to use SendText mode instead of paste in functions such as `pasteThis`, `ChangeCase_action` and `WrapText_action`
+ + add more `#HotIf Apps` like `AHK ToolTip`, `Windows Explorer` > `Desktop` and `Run window` and hotkeys/hotstrings in existing sections such as `Notepad++` and `Edit .ahk`
+ + add functions `CatchError_details` and `CatchError_show` to record and display error details when using `Try...Catch` statements
+ + add function `Folder_move` to help with `DirMove` commands
+ + add section `String Fn` with functions that streamline manipulation of strings in other functions
+ + add function `ShowErrExit` to show error msgs in msgbox and exit function
+ + add section `Compare Arrays & Remove Duplicates` with functions that improve other parts of script such as `^!+F4` hotkey (which was completely rewritten)
+ + add classic Notepad to ahk_group `CapitaliseFirstLetter_optIn`
+ + add mpc-hc64.exe to ahk_group `CloseWithQW` and `WrapText_disabled`
+ + add networx.exe to ahk_group `CloseWithQW`
+ + add function `MenuIcons_add` to simplify adding menu icons
+ * improve reloading by adding error msg if reload fails using sleep and msgbox
+ * reorganise `Windows Explorer` hotkeys/hotstrings to include Desktop as active window for them (`ahk_class Progman`); and improve several of them
+ * reduce `SetTimer () =>` timer from -100ms to -1ms
+ * change case-sensitive `==` comparisons to case-insensitive `=` comparison wherever case-sensitivity is not needed
+ * renamed ahk_group `CloseWithQW` to `CloseWithEscQW`
+ * add extra character `+` to some hotstrings in `ahk_group FileNameSymbols` to prevent false positive match while entering RegEx
+ * change default location from `A_MyDocuments` to `A_ScriptDir` in a few places
+ * move functions from `Launch explorer or reuse to open path` section to `Windows Explorer Fn` section
+ * renamed `ClipArr`, `ClipMenu` and associated `MultiClip` functions, variables and headings to refer to `MultiClip` functionality with a prefix; and imrpoved them
+ * renamed functions `MyNotificationGui` to `MyNotification_show` and `EndMyNotif` to `MyNotification_close`; and imrpoved them
+ * renamed functions `ToggleOS` to `OSfiles_toggle` and `ToggleOSCheck` to `OSfiles_check`; remove redundant function `CheckRegWrite`; incorporate `WindowsRefreshOrRun` function into `RefreshExplorer` itself to remove redundancy
+ * improve `GetKillTitles` function and rename it to `KillAll_titles`; remove redundant function `GetKillTitlesFileList`
+ * improve `!t` hotkey by moving relevant commands to separate functions `AlwaysOnTop_enable` and `AlwaysOnTop_disable`
+ * improve function `SizeFn` to enable `TB` calculation
+ * rename function `FileCreate_Or_Append` to `FileCreate_Overwrite`
+ * rename section `Calculator view (classic)` to `#HotIf functions` and move inline functions (such as `MarkletFn` and `CloseIncrSearch`) to this section
+ * renamed functions in `Adjust Window Transparency` section with prefix `WinTrans_`; and improve them
+ * renamed functions in `Change Text Case` section with prefix `ChangeCase_`
+ * renamed functions in `Clipboard Fn` section with prefix `Clip_`
+ * renamed functions in `Wrap Text In Quotes or Symbols` section with prefix `WrapText_`; and improve them
+ * renamed functions in `URL Encode/Decode` section with prefix `URL_`; and improve them
+ * renamed functions in `Print Screen Fn` section with prefix `ScreenSnip_`
+ * renamed functions in `Windows Explorer Fn` section with prefix `Explorer_` and `ExplorerTab_` (if function is tab-aware); and improve them
+ * renamed functions in `Windows Registry` section with prefix `Registry_`
+ * renamed functions in `Control Panel Tools` section with prefix `ControlPanel_`
+ * replace excessively complicated functions `Paste_via_clipboard` and `RestoreClip` with `pasteThis_clip`
+ * replace `and` with `&&`; `or` with `||` in `If` statements
+ * improve function `ToolTipFn` by removing excessively complicated commands
+ - remove redundant functions `FocusFileList` and `CaptureFolderPath`
+ * use continuation sections to breakdown long lines for readability and maintainability
+ * rearrange/rename/update headings in TOC
+ * improve comments and other small changes
+
+### v2.18 - 2024.12.11
+ * fix `MouseMove` hotkey `#Numpad5` to centre the mouse for any display by creating new function `MouseMove_screenCenter()`
+ - remove unnecessary "ahk_id " from `WinTitle` parameter wherever applicable
+ * fix `Toggle Window On Top` hotkey `!t` from throwing error when triggered for windows without title/title bar
+ * improve function `GetExplorerSize` by removing display tooltip commands and adding `return` command to send results to calling hotkey/function; add new variable `files` to store folder contents
+ * improve function `DeleteEmptyFolder` by adding `DirExist` verification; adding `return` command to send results to calling hotkey/function; using the improved `GetExplorerSize` function to determine if folder is empty before recycling
+ * fix `Show folder/file size in ToolTip` hotkey `^+s` as consequence of changes to `GetExplorerSize` function such as adding display tooltip commands
+ * fix `Delete Empty Folder` hotkey `^+d` as consequence of changes to `DeleteEmptyFolder` function; add `MsgBox` to show final results of operation
+ * improve `Extract from folder & delete` hotkey `^+e` by moving majority of commands into new function `ExtractExplorerFolder()`; replace `CaptureFolderPath()` with simpler `CallClipboardVar()`; add `Loop Parse` command to allow extraction of multiple folders by `ExtractExplorerFolder()`; replace `Tooltip` with `MsgBox` to allow for detailed inspection/copying of extraction results and errors
+ - remove unnecessary `.*` from `Loop Files` command
+ * fix `Trim` commands to include `\t\s\r` characters
+ * rearrange/rename/update headings in TOC
+ * improve comments and other small changes
 
 ### v2.17 - 2024.11.29
  * update version in script file
@@ -256,7 +327,7 @@ Credits.md
  * add variable `AHKname` to easily update script name and version in template and standalone scripts
  * improve comments
 
-# \Standalone\MultiClip.ahk
+# \standalone\MultiClip.ahk
 
 ### v4.12 - 2024.11.29  
  ! enabled "UTF-8" encoding for `FileRead`, `FileAppend` command, instead of the previous "CP0" (system default ANSI) encoding. Might cause error messages if you have previously used this script

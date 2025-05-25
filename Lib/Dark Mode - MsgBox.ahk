@@ -1,7 +1,10 @@
-/* Source: https://raw.githubusercontent.com/nperovic/DarkMsgBox/main/Dark_MsgBox.ahk
+﻿/* Source: https://raw.githubusercontent.com/nperovic/DarkMsgBox/main/Dark_MsgBox.ahk
 
-Last checked: 2024.10.15
+Last checked: 2025.05.08
 Last update: 2024/06/16
+
+Modifications by xypha -
+    * 2024.12.23 - add ListLines
 */
 
 #Requires AutoHotkey v2
@@ -20,6 +23,8 @@ class DarkMsgBox
 
         CallNativeFunc(_this, params*)
         {
+            ListLines 0     ; Omit subsequently-executed lines from the history
+            
             static WM_COMMNOTIFY := 0x44
             static WM_INITDIALOG := 0x0110
             
@@ -49,6 +54,8 @@ class DarkMsgBox
             
             ON_WM_COMMNOTIFY(wParam, lParam, msg, hwnd)
             {
+                ListLines 0     ; Omit subsequently-executed lines from the history
+                
                 if (msg = 68 && wParam = 1027)
                     OnMessage(0x44, ON_WM_COMMNOTIFY, 0),                    
                     EnumThreadWindows(GetCurrentThreadId(), CallbackCreate(WNDENUMPROC), 0)
@@ -56,6 +63,8 @@ class DarkMsgBox
     
             WNDENUMPROC(hwnd, *)
             {
+                ListLines 0     ; Omit subsequently-executed lines from the history
+                
                 static SM_CICON         := "W" SysGet(11) " H" SysGet(12)
                 static SM_CSMICON       := "W" SysGet(49) " H" SysGet(50)
                 static ICON_BIG         := 1
@@ -123,6 +132,9 @@ class DarkMsgBox
                 
                 WNDPROC(hwnd, uMsg, wParam, lParam)
                 {
+                
+                ListLines 0     ; Omit subsequently-executed lines from the history
+                
                     static hbrush := []
                     SetWinDelay(-1)
                     SetControlDelay(-1)
@@ -176,6 +188,8 @@ class DarkMsgBox
                         while hbrush.Length
                             DeleteObject(hbrush.Pop())
                     }}
+                    
+                    ListLines 1     ; Include subsequently-executed lines in the history
     
                     return CallWindowProc(WindowProcOld, hwnd, uMsg, wParam, lParam) 
                 }
